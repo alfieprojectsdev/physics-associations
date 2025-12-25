@@ -1,0 +1,8 @@
+.claude/*
+.claude/commands/*.md*
+.claude/settings.local.json
+.claude/*.md
+.claude/agents/*
+.claude/agents/*.md
+docs/*.md
+test-abbreviations.html

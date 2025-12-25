@@ -2,6 +2,39 @@
 
 let game = null;
 let selectedWordCard = null;
+let currentDisplayMode = displayModes.ABBREVIATED;
+
+// Drag-and-drop state
+let isDragging = false;
+let draggedCard = null;
+let dragClone = null;
+let dragOperationId = 0; // Track unique drag operations
+let touchStartX = 0;
+let touchStartY = 0;
+let currentTouchX = 0;
+let currentTouchY = 0;
+
+// Performance monitoring for budget devices (Phase 4)
+let lastFrameTime = performance.now();
+let frameCount = 0;
+let lowPerformanceMode = false;
+let isInitialDeal = true; // Track first render for stagger animation
+let previousTableauState = []; // Track face-down cards for flip animation
+
+// Load saved display preference from localStorage
+function loadDisplayPreference() {
+    const saved = localStorage.getItem('physics_display_mode');
+    if (saved && displayModes[saved.toUpperCase()]) {
+        currentDisplayMode = displayModes[saved];
+    }
+}
+
+// Save display preference to localStorage and re-render
+function setDisplayMode(mode) {
+    currentDisplayMode = mode;
+    localStorage.setItem('physics_display_mode', mode);
+    renderGame(); // Re-render with new mode
+}
 
 const elements = {
     level: null,
@@ -25,9 +58,11 @@ const elements = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
+    loadDisplayPreference();
     initializeElements();
     setupEventListeners();
     startNewGame();
+    startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
 });
 
 function initializeElements() {
@@ -58,11 +93,259 @@ function setupEventListeners() {
     elements.modalClose.addEventListener('click', closeModal);
     elements.modalOverlay.addEventListener('click', closeModal);
     elements.cancelSort.addEventListener('click', hideCategorySelector);
+
+    // Drag-and-drop touch event listeners
+    elements.gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
+    elements.gameBoard.addEventListener('touchmove', handleTouchMove, { passive: false });
+    elements.gameBoard.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
+
+// Check FPS and enable low-performance mode if needed (Phase 4)
+let performanceMonitoringActive = false;
+
+function startPerformanceMonitoring() {
+    if (!performanceMonitoringActive) {
+        performanceMonitoringActive = true;
+        frameCount = 0;
+        lastFrameTime = performance.now();
+        requestAnimationFrame(checkPerformance);
+    }
+}
+
+function stopPerformanceMonitoring() {
+    performanceMonitoringActive = false;
+}
+
+function checkPerformance() {
+    if (!performanceMonitoringActive) return;
+
+    frameCount++;
+    const now = performance.now();
+    const elapsed = now - lastFrameTime;
+
+    if (frameCount >= 180) { // Check every 180 frames (3 seconds @ 60fps) - P1 fix
+        const fps = (frameCount / elapsed) * 1000;
+
+        if (fps < 30 && !lowPerformanceMode) {
+            lowPerformanceMode = true;
+            document.body.classList.add('low-performance-mode');
+            console.log('Low performance mode enabled (FPS:', Math.round(fps), ')');
+            showFeedback('Animations reduced for smoother gameplay', 'info');
+            // Stop monitoring after detection
+            stopPerformanceMonitoring();
+            return;
+        }
+
+        frameCount = 0;
+        lastFrameTime = now;
+    }
+
+    requestAnimationFrame(checkPerformance);
+}
+
+// Pause monitoring when tab hidden (battery optimization)
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        stopPerformanceMonitoring();
+    } else if (game && !lowPerformanceMode) {
+        startPerformanceMonitoring();
+    }
+});
+
+// Helper function to announce messages to screen readers (Phase 4 - WCAG compliance)
+function announceToScreenReader(message, priority = 'polite') {
+    let announcer = document.getElementById('screen-reader-announcements');
+    if (!announcer) {
+        announcer = document.createElement('div');
+        announcer.id = 'screen-reader-announcements';
+        announcer.className = 'sr-only';
+        document.body.appendChild(announcer);
+    }
+    announcer.setAttribute('aria-live', priority);
+    announcer.setAttribute('aria-atomic', 'true');
+    announcer.textContent = message;
+}
+
+// Helper to add animation class with automatic cleanup (Phase 4 - memory leak fix)
+function addAnimationClass(element, className, cleanup = () => {}) {
+    if (!element) return;
+
+    element.classList.add(className);
+
+    const handler = () => {
+        if (element.classList.contains(className)) {
+            element.classList.remove(className);
+            cleanup();
+        }
+    };
+
+    // Listen for animationend
+    element.addEventListener('animationend', handler, { once: true });
+
+    // Fallback timeout for disabled animations (low-performance mode, prefers-reduced-motion)
+    setTimeout(() => {
+        if (element.classList.contains(className)) {
+            element.removeEventListener('animationend', handler);
+            element.classList.remove(className);
+            cleanup();
+        }
+    }, 700); // Increased from 600ms to 700ms (shake = 500ms max)
+}
+
+// Drag-and-drop: Touch start handler
+function handleTouchStart(e) {
+  // Only drag word cards that are playable
+  const cardEl = e.target.closest('.card.word.playable');
+  if (!cardEl) return;
+
+  // Prevent default to avoid scrolling while dragging
+  e.preventDefault();
+
+  // Get touch coordinates
+  const touch = e.touches[0];
+  touchStartX = touch.clientX;
+  touchStartY = touch.clientY;
+  currentTouchX = touch.clientX;
+  currentTouchY = touch.clientY;
+
+  // Store reference to dragged card
+  draggedCard = cardEl;
+
+  // Trigger haptic feedback
+  triggerHaptic('light');
+}
+
+// Drag-and-drop: Touch move handler
+function handleTouchMove(e) {
+  if (!draggedCard) return;
+
+  e.preventDefault();
+
+  const touch = e.touches[0];
+  currentTouchX = touch.clientX;
+  currentTouchY = touch.clientY;
+
+  // Calculate distance moved
+  const deltaX = Math.abs(currentTouchX - touchStartX);
+  const deltaY = Math.abs(currentTouchY - touchStartY);
+  const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+  // Start drag if moved > 10px (prevents accidental drags on taps)
+  if (!isDragging && distance > 10) {
+    isDragging = true;
+
+    // Create floating clone (shallow to avoid copying event listeners)
+    dragClone = draggedCard.cloneNode(false); // Shallow clone
+    dragClone.innerHTML = draggedCard.innerHTML; // Copy visual content only
+    dragClone.classList.add('dragging-clone');
+    dragClone.style.position = 'fixed';
+    dragClone.style.pointerEvents = 'none';
+    dragClone.style.zIndex = '1000';
+    dragClone.style.width = draggedCard.offsetWidth + 'px';
+    dragClone.style.height = draggedCard.offsetHeight + 'px';
+    document.body.appendChild(dragClone);
+
+    // Add dragging class to original
+    draggedCard.classList.add('dragging');
+  }
+
+  // Update clone position to follow finger
+  if (isDragging && dragClone) {
+    dragClone.style.left = (currentTouchX - dragClone.offsetWidth / 2) + 'px';
+    dragClone.style.top = (currentTouchY - dragClone.offsetHeight / 2) + 'px';
+  }
+}
+
+// Drag-and-drop: Touch end handler
+function handleTouchEnd(e) {
+  if (!isDragging) {
+    // If not dragging, treat as tap (existing tap behavior)
+    draggedCard = null;
+    return;
+  }
+
+  e.preventDefault();
+
+  let foundationTarget = null;
+
+  // Check collision with foundation slots
+  const foundations = document.querySelectorAll('.foundation-slot');
+  foundations.forEach(foundation => {
+    const rect = foundation.getBoundingClientRect();
+    if (currentTouchX >= rect.left && currentTouchX <= rect.right &&
+        currentTouchY >= rect.top && currentTouchY <= rect.bottom) {
+      foundationTarget = foundation;
+    }
+  });
+
+  if (foundationTarget && draggedCard) {
+    const categoryId = foundationTarget.dataset.categoryId;
+    const cardId = draggedCard.dataset.cardId;
+
+    try {
+      const result = game.sortWordToFoundation(cardId, categoryId);
+
+      if (result.success) {
+        const fullWord = draggedCard.dataset.fullWord || cardId;
+        triggerHaptic('success');
+        showFeedback(result.message, 'success');
+        announceToScreenReader(`Success! ${fullWord} sorted correctly`, 'polite');
+        // Color feedback for visual learners
+        if (dragClone) {
+          dragClone.style.background = 'var(--success)';
+          dragClone.style.color = 'white';
+          addAnimationClass(dragClone, 'sorted-correct');
+        }
+      } else {
+        triggerHaptic('error');
+        showFeedback(result.message, 'error');
+        announceToScreenReader(`Error: ${result.message}`, 'assertive');
+        // Color feedback for visual learners
+        if (dragClone) {
+          dragClone.style.background = 'var(--danger)';
+          dragClone.style.color = 'white';
+          addAnimationClass(dragClone, 'sorted-wrong');
+        }
+      }
+      renderGame();
+    } catch (err) {
+      console.error('Drag-drop sort failed:', err);
+      triggerHaptic('error');
+      showFeedback('Sort operation failed', 'error');
+    }
+  } else {
+    // Snap back animation for invalid drop
+    if (dragClone) {
+      dragClone.classList.add('snap-back');
+      triggerHaptic('light');
+    }
+  }
+
+  // Cleanup with race condition protection
+  const currentOperationId = ++dragOperationId;
+  const cloneToCleanup = dragClone;
+  const cardToCleanup = draggedCard;
+
+  setTimeout(() => {
+    if (cloneToCleanup) {
+      cloneToCleanup.remove();
+    }
+    if (cardToCleanup) {
+      cardToCleanup.classList.remove('dragging');
+    }
+    // Only reset global state if no new drag started
+    if (dragOperationId === currentOperationId) {
+      isDragging = false;
+      draggedCard = null;
+      dragClone = null;
+    }
+  }, 300); // Increased from 200ms to 300ms to accommodate longer animations
 }
 
 function startNewGame(level = 1) {
     game = new PhysicsAssociations();
     game.initLevel(level);
+    isInitialDeal = true; // Reset for stagger animation (Phase 4)
     renderGame();
 }
 
@@ -114,9 +397,10 @@ function renderFoundations(foundations, placedCategories) {
     placedCategories.forEach(catId => {
         const foundation = foundations[catId];
         const category = foundation.category;
-        
+
         const foundationEl = document.createElement('div');
-        foundationEl.className = 'foundation-stack';
+        foundationEl.className = 'foundation-stack foundation-slot'; // Add foundation-slot for drag-and-drop
+        foundationEl.dataset.categoryId = catId; // Add data attribute for drag-and-drop
         foundationEl.innerHTML = `
             <div class="foundation-header">
                 <div class="foundation-icon">${category.icon}</div>
@@ -129,38 +413,75 @@ function renderFoundations(foundations, placedCategories) {
                 `).join('')}
             </div>
         `;
-        
+
         elements.foundationsArea.appendChild(foundationEl);
     });
 }
 
 function renderTableau(tableau, playableCards) {
     elements.gameBoard.innerHTML = '';
-    
+
     const columnsContainer = document.createElement('div');
     columnsContainer.className = 'tableau-columns';
-    
+
+    // Build tableau state tracking for flip animation
+    const tableauState = [];
+
     tableau.forEach((column, colIndex) => {
         const columnEl = document.createElement('div');
         columnEl.className = 'tableau-column';
-        
+        const columnState = [];
+
         column.forEach((card, cardIndex) => {
             const cardEl = createCardElement(card);
-            
+
+            // Track card state
+            columnState.push({ id: card.id, faceUp: card.faceUp });
+
             // Check if playable
             const isPlayable = playableCards.some(pc => pc.id === card.id);
             if (isPlayable) {
                 cardEl.classList.add('playable');
                 cardEl.addEventListener('click', () => handleCardClick(card));
             }
-            
+
             columnEl.appendChild(cardEl);
         });
-        
+
+        tableauState.push(columnState);
         columnsContainer.appendChild(columnEl);
     });
-    
+
     elements.gameBoard.appendChild(columnsContainer);
+
+    // Detect newly revealed cards and add flip animation
+    const currentFaceUpCards = tableauState.map(pile => pile.filter(c => c.faceUp).map(c => c.id)).flat();
+    const previousFaceUpCards = previousTableauState.map(pile => pile.filter(c => c.faceUp).map(c => c.id)).flat();
+    const newlyRevealedCards = currentFaceUpCards.filter(id => !previousFaceUpCards.includes(id));
+
+    newlyRevealedCards.forEach(cardId => {
+        const cardEl = document.querySelector(`.card[data-card-id="${cardId}"]`);
+        if (cardEl) {
+            addAnimationClass(cardEl, 'flipping');
+            const fullWord = cardEl.dataset.fullWord || 'card';
+            announceToScreenReader(`${fullWord} revealed`, 'polite');
+        }
+    });
+
+    // Add stagger animation on initial deal
+    if (isInitialDeal) {
+        const allCards = columnsContainer.querySelectorAll('.card');
+        allCards.forEach((cardEl, index) => {
+            cardEl.style.animationDelay = `${index * 0.02}s`; // Changed from 0.05s to 0.02s (20ms)
+            addAnimationClass(cardEl, 'dealing', () => {
+                cardEl.style.animationDelay = '';
+            });
+        });
+        isInitialDeal = false;
+    }
+
+    // Update previous state for next render
+    previousTableauState = tableauState;
 }
 
 function renderWaste(waste) {
@@ -195,10 +516,17 @@ function createCardElement(card) {
         `;
     } else if (card.type === 'word') {
         cardEl.classList.add('word');
+
+        // Get abbreviated display text
+        const displayText = getCardDisplayText(card.word, currentDisplayMode);
+
         cardEl.innerHTML = `
-            <div class="card-title">${card.word}</div>
+            <div class="card-title">${displayText}</div>
             <div class="card-points">${card.points}</div>
         `;
+
+        // Add data attribute for full word (for tooltips/sorting feedback)
+        cardEl.dataset.fullWord = card.word;
     }
     
     return cardEl;
@@ -298,11 +626,13 @@ function hideCategorySelector() {
 function handleSortResult(result) {
     if (result.success) {
         triggerHaptic('success');
-        showFeedback(result.message, 'success');
+        // Show full word in feedback, not abbreviation
+        const fullWord = selectedWordCard.word;
+        showFeedback(`"${fullWord}" sorted! +${result.points}`, 'success');
         renderGame();
     } else {
         triggerHaptic('error');
-        showFeedback(result.message, 'error');
+        showFeedback(result.message, 'error'); // Already has full word from game logic
         renderGame(); // Still render to show move count decrease
     }
 }
@@ -393,58 +723,122 @@ function handleShowHint() {
 }
 
 function handleShowMenu() {
+    stopPerformanceMonitoring(); // Pause FPS monitoring when menu open
     const state = game.getGameState();
-    
-    elements.modalTitle.textContent = 'Menu';
+
+    elements.modalTitle.textContent = 'Settings & Menu';
     elements.modalBody.innerHTML = `
-        <div style="margin-bottom: 16px;">
-            <h3 style="margin-bottom: 8px;">How to Play</h3>
-            <ol style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
-                <li><strong>Place categories first</strong> - You can't sort words until their category is on a foundation</li>
-                <li><strong>Sort words to categories</strong> - Tap a word, then select which category it belongs to</li>
-                <li><strong>Reveal hidden cards</strong> - Sorting from tableau columns flips face-down cards</li>
-                <li><strong>Draw strategically</strong> - Only draw from stock when no tableau moves exist</li>
-                <li><strong>Watch your moves!</strong> - Every action costs 1 move. Wrong categories = wasted move</li>
-            </ol>
+        <div class="menu-tabs">
+            <button class="tab-btn active" onclick="showMenuTab('game')">Game</button>
+            <button class="tab-btn" onclick="showMenuTab('settings')">Settings</button>
         </div>
-        
-        <div style="margin-bottom: 16px; background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid var(--warning);">
-            <h3 style="margin-bottom: 8px; color: var(--warning);">⚡ Strategy Tips</h3>
-            <ul style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
-                <li><strong>Analyze first</strong> - Check all face-up cards before placing categories</li>
-                <li><strong>Prioritize tableau</strong> - Sort from columns to reveal more cards (avoid drawing unnecessarily)</li>
-                <li><strong>Think ahead</strong> - Ensure word truly belongs to category before tapping</li>
-                <li><strong>Manage the stock</strong> - Drawing uses a move; use board cards first</li>
-            </ul>
-        </div>
-        
-        <div style="margin-bottom: 16px;">
-            <h3 style="margin-bottom: 8px;">Current Progress</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 0.75rem; color: var(--text-light);">Level</div>
-                    <div style="font-size: 1.5rem; font-weight: bold;">${state.level}</div>
-                </div>
-                <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 0.75rem; color: var(--text-light);">Score</div>
-                    <div style="font-size: 1.5rem; font-weight: bold;">${state.score}</div>
-                </div>
-                <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 0.75rem; color: var(--text-light);">Moves Left</div>
-                    <div style="font-size: 1.5rem; font-weight: bold; color: ${state.movesRemaining <= 5 ? 'var(--danger)' : 'var(--primary)'};">${state.movesRemaining}</div>
-                </div>
-                <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
-                    <div style="font-size: 0.75rem; color: var(--text-light);">Categories</div>
-                    <div style="font-size: 1.5rem; font-weight: bold;">${state.placedCategories.length}</div>
+
+        <!-- Game tab (existing content) -->
+        <div id="game-tab" class="tab-content">
+            <div style="margin-bottom: 16px;">
+                <h3 style="margin-bottom: 8px;">How to Play</h3>
+                <ol style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
+                    <li><strong>Place categories first</strong> - You can't sort words until their category is on a foundation</li>
+                    <li><strong>Sort words to categories</strong> - Tap a word, then select which category it belongs to</li>
+                    <li><strong>Reveal hidden cards</strong> - Sorting from tableau columns flips face-down cards</li>
+                    <li><strong>Draw strategically</strong> - Only draw from stock when no tableau moves exist</li>
+                    <li><strong>Watch your moves!</strong> - Every action costs 1 move. Wrong categories = wasted move</li>
+                </ol>
+            </div>
+
+            <div style="margin-bottom: 16px; background: #fef3c7; padding: 12px; border-radius: 8px; border-left: 4px solid var(--warning);">
+                <h3 style="margin-bottom: 8px; color: var(--warning);">⚡ Strategy Tips</h3>
+                <ul style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
+                    <li><strong>Analyze first</strong> - Check all face-up cards before placing categories</li>
+                    <li><strong>Prioritize tableau</strong> - Sort from columns to reveal more cards (avoid drawing unnecessarily)</li>
+                    <li><strong>Think ahead</strong> - Ensure word truly belongs to category before tapping</li>
+                    <li><strong>Manage the stock</strong> - Drawing uses a move; use board cards first</li>
+                </ul>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <h3 style="margin-bottom: 8px;">Current Progress</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--text-light);">Level</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${state.level}</div>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--text-light);">Score</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${state.score}</div>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--text-light);">Moves Left</div>
+                        <div style="font-size: 1.5rem; font-weight: bold; color: ${state.movesRemaining <= 5 ? 'var(--danger)' : 'var(--primary)'};">${state.movesRemaining}</div>
+                    </div>
+                    <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 0.75rem; color: var(--text-light);">Categories</div>
+                        <div style="font-size: 1.5rem; font-weight: bold;">${state.placedCategories.length}</div>
+                    </div>
                 </div>
             </div>
+            <button class="btn-stock" onclick="confirmNewGame()" style="margin-top: 8px; background: var(--danger);">
+                Restart Level
+            </button>
         </div>
-        <button class="btn-stock" onclick="confirmNewGame()" style="margin-top: 8px; background: var(--danger);">
-            Restart Level
-        </button>
+
+        <!-- Settings tab (new) -->
+        <div id="settings-tab" class="tab-content hidden">
+            <h3>Display Settings</h3>
+
+            <div class="setting-group">
+                <label class="setting-label">Card Display Mode</label>
+                <div class="radio-group">
+                    <label class="radio-option">
+                        <input type="radio" name="display-mode" value="abbreviated" checked>
+                        <span class="radio-label">
+                            <strong>Abbreviated</strong>
+                            <small>Uses physics notation (p, λ, F)</small>
+                        </span>
+                    </label>
+
+                    <label class="radio-option disabled" title="Coming soon!">
+                        <input type="radio" name="display-mode" value="icon_label" disabled>
+                        <span class="radio-label">
+                            <strong>Icon + Label</strong>
+                            <small>Visual icons with text (Coming Soon)</small>
+                            <span class="badge">v2.0</span>
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="setting-info">
+                <p><strong>ℹ️ About Abbreviations:</strong></p>
+                <p>This game uses standard physics notation. For example:</p>
+                <ul>
+                    <li><strong>p</strong> = momentum</li>
+                    <li><strong>λ</strong> = wavelength</li>
+                    <li><strong>F</strong> = force</li>
+                </ul>
+                <p>Tap any card to see the full word.</p>
+            </div>
+        </div>
     `;
-    
+
+    // Setup radio button listener
+    document.querySelectorAll('input[name="display-mode"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (!e.target.disabled) {
+                setDisplayMode(displayModes[e.target.value.toUpperCase()]);
+            }
+        });
+    });
+
     showModal();
+}
+
+function showMenuTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+    document.getElementById(`${tab}-tab`).classList.remove('hidden');
+    event.target.classList.add('active');
 }
 
 function confirmNewGame() {
@@ -501,6 +895,10 @@ function showModal() {
 
 function closeModal() {
     elements.modal.classList.add('hidden');
+    // Resume FPS monitoring
+    if (game && !lowPerformanceMode) {
+        startPerformanceMonitoring();
+    }
 }
 
 function showFeedback(message, type = 'info') {
@@ -522,3 +920,4 @@ window.closeModal = closeModal;
 window.confirmNewGame = confirmNewGame;
 window.nextLevel = nextLevel;
 window.retryLevel = retryLevel;
+window.showMenuTab = showMenuTab;

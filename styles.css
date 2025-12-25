@@ -20,7 +20,8 @@
     --text-dark: #1e293b;
     --text-light: #64748b;
     --border-light: #e2e8f0;
-    
+    --bg-light: #f8fafc;
+
     --card-width: 70px;
     --card-height: 90px;
     --card-radius: 10px;
@@ -273,15 +274,14 @@ body {
 }
 
 .card.playable {
-    box-shadow: 0 0 0 3px var(--success), 0 4px 8px var(--card-shadow);
     cursor: pointer;
     transform: scale(1); /* Base for animation */
-    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+    transition: transform 0.15s ease-out;
+    /* Animation applied via @keyframes pulseGlow in Phase 4 animations section */
 }
 
 .card.playable:active {
     transform: scale(0.92);
-    box-shadow: 0 0 0 3px var(--success), 0 2px 4px var(--card-shadow);
 }
 
 .card.category {
@@ -302,9 +302,31 @@ body {
 }
 
 .card.word .card-title {
-    font-size: 0.9rem;
+    font-size: 1.5rem;  /* Larger since text is shorter */
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    font-family: 'Times New Roman', serif; /* Better Greek letter rendering */
+}
+
+/* Show full word on hover/long-press (desktop/mobile) */
+.card.word:hover::after,
+.card.word:active::after {
+    content: attr(data-full-word);
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    z-index: 100;
+    pointer-events: none;
 }
 
 .card-points {
@@ -567,9 +589,329 @@ body {
     }
 }
 
+/* Reduce motion for accessibility (keep essential feedback) */
 @media (prefers-reduced-motion: reduce) {
+    /* Disable decorative infinite animations */
+    .card.playable {
+        animation: none !important;
+        box-shadow: 0 0 0 3px var(--success), 0 0 15px rgba(16, 185, 129, 0.75);
+    }
+
+    .card.dealing {
+        animation: none !important;
+    }
+
+    /* Keep essential feedback animations but reduce duration */
+    .card.flipping {
+        animation-duration: 0.15s !important;
+    }
+
+    .card.sorted-correct {
+        animation-duration: 0.25s !important;
+    }
+
+    .card.sorted-wrong {
+        animation-duration: 0.2s !important;
+    }
+
+    /* Remove rotation to reduce motion */
+    .dragging-clone {
+        transform: scale(1.1) !important;
+    }
+
+    /* Reduce transition speeds */
     * {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
+        transition-duration: 0.05s !important;
     }
 }
+
+/* ===== SETTINGS PANEL ===== */
+
+/* Menu tabs styling */
+.menu-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-light);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-light);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.05);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+}
+
+.tab-content {
+    display: block;
+}
+
+.tab-content.hidden {
+    display: none;
+}
+
+/* Setting group styling */
+.setting-group {
+    margin: 20px 0;
+}
+
+.setting-label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-dark);
+}
+
+/* Radio button group */
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    border: 2px solid var(--border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-option:not(.disabled):hover {
+    border-color: var(--primary);
+    background: var(--bg-light);
+}
+
+.radio-option.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    position: relative;
+}
+
+.radio-option input[type="radio"] {
+    margin-right: 12px;
+    margin-top: 2px;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+    color: var(--primary);
+}
+
+.radio-label {
+    flex: 1;
+}
+
+.radio-label strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.radio-label small {
+    color: var(--text-light);
+    font-size: 0.8rem;
+}
+
+/* Badge and info panel */
+.badge {
+    display: inline-block;
+    background: var(--warning);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+.setting-info {
+    margin-top: 20px;
+    padding: 12px;
+    background: #e0f2fe;
+    border-radius: 8px;
+    border-left: 4px solid var(--primary);
+}
+
+.setting-info p {
+    margin: 8px 0;
+    font-size: 0.875rem;
+}
+
+.setting-info ul {
+    margin: 8px 0;
+    padding-left: 20px;
+    font-size: 0.875rem;
+}
+
+.setting-info li {
+    margin: 4px 0;
+}
+
+/* ============================================
+   DRAG-AND-DROP STYLES
+   ============================================ */
+
+/* Dragging clone (floating card that follows finger) */
+.dragging-clone {
+  opacity: 0.9;
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
+}
+
+/* Original card while being dragged */
+.card.dragging {
+  opacity: 0.3;
+  transform: scale(0.95);
+}
+
+/* Snap-back animation for invalid drops */
+@keyframes snap-back {
+  0% {
+    transform: scale(1.1) rotate(5deg);
+  }
+  50% {
+    transform: scale(0.8) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.5) rotate(-5deg);
+  }
+}
+
+.snap-back {
+  animation: snap-back 0.2s ease-out forwards;
+}
+
+/* ============================================
+   PHASE 4: CARD ANIMATIONS
+   ============================================ */
+
+/* Card flip when revealed (3D rotate effect) */
+@keyframes flip3d {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+.card.flipping {
+  animation: flip3d 0.4s ease-in-out;
+}
+
+/* Stagger animation for initial deal */
+@keyframes slideInCard {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card.dealing {
+  animation: slideInCard 0.2s ease-out forwards; /* Reduced from 0.3s */
+}
+
+/* Slide to foundation animation */
+@keyframes slideToFoundation {
+  from {
+    transform: translate(var(--start-x), var(--start-y));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+
+.card.sliding-to-foundation {
+  animation: slideToFoundation 0.3s ease-out forwards;
+}
+
+/* Bounce effect on successful sort */
+@keyframes bounce {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.card.sorted-correct {
+  animation: bounce 0.5s ease-out;
+}
+
+/* Shake animation on wrong category - increased duration for visibility */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-12px); }
+  40% { transform: translateX(12px); }
+  60% { transform: translateX(-12px); }
+  80% { transform: translateX(12px); }
+}
+
+.card.sorted-wrong {
+  animation: shake 0.5s ease-in-out; /* Increased from 0.3s */
+}
+
+/* Glow/pulse on playable cards - single-play animation (WCAG compliant) */
+@keyframes pulseGlowOnce {
+  0% { box-shadow: 0 0 0 0px var(--success), 0 0 0px rgba(16, 185, 129, 0); }
+  50% { box-shadow: 0 0 0 5px var(--success), 0 0 20px rgba(16, 185, 129, 1); }
+  100% { box-shadow: 0 0 0 3px var(--success), 0 0 15px rgba(16, 185, 129, 0.75); }
+}
+
+.card.playable {
+  /* Static glow instead of infinite animation */
+  box-shadow: 0 0 0 3px var(--success), 0 0 15px rgba(16, 185, 129, 0.75);
+  /* Single-play animation when card becomes playable */
+  animation: pulseGlowOnce 0.6s ease-out;
+}
+
+/* Low-performance mode - disable expensive animations */
+.low-performance-mode .card.flipping {
+  animation: none;
+}
+
+.low-performance-mode .card.playable {
+  animation: none;
+  /* Keep static highlight */
+  box-shadow: 0 0 0 3px var(--success), 0 4px 8px var(--card-shadow);
+}
+
+.low-performance-mode .card.dealing {
+  animation: slideInCard 0.1s ease-out forwards; /* Faster for budget devices */
+}
+
+.low-performance-mode .card.sorted-correct {
+  animation: none;
+}
+
+/* Screen reader only - hide visually but keep for assistive tech */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
