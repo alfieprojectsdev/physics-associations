@@ -6,10 +6,9 @@ const urlsToCache = [
   '/physics-dictionary.js',
   '/game-logic.js',
   '/main.js',
-  '/analytics.js'
-  // TODO: Uncomment once icons are generated (see /icons/README.md)
-  // '/icons/icon-192.png',
-  // '/icons/icon-512.png'
+  '/analytics.js',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
 // Install service worker and cache assets

@@ -834,6 +834,9 @@ function handleShowMenu() {
             <button class="btn-stock" onclick="confirmNewGame()" style="margin-top: 8px; background: var(--danger);">
                 Restart Level
             </button>
+            <a href="about.html" class="btn-stock" style="margin-top: 8px; background: var(--primary); text-align: center; text-decoration: none; display: block;">
+                About Ground State
+            </a>
         </div>
 
         <!-- Settings tab (new) -->
