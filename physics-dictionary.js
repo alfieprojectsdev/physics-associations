@@ -1,5 +1,159 @@
 // Physics Dictionary - Category-Based System for Associations Gameplay
 
+// Display mode constants
+const displayModes = {
+  ABBREVIATED: 'abbreviated',
+  ICON_LABEL: 'icon_label'  // Future feature
+};
+
+// Abbreviation rules by word length and physics convention
+const abbreviations = {
+  // === MECHANICS ===
+  'force': 'F',           // Standard physics notation
+  'mass': 'm',
+  'speed': 'v',
+  'work': 'W',
+  'power': 'P',
+  'energy': 'E',
+  'motion': 'motion',     // Short enough to keep
+  'weight': 'W',
+  'lever': 'lever',
+  'pulley': 'pulley',
+  'momentum': 'p',        // Standard notation
+  'velocity': 'v',
+  'friction': 'f',
+  'gravity': 'g',
+  'inertia': 'inertia',
+  'torque': 'τ',          // Greek tau
+  'kinetic': 'KE',
+  'potential': 'PE',
+  'collision': 'collis.',
+  'elastic': 'elastic',
+
+  // === THERMODYNAMICS ===
+  'heat': 'Q',            // Standard notation
+  'cold': 'cold',
+  'steam': 'steam',
+  'boil': 'boil',
+  'freeze': 'freeze',
+  'thermal': 'thermal',
+  'entropy': 'S',         // Standard notation
+  'pressure': 'P',
+  'volume': 'V',
+  'temperature': 'T',     // Standard notation
+  'celsius': '°C',
+  'kelvin': 'K',
+  'adiabatic': 'adiab.',
+  'isothermal': 'isoth.',
+  'carnot': 'Carnot',
+  'boltzmann': 'Boltz.',
+
+  // === ELECTROMAGNETISM ===
+  'volt': 'V',
+  'amp': 'A',
+  'watt': 'W',
+  'ohm': 'Ω',             // Greek omega
+  'charge': 'q',          // Standard notation
+  'current': 'I',         // Standard notation
+  'circuit': 'circuit',
+  'magnet': 'magnet',
+  'voltage': 'V',
+  'resistance': 'R',
+  'capacitor': 'C',
+  'inductor': 'L',
+  'resistor': 'R',
+  'conductor': 'conduc.',
+  'insulator': 'insul.',
+  'magnetic': 'B',        // Magnetic field
+  'maxwell': 'Maxwell',
+  'faraday': 'Faraday',
+  'ampere': 'Ampere',
+  'coulomb': 'Coulomb',
+  'tesla': 'Tesla',
+  'dielectric': 'dielec.',
+
+  // === QUANTUM PHYSICS ===
+  'atom': 'atom',
+  'ion': 'ion',
+  'nucleus': 'nucleus',
+  'photon': 'γ',          // Greek gamma
+  'proton': 'p⁺',
+  'neutron': 'n',
+  'electron': 'e⁻',
+  'quantum': 'quantum',
+  'particle': 'particle',
+  'isotope': 'isotope',
+  'orbital': 'orbital',
+  'fermion': 'fermion',
+  'boson': 'boson',
+  'quark': 'quark',
+  'lepton': 'lepton',
+  'planck': 'Planck',
+  'heisenberg': 'Heisen.',
+  'schrodinger': 'Schrö.',
+  'eigenvalue': 'λ',      // Eigenvalue notation
+  'spin': 'spin',
+
+  // === RELATIVITY ===
+  'time': 't',
+  'space': 'space',
+  'light': 'c',           // Speed of light
+  'velocity': 'v',
+  'spacetime': 'spacet.',
+  'relativity': 'relat.',
+  'einstein': 'Einstein',
+  'singularity': 'singul.',
+  'wormhole': 'wormh.',
+  'redshift': 'z',        // Redshift notation
+  'blueshift': 'blueshift',
+  'doppler': 'Doppler',
+  'lorentz': 'Lorentz',
+
+  // === WAVES & OPTICS ===
+  'wave': 'wave',
+  'ray': 'ray',
+  'lens': 'lens',
+  'prism': 'prism',
+  'sound': 'sound',
+  'amplitude': 'A',
+  'frequency': 'f',       // Standard notation
+  'wavelength': 'λ',      // Greek lambda (standard)
+  'spectrum': 'spectr.',
+  'refraction': 'refr.',
+  'reflection': 'refl.',
+  'diffraction': 'diffr.',
+  'interference': 'interf.',
+  'resonance': 'reson.',
+  'harmonic': 'harmon.',
+  'doppler': 'Doppler',
+  'polarization': 'polar.',
+  'coherence': 'coher.',
+  'dispersion': 'disper.'
+};
+
+// Helper function to get display text
+function getCardDisplayText(word, mode = displayModes.ABBREVIATED) {
+  if (mode === displayModes.ABBREVIATED) {
+    return abbreviations[word.toLowerCase()] || word.toUpperCase();
+  }
+
+  // Future: icon mode
+  if (mode === displayModes.ICON_LABEL) {
+    return {
+      icon: getWordIcon(word),  // Future implementation
+      label: abbreviations[word.toLowerCase()] || word
+    };
+  }
+
+  return word;
+}
+
+// Future: Icon mapping (placeholder)
+function getWordIcon(word) {
+  // To be implemented in Phase 2
+  return null;
+}
+
 // Physics Categories (Foundation cards)
 const PhysicsCategories = [
     {

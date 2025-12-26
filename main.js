@@ -1,4 +1,4 @@
-// Main.js - UI Controller for Physics Associations
+// Main.js - UI Controller for Ground State
 
 let game = null;
 let selectedWordCard = null;
@@ -21,6 +21,9 @@ let lowPerformanceMode = false;
 let isInitialDeal = true; // Track first render for stagger animation
 let previousTableauState = []; // Track face-down cards for flip animation
 
+// PWA Install Prompt (Phase 5)
+let deferredInstallPrompt = null;
+
 // Load saved display preference from localStorage
 function loadDisplayPreference() {
     const saved = localStorage.getItem('physics_display_mode');
@@ -33,6 +36,12 @@ function loadDisplayPreference() {
 function setDisplayMode(mode) {
     currentDisplayMode = mode;
     localStorage.setItem('physics_display_mode', mode);
+
+    // Track display mode change
+    if (typeof GameAnalytics !== 'undefined') {
+        GameAnalytics.displayModeChanged(mode);
+    }
+
     renderGame(); // Re-render with new mode
 }
 
@@ -63,6 +72,33 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     startNewGame();
     startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
+
+    // Register service worker for PWA offline support (Phase 5)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then((registration) => {
+                console.log('ServiceWorker registered:', registration.scope);
+            })
+            .catch((error) => {
+                console.log('ServiceWorker registration failed:', error);
+            });
+    }
+
+    // Capture PWA install prompt event (Phase 5)
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent default mini-infobar
+        e.preventDefault();
+
+        // Save prompt for later
+        deferredInstallPrompt = e;
+
+        // Track prompt shown
+        if (typeof GameAnalytics !== 'undefined') {
+            GameAnalytics.installPromptShown();
+        }
+
+        console.log('PWA install prompt available');
+    });
 });
 
 function initializeElements() {
@@ -290,6 +326,12 @@ function handleTouchEnd(e) {
         triggerHaptic('success');
         showFeedback(result.message, 'success');
         announceToScreenReader(`Success! ${fullWord} sorted correctly`, 'polite');
+
+        // Track successful word sort
+        if (typeof GameAnalytics !== 'undefined') {
+            GameAnalytics.wordSorted(true, categoryId);
+        }
+
         // Color feedback for visual learners
         if (dragClone) {
           dragClone.style.background = 'var(--success)';
@@ -300,6 +342,12 @@ function handleTouchEnd(e) {
         triggerHaptic('error');
         showFeedback(result.message, 'error');
         announceToScreenReader(`Error: ${result.message}`, 'assertive');
+
+        // Track wrong guess
+        if (typeof GameAnalytics !== 'undefined') {
+            GameAnalytics.wordSorted(false, categoryId);
+        }
+
         // Color feedback for visual learners
         if (dragClone) {
           dragClone.style.background = 'var(--danger)';
@@ -346,6 +394,12 @@ function startNewGame(level = 1) {
     game = new PhysicsAssociations();
     game.initLevel(level);
     isInitialDeal = true; // Reset for stagger animation (Phase 4)
+
+    // Track level start
+    if (typeof GameAnalytics !== 'undefined') {
+        GameAnalytics.levelStarted(level);
+    }
+
     renderGame();
 }
 
@@ -850,6 +904,18 @@ function confirmNewGame() {
 
 function showGameOverModal(won, state) {
     elements.modalTitle.textContent = won ? '🎉 Level Complete!' : '😔 Out of Moves';
+
+    // Track level completion/failure (Phase 5)
+    if (typeof GameAnalytics !== 'undefined') {
+        if (won) {
+            const movesTaken = (game.maxMoves || 30) - state.movesRemaining;
+            GameAnalytics.levelCompleted(state.level, state.score, movesTaken);
+        } else {
+            const reason = state.movesRemaining === 0 ? 'out-of-moves' : 'no-valid-moves';
+            GameAnalytics.levelFailed(state.level, reason);
+        }
+    }
+
     elements.modalBody.innerHTML = `
         <p style="font-size: 1.125rem; margin-bottom: 16px;">
             ${won 
@@ -921,3 +987,44 @@ window.confirmNewGame = confirmNewGame;
 window.nextLevel = nextLevel;
 window.retryLevel = retryLevel;
 window.showMenuTab = showMenuTab;
+
+// PWA Install Functions (Phase 5)
+
+// Detect if running as installed PWA
+function isInstalledPWA() {
+    return window.matchMedia('(display-mode: standalone)').matches ||
+           window.navigator.standalone === true;
+}
+
+// Prompt user to install PWA
+async function promptInstall() {
+    if (!deferredInstallPrompt) {
+        console.log('Install prompt not available');
+        return;
+    }
+
+    // Show install prompt
+    deferredInstallPrompt.prompt();
+
+    // Wait for user choice
+    const { outcome } = await deferredInstallPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+        console.log('User installed PWA');
+
+        // Track installation
+        if (typeof GameAnalytics !== 'undefined') {
+            GameAnalytics.installCompleted();
+        }
+    } else {
+        console.log('User declined PWA installation');
+    }
+
+    // Clear prompt
+    deferredInstallPrompt = null;
+}
+
+// Track if launched from home screen
+if (isInstalledPWA() && typeof GameAnalytics !== 'undefined') {
+    trackGameEvent('app-launched-from-homescreen');
+}

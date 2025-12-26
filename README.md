@@ -1,4 +1,4 @@
-# Physics Associations
+# Ground State
 
 A mobile-first category-sorting word game that combines classic solitaire mechanics with physics terminology. Sort physics terms into their correct categories before running out of moves!
 

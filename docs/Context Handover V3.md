@@ -1,41 +1,40 @@
-# Context Handover V3: Analytics & PWA Implementation
+# Context Handover V3: Analytics + PWA Implementation
 
 ## Project Overview
-**Extends:** V1 (UI/UX + drag-and-drop) + V2 (abbreviation system + toggle)  
-**Focus:** Add privacy-friendly analytics to track gameplay metrics + make game installable as PWA
+**Extends:** V1 (UI/UX improvements) + V2 (Abbreviation system)  
+**Focus:** Add privacy-friendly analytics and Progressive Web App capabilities for native-like experience
 
 ---
 
-## Part 1: GoatCounter Analytics Integration
+## Part A: GoatCounter Analytics Integration
 
 ### Why Analytics for This Game?
 
-**Educational Insights:**
-- Which physics categories are most/least understood (wrong guess patterns)
-- Difficulty curve validation (where do players get stuck?)
-- Feature usage (do players use hints? draw from stock?)
-- Abbreviation clarity (which terms confuse players?)
-
-**Product Metrics:**
-- Daily/weekly active players
+**Player Behavior Insights:**
+- Which physics categories are most/least popular
+- Which levels players struggle with (quit rates)
 - Average session length
-- Level completion rates
-- Retention (do players return?)
+- Drag vs tap interaction preferences
+- Display mode preference (abbreviated vs icons when available)
 
-**Privacy-First:** GoatCounter doesn't track personal data, no cookies, GDPR-compliant
+**Product Decisions:**
+- Prioritize icon design for most-played categories
+- Adjust difficulty curve based on completion rates
+- Identify confusing physics terms (high wrong-guess rate)
+- Optimize onboarding based on tutorial completion
+
+**Privacy-First:** No personal data, no IP tracking, GDPR-compliant
 
 ---
 
-### Implementation Steps
-
-#### Step 1: Add GoatCounter Script (2 minutes)
+### Level 1: Basic Pageviews (5 minutes - REQUIRED)
 
 **File:** `index.html`
 
 Add before `</body>`:
 
 ```html
-<!-- GoatCounter Analytics (privacy-friendly, no cookies) -->
+<!-- GoatCounter Analytics - Privacy-friendly, no cookies -->
 <script data-goatcounter="https://YOUR-CODE.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
 </body>
@@ -43,134 +42,172 @@ Add before `</body>`:
 
 **Setup:**
 1. Create free account at https://goatcounter.com
-2. Get your unique code (e.g., `physics-game.goatcounter.com`)
-3. Replace `YOUR-CODE` in script above
-4. Dashboard: `https://YOUR-CODE.goatcounter.com`
+2. Get your tracking code (e.g., `physics-solitaire.goatcounter.com`)
+3. Replace `YOUR-CODE` in script above with `ithinkandicode`
+4. Verify pageviews in dashboard
+
+**Test:**
+- Open game in browser
+- Check GoatCounter dashboard (updates every ~10 seconds)
+- Should see pageview count
 
 ---
 
-#### Step 2: Event Tracking Helper (15 minutes)
+### Level 2: Game Event Tracking (30 minutes - HIGHLY RECOMMENDED)
 
-**File:** `main.js`
-
-Add analytics helper at top of file:
+**File:** Create new `analytics.js`
 
 ```javascript
-// Analytics Helper - Privacy-friendly event tracking
-function trackEvent(eventName, metadata = {}) {
-  if (typeof window === 'undefined' || !window.goatcounter) return;
+// Analytics wrapper for GoatCounter
+// Privacy-friendly event tracking for game engagement
+
+/**
+ * Track custom game events
+ * @param {string} eventName - Event identifier (e.g., 'level-completed')
+ * @param {object} metadata - Optional event metadata
+ */
+function trackGameEvent(eventName, metadata = {}) {
+  if (typeof window === 'undefined' || !window.goatcounter) {
+    return; // GoatCounter not loaded yet
+  }
   
   // Build event path with metadata
-  let path = `/event/${eventName}`;
+  let eventPath = `/event/${eventName}`;
+  
   if (Object.keys(metadata).length > 0) {
-    const params = new URLSearchParams(metadata).toString();
-    path += `?${params}`;
+    const params = Object.entries(metadata)
+      .map(([key, val]) => `${key}:${val}`)
+      .join(',');
+    eventPath += `?${params}`;
   }
   
   window.goatcounter.count({
-    path: path,
+    path: eventPath,
     title: eventName,
     event: true
   });
 }
 
-// Safe wrapper (fails silently if GoatCounter not loaded)
-window.trackEvent = trackEvent;
+// Convenience functions for common game events
+const GameAnalytics = {
+  // Level events
+  levelStarted: (level) => trackGameEvent('level-started', { level }),
+  levelCompleted: (level, score, moves) => trackGameEvent('level-completed', { level, score, moves }),
+  levelFailed: (level, reason) => trackGameEvent('level-failed', { level, reason }),
+  
+  // Gameplay events
+  categoryPlaced: (categoryId) => trackGameEvent('category-placed', { category: categoryId }),
+  wordSorted: (correct, categoryId) => trackGameEvent('word-sorted', { 
+    correct: correct ? 'yes' : 'no',
+    category: categoryId 
+  }),
+  stockDrawn: (movesLeft) => trackGameEvent('stock-drawn', { movesRemaining: movesLeft }),
+  
+  // User actions
+  hintUsed: (level) => trackGameEvent('hint-used', { level }),
+  undoUsed: (level) => trackGameEvent('undo-used', { level }),
+  levelRestarted: (level) => trackGameEvent('level-restarted', { level }),
+  
+  // Settings
+  displayModeChanged: (mode) => trackGameEvent('display-mode-changed', { mode }),
+  
+  // Engagement
+  sessionStart: () => trackGameEvent('session-start'),
+  sessionEnd: (duration) => trackGameEvent('session-end', { duration }),
+  
+  // Tutorial
+  tutorialStarted: () => trackGameEvent('tutorial-started'),
+  tutorialCompleted: () => trackGameEvent('tutorial-completed'),
+  tutorialSkipped: () => trackGameEvent('tutorial-skipped'),
+  
+  // Sharing/virality
+  shareClicked: (platform) => trackGameEvent('share-clicked', { platform }),
+  installPromptShown: () => trackGameEvent('pwa-install-prompt-shown'),
+  installCompleted: () => trackGameEvent('pwa-installed')
+};
+
+// Track session duration
+let sessionStartTime = Date.now();
+window.addEventListener('beforeunload', () => {
+  const duration = Math.round((Date.now() - sessionStartTime) / 1000); // seconds
+  GameAnalytics.sessionEnd(duration);
+});
+
+// Track session start
+GameAnalytics.sessionStart();
 ```
 
----
+**File:** `index.html`
 
-#### Step 3: Track Key Gameplay Events
+Add analytics script:
 
-**Add tracking to existing functions in `main.js`:**
+```html
+<script src="analytics.js"></script>
+<script src="physics-dictionary.js"></script>
+<script src="game-logic.js"></script>
+<script src="main.js"></script>
+```
+
+**File:** `main.js`
+
+Integrate analytics into existing game flow:
 
 ```javascript
-// 1. Game Start
+// In startNewGame()
 function startNewGame(level = 1) {
   game = new PhysicsAssociations();
-  game.initGame(level);
+  game.initLevel(level);
   
-  // Track game starts
-  trackEvent('game-started', { level: level });
+  // Track level start
+  if (typeof GameAnalytics !== 'undefined') {
+    GameAnalytics.levelStarted(level);
+  }
   
   renderGame();
 }
 
-// 2. Level Complete (in showGameOverModal)
-function showGameOverModal(won, state) {
-  if (won) {
-    trackEvent('level-completed', { 
-      level: state.level,
-      score: state.score,
-      moves_remaining: state.movesRemaining
-    });
-  } else {
-    trackEvent('level-failed', { 
-      level: state.level,
-      score: state.score,
-      moves_used: state.maxMoves
-    });
-  }
-  
-  // ... existing modal code
-}
-
-// 3. Category Placement
-function handleCategoryClick(card) {
-  const result = game.placeCategory(card.id);
-  
-  if (result.success) {
-    trackEvent('category-placed', { 
-      category: card.categoryId,
-      level: game.level 
-    });
-    
-    triggerHaptic('medium');
-    showFeedback(result.message, 'success');
-    renderGame();
-  } else {
-    triggerHaptic('error');
-    showFeedback(result.message, 'error');
-  }
-}
-
-// 4. Word Sorting (Success & Failure)
+// In handleSortResult()
 function handleSortResult(result) {
+  const state = game.getGameState();
+  
   if (result.success) {
-    trackEvent('word-sorted-correct', { 
-      level: game.level,
-      points: result.points 
-    });
-    
     triggerHaptic('success');
     showFeedback(result.message, 'success');
+    
+    // Track successful word sort
+    if (typeof GameAnalytics !== 'undefined') {
+      GameAnalytics.wordSorted(true, selectedWordCard.categoryId);
+    }
+    
     renderGame();
   } else {
-    // Track wrong category attempts (learning opportunity data)
-    trackEvent('word-sorted-wrong', { 
-      level: game.level,
-      correct_category: result.correctCategory 
-    });
-    
     triggerHaptic('error');
     showFeedback(result.message, 'error');
+    
+    // Track wrong guess
+    if (typeof GameAnalytics !== 'undefined') {
+      GameAnalytics.wordSorted(false, 'wrong-category');
+    }
+    
     renderGame();
   }
 }
 
-// 5. Stock Draws
+// In handleDrawCard()
 function handleDrawCard() {
   triggerHaptic('light');
   const result = game.drawFromStock();
   
   if (result.success) {
-    trackEvent('stock-drawn', { 
-      level: game.level,
-      moves_remaining: game.movesRemaining 
-    });
-    
     triggerHaptic('medium');
     showFeedback(result.message, 'info');
+    
+    // Track stock draw
+    if (typeof GameAnalytics !== 'undefined') {
+      const state = game.getGameState();
+      GameAnalytics.stockDrawn(state.movesRemaining);
+    }
+    
     renderGame();
   } else {
     triggerHaptic('error');
@@ -178,272 +215,191 @@ function handleDrawCard() {
   }
 }
 
-// 6. Hint Usage
-function handleShowHint() {
-  trackEvent('hint-used', { level: game.level });
+// In showGameOverModal()
+function showGameOverModal(won, state) {
+  // Track game completion
+  if (typeof GameAnalytics !== 'undefined') {
+    if (won) {
+      GameAnalytics.levelCompleted(state.level, state.score, state.movesRemaining);
+    } else {
+      const reason = state.movesRemaining === 0 ? 'no-moves' : 'no-valid-moves';
+      GameAnalytics.levelFailed(state.level, reason);
+    }
+  }
   
-  const hint = game.getHint();
+  // ... existing modal code
+}
+
+// In handleShowHint()
+function handleShowHint() {
+  const state = game.getGameState();
+  
+  // Track hint usage
+  if (typeof GameAnalytics !== 'undefined') {
+    GameAnalytics.hintUsed(state.level);
+  }
+  
   // ... existing hint code
 }
 
-// 7. Display Mode Toggle (from V2)
+// In setDisplayMode()
 function setDisplayMode(mode) {
   currentDisplayMode = mode;
   localStorage.setItem('physics_display_mode', mode);
   
-  trackEvent('display-mode-changed', { mode: mode });
+  // Track display mode change
+  if (typeof GameAnalytics !== 'undefined') {
+    GameAnalytics.displayModeChanged(mode);
+  }
   
   renderGame();
 }
-
-// 8. Menu Interactions
-function handleShowMenu() {
-  trackEvent('menu-opened', { level: game.level });
-  // ... existing menu code
-}
-
-// 9. Session Engagement (add to init)
-document.addEventListener('DOMContentLoaded', () => {
-  loadDisplayPreference();
-  initializeElements();
-  setupEventListeners();
-  startNewGame();
-  
-  // Track session start
-  trackEvent('session-started');
-  
-  // Track session duration on visibility change
-  let sessionStartTime = Date.now();
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      const duration = Math.round((Date.now() - sessionStartTime) / 1000);
-      trackEvent('session-ended', { duration_seconds: duration });
-    } else {
-      sessionStartTime = Date.now();
-      trackEvent('session-resumed');
-    }
-  });
-});
 ```
 
 ---
 
-#### Step 4: Track Confusion Points (Educational Value)
+### Event Tracking Priority
 
-**Add specialized tracking for learning insights:**
+**Essential (implement first):**
+- ✅ Level started/completed/failed
+- ✅ Session start/end
+- ✅ Word sorting (correct/incorrect)
+- ✅ Display mode changes
 
-```javascript
-// Track which abbreviations confuse players
-// (When they hover to see full word frequently)
-let abbreviationHoverCounts = {};
+**Nice to have:**
+- Hint usage
+- Stock pile draws
+- Category placement
+- Level restarts
 
-document.addEventListener('DOMContentLoaded', () => {
-  // ... existing init code
-  
-  // Track tooltip usage (indicates abbreviation confusion)
-  document.addEventListener('mouseenter', (e) => {
-    if (e.target.classList.contains('card') && e.target.dataset.fullWord) {
-      const word = e.target.dataset.fullWord;
-      abbreviationHoverCounts[word] = (abbreviationHoverCounts[word] || 0) + 1;
-      
-      // Track if hovered 3+ times (indicates confusion)
-      if (abbreviationHoverCounts[word] === 3) {
-        trackEvent('abbreviation-confusing', { 
-          word: word,
-          abbreviation: getCardDisplayText(word, currentDisplayMode)
-        });
-      }
-    }
-  }, true);
-});
-
-// Track category confusion (wrong sorting patterns)
-// This helps identify which physics concepts are misunderstood
-function handleSortResult(result) {
-  if (!result.success && result.correctCategory) {
-    trackEvent('category-confusion', {
-      word: selectedWordCard.word,
-      attempted_category: selectedWordCard.categoryId,
-      correct_category: result.correctCategory
-    });
-  }
-  
-  // ... existing sort result code
-}
-```
+**Future:**
+- Tutorial completion
+- Share button clicks
+- PWA install events
 
 ---
 
-### Events Summary (What Gets Tracked)
+## Part B: Progressive Web App (PWA) Implementation
 
-**Gameplay Metrics:**
-- `game-started` - Level number
-- `level-completed` - Score, moves remaining
-- `level-failed` - Score, moves used
-- `category-placed` - Which category, level
-- `word-sorted-correct` - Points earned
-- `word-sorted-wrong` - Correct category (learning data)
-- `stock-drawn` - When players get stuck
-- `hint-used` - Hint reliance
+### Why PWA for This Game?
 
-**UX Metrics:**
-- `display-mode-changed` - Abbreviation vs icon preference
-- `abbreviation-confusing` - Which terms need better UI
-- `category-confusion` - Which physics concepts are hard
-- `menu-opened` - Engagement with help
-
-**Session Metrics:**
-- `session-started` - Daily active users
-- `session-ended` - Session duration
-- `session-resumed` - Return rate
-
-**Privacy:** ✅ No personal data, no IP tracking, no cookies
-
----
-
-### Analytics Dashboard Insights
-
-**What you'll learn:**
-
-1. **Educational Effectiveness:**
-   - Which categories cause most wrong guesses?
-   - Which abbreviations confuse players?
-   - Do players improve with hints?
-
-2. **Difficulty Tuning:**
-   - Where do players quit? (level difficulty curve)
-   - Is move count too tight/generous?
-   - Stock pile usage patterns
-
-3. **Feature Adoption:**
-   - Do players use hints?
-   - Display mode preference (abbreviation vs future icons)
-   - Menu engagement
-
-4. **Retention:**
-   - Average session length
-   - Return player rate
-   - Level completion percentage
-
----
-
-## Part 2: Progressive Web App (PWA) Implementation
-
-### Why Make It a PWA?
+**Native-like Experience:**
+- Install to home screen (iOS/Android)
+- Works offline (play without internet)
+- Full-screen mode (no browser chrome)
+- Faster load times (cached assets)
+- App-like feel (boosts engagement)
 
 **User Benefits:**
-- **Install to home screen** - Feels like native app
-- **Offline play** - Works without internet
-- **Faster loading** - Cached assets
-- **No app store** - Instant install from browser
-- **Less storage** - Smaller than native app
+- Quick access from home screen
+- Plays on airplane/subway
+- Feels like real app, not website
+- Background sync for future features
 
 **Technical Benefits:**
-- Same codebase (no iOS/Android separate versions)
-- Easy updates (no app store approval)
-- Works across all devices
-- SEO-friendly (still a website)
+- No app store approval needed
+- One codebase for all platforms
+- Instant updates (no user action needed)
+- Small footprint (~500KB total)
 
 ---
 
-### PWA Implementation Steps
+### PWA Implementation Checklist
 
-#### Step 1: Create Web App Manifest (5 minutes)
+#### 1. Web App Manifest (5 minutes - REQUIRED)
 
-**New File:** `manifest.json`
+**File:** Create `manifest.json` in root:
 
 ```json
 {
-  "name": "Physics Associations",
-  "short_name": "PhysicsGame",
-  "description": "Sort physics terms into categories - A word solitaire game for science students",
+  "name": "Physics Associations - Word Solitaire",
+  "short_name": "Physics Solitaire",
+  "description": "Sort physics terms into categories. Educational word game with limited moves.",
   "start_url": "/index.html",
   "display": "standalone",
   "background_color": "#667eea",
-  "theme_color": "#6366f1",
-  "orientation": "portrait",
-  "scope": "/",
+  "theme_color": "#667eea",
+  "orientation": "portrait-primary",
+  "categories": ["education", "games"],
   "icons": [
     {
-      "src": "/icons/icon-72x72.png",
+      "src": "/icons/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-96x96.png",
+      "src": "/icons/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-128x128.png",
+      "src": "/icons/icon-128.png",
       "sizes": "128x128",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-144x144.png",
+      "src": "/icons/icon-144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-152x152.png",
+      "src": "/icons/icon-152.png",
       "sizes": "152x152",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-192x192.png",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-384x384.png",
+      "src": "/icons/icon-384.png",
       "sizes": "384x384",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icons/icon-512x512.png",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["games", "education"],
   "screenshots": [
     {
       "src": "/screenshots/gameplay.png",
       "sizes": "540x720",
-      "type": "image/png",
-      "form_factor": "narrow"
+      "type": "image/png"
     }
   ]
 }
 ```
 
-**Link manifest in `index.html` `<head>`:**
+**File:** `index.html` - Add to `<head>`:
 
 ```html
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#6366f1">
+<meta name="theme-color" content="#667eea">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Physics Game">
-<link rel="apple-touch-icon" href="/icons/icon-152x152.png">
+<meta name="apple-mobile-web-app-title" content="Physics Solitaire">
+<link rel="apple-touch-icon" href="/icons/icon-152.png">
 ```
 
 ---
 
-#### Step 2: Create Service Worker for Offline Support (20 minutes)
+#### 2. Service Worker for Offline Support (20 minutes - RECOMMENDED)
 
-**New File:** `service-worker.js`
+**File:** Create `service-worker.js` in root:
 
 ```javascript
-const CACHE_NAME = 'physics-associations-v1.0.0';
+const CACHE_NAME = 'physics-solitaire-v1.0.0';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -451,42 +407,23 @@ const urlsToCache = [
   '/physics-dictionary.js',
   '/game-logic.js',
   '/main.js',
-  '/manifest.json',
-  // Add all icons
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/analytics.js',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png'
 ];
 
-// Install - Cache assets
+// Install service worker and cache assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('Caching app assets');
+        console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting(); // Activate immediately
 });
 
-// Activate - Clean old caches
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
-  );
-  return self.clients.claim();
-});
-
-// Fetch - Serve from cache, fallback to network
+// Serve cached content when offline
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
@@ -496,7 +433,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         }
         
-        // Clone request (can only be consumed once)
+        // Clone the request
         const fetchRequest = event.request.clone();
         
         return fetch(fetchRequest).then((response) => {
@@ -505,10 +442,9 @@ self.addEventListener('fetch', (event) => {
             return response;
           }
           
-          // Clone response (can only be consumed once)
+          // Clone the response
           const responseToCache = response.clone();
           
-          // Cache new resources
           caches.open(CACHE_NAME)
             .then((cache) => {
               cache.put(event.request, responseToCache);
@@ -517,264 +453,344 @@ self.addEventListener('fetch', (event) => {
           return response;
         });
       })
-      .catch(() => {
-        // Offline fallback (if needed)
-        return caches.match('/index.html');
-      })
+  );
+});
+
+// Clean up old caches
+self.addEventListener('activate', (event) => {
+  const cacheWhitelist = [CACHE_NAME];
+  
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 ```
 
-**Register service worker in `main.js`:**
+**File:** `main.js` - Register service worker:
 
 ```javascript
-// Register service worker for PWA offline support
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+// Register service worker (at top of file, after DOMContentLoaded)
+document.addEventListener('DOMContentLoaded', () => {
+  loadDisplayPreference();
+  initializeElements();
+  setupEventListeners();
+  startNewGame();
+  
+  // Register service worker for PWA
+  if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then((registration) => {
         console.log('ServiceWorker registered:', registration.scope);
-        
-        // Track PWA install
-        trackEvent('pwa-service-worker-registered');
       })
       .catch((error) => {
         console.log('ServiceWorker registration failed:', error);
       });
-  });
-  
-  // Track PWA install event
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    
-    // Show custom install prompt (optional)
-    // Store event for later use
-    window.deferredPrompt = e;
-    
-    trackEvent('pwa-install-prompt-shown');
-  });
-  
-  // Track successful install
-  window.addEventListener('appinstalled', () => {
-    trackEvent('pwa-installed');
-    window.deferredPrompt = null;
-  });
-}
+  }
+});
 ```
 
 ---
 
-#### Step 3: Generate App Icons (10 minutes)
+#### 3. Install Prompt (15 minutes - NICE TO HAVE)
 
-**Quick Icon Generation:**
-
-1. **Design base icon (512x512px):**
-   - Purple/blue gradient background
-   - Physics symbol (⚛️ atom or ⚙️ gear)
-   - Clean, recognizable design
-
-2. **Use icon generator:**
-   - https://realfavicongenerator.net/
-   - Upload 512x512 image
-   - Download all sizes (72, 96, 128, 144, 152, 192, 384, 512)
-
-3. **Save to `/icons/` folder**
-
-**Alternative - Quick SVG Icon:**
-
-```svg
-<!-- icons/icon.svg - Convert to PNGs with tool -->
-<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#667eea" />
-      <stop offset="100%" style="stop-color:#764ba2" />
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="80" fill="url(#gradient)"/>
-  <text x="256" y="320" font-size="200" text-anchor="middle" fill="white">⚛️</text>
-</svg>
-```
-
----
-
-#### Step 4: Add Install Prompt (Optional - 15 minutes)
-
-**Show custom install banner when PWA is installable:**
-
-**File:** `main.js`
+**File:** `main.js` - Add install prompt:
 
 ```javascript
 // PWA Install Prompt
-let deferredPrompt = null;
+let deferredInstallPrompt = null;
 
+// Capture install prompt event
 window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevent default mini-infobar
   e.preventDefault();
-  deferredPrompt = e;
   
-  // Show custom install button (add to header or menu)
+  // Save prompt for later
+  deferredInstallPrompt = e;
+  
+  // Show custom install button
   showInstallButton();
   
-  trackEvent('pwa-install-available');
+  // Track prompt shown
+  if (typeof GameAnalytics !== 'undefined') {
+    GameAnalytics.installPromptShown();
+  }
 });
 
+// Show install button in menu
 function showInstallButton() {
-  // Add button to header
+  // Add to menu modal
   const installBtn = document.createElement('button');
-  installBtn.className = 'btn-icon install-btn';
-  installBtn.innerHTML = '📥';
-  installBtn.title = 'Install App';
-  installBtn.addEventListener('click', installApp);
+  installBtn.className = 'btn-stock';
+  installBtn.style.background = 'var(--success)';
+  installBtn.innerHTML = '📱 Install App';
+  installBtn.onclick = promptInstall;
   
-  elements.menuBtn.parentElement.insertBefore(installBtn, elements.menuBtn);
+  // Insert into menu (you'll add this during menu redesign)
+  // For now, log that it's available
+  console.log('PWA install available');
 }
 
-async function installApp() {
-  if (!deferredPrompt) return;
-  
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
-  
-  trackEvent('pwa-install-prompt-clicked', { outcome });
-  
-  if (outcome === 'accepted') {
-    console.log('User accepted PWA install');
-  } else {
-    console.log('User dismissed PWA install');
+// Prompt user to install
+async function promptInstall() {
+  if (!deferredInstallPrompt) {
+    return;
   }
   
-  deferredPrompt = null;
-  document.querySelector('.install-btn')?.remove();
+  // Show install prompt
+  deferredInstallPrompt.prompt();
+  
+  // Wait for user choice
+  const { outcome } = await deferredInstallPrompt.userChoice;
+  
+  if (outcome === 'accepted') {
+    console.log('User installed PWA');
+    
+    // Track installation
+    if (typeof GameAnalytics !== 'undefined') {
+      GameAnalytics.installCompleted();
+    }
+  }
+  
+  // Clear prompt
+  deferredInstallPrompt = null;
 }
 
-// Track if running as installed PWA
-if (window.matchMedia('(display-mode: standalone)').matches) {
-  trackEvent('pwa-launched-as-app');
+// Detect if running as installed PWA
+function isInstalledPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+// Track if user is using installed version
+if (isInstalledPWA() && typeof GameAnalytics !== 'undefined') {
+  trackGameEvent('app-launched-from-homescreen');
 }
 ```
+
+---
+
+#### 4. App Icons (10 minutes - REQUIRED)
+
+**Generate icons from base image:**
+
+Use a tool like https://realfavicongenerator.net/ or create manually:
+
+**Required sizes:**
+- 72x72, 96x96, 128x128, 144x144, 152x152, 192x192, 384x384, 512x512
+
+**Icon design suggestions:**
+- Use atom symbol (⚛️) or physics-themed graphic
+- Match gradient colors from game (purple/blue)
+- Simple, recognizable at small sizes
+- Maskable (safe area for rounded corners)
+
+**Folder structure:**
+```
+/icons/
+  icon-72.png
+  icon-96.png
+  icon-128.png
+  icon-144.png
+  icon-152.png
+  icon-192.png
+  icon-384.png
+  icon-512.png
+```
+
+**Quick icon creation (if no design tool):**
+```html
+<!-- Create temporary HTML to screenshot -->
+<div style="width: 512px; height: 512px; 
+     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+     display: flex; align-items: center; justify-content: center;
+     font-size: 256px;">
+  ⚛️
+</div>
+```
+Screenshot at 512x512, then resize for other dimensions.
 
 ---
 
 ### PWA Testing Checklist
 
-**Development:**
-- [ ] Manifest linked in HTML
-- [ ] Service worker registered
-- [ ] All icons generated (8 sizes)
-- [ ] Cache strategy working
+**Desktop (Chrome DevTools):**
+- [ ] Open DevTools → Application → Manifest
+- [ ] Verify manifest loads correctly
+- [ ] Check all icons present
+- [ ] Application → Service Workers → verify registered
+- [ ] Application → Cache Storage → verify files cached
+- [ ] Lighthouse audit → PWA score > 90
 
-**Chrome DevTools (Lighthouse):**
-- [ ] Run PWA audit
-- [ ] Score 90+ on installability
-- [ ] Offline functionality works
-- [ ] Manifest validated
-
-**Mobile Testing:**
-- [ ] Install prompt appears (Chrome Android)
-- [ ] Add to Home Screen works (iOS Safari)
-- [ ] App opens in standalone mode
-- [ ] Offline mode functions
-- [ ] Icons display correctly
-
-**Analytics Verification:**
-- [ ] `pwa-service-worker-registered` fires
-- [ ] `pwa-install-prompt-shown` tracked
-- [ ] `pwa-installed` event captured
-- [ ] `pwa-launched-as-app` tracked
+**Mobile (Real Device):**
+- [ ] Android: Chrome shows "Install app" banner
+- [ ] iOS: Share → "Add to Home Screen" available
+- [ ] App icon appears on home screen
+- [ ] Launches in standalone mode (no browser chrome)
+- [ ] Works offline (airplane mode test)
+- [ ] Splash screen shows correctly
 
 ---
 
-## Combined Success Criteria
+## Implementation Priority
 
-**Analytics:**
-- ✅ GoatCounter script loaded
-- ✅ 10+ gameplay events tracked
-- ✅ Educational metrics captured (confusion patterns)
-- ✅ Session duration tracked
-- ✅ Dashboard shows real data
+### Must Have (Ship v1.0):
+1. ✅ GoatCounter pageview tracking (5 min)
+2. ✅ Web app manifest (5 min)
+3. ✅ Service worker with offline support (20 min)
+4. ✅ App icons (10 min)
+5. ✅ Basic event tracking (level start/complete/fail) (15 min)
 
-**PWA:**
-- ✅ Manifest validated (Lighthouse)
-- ✅ Service worker caching assets
-- ✅ Installable on Android (Chrome)
-- ✅ Add to Home Screen on iOS (Safari)
-- ✅ Offline mode works
-- ✅ Standalone display mode
-- ✅ App icons display properly
+**Total: ~55 minutes**
 
-**Combined:**
-- ✅ Analytics track PWA-specific events
-- ✅ Offline gameplay tracked when online
-- ✅ Performance maintained (60fps)
+### Should Have (Ship v1.1):
+- Full event tracking (all game actions)
+- Install prompt in menu
+- PWA install analytics
+- Tutorial completion tracking
+
+### Nice to Have (Ship v2.0):
+- Background sync (for future multiplayer)
+- Push notifications (daily challenge reminders)
+- Share functionality (share score to Twitter/etc)
+- Offline indicator in UI
 
 ---
 
-## File Structure After V3
+## Analytics Dashboard Insights
 
+**What to monitor weekly:**
+
+**Engagement:**
+- Sessions per day
+- Average session duration
+- Level completion rate by level
+- Hint usage rate (>50% = too hard)
+
+**UX Optimization:**
+- Wrong guess rate by category (confusing terms)
+- Stock pile draw frequency (difficulty tuning)
+- Level restart rate (frustration indicator)
+- Display mode preference split
+
+**Growth:**
+- PWA install rate
+- Return visitor rate
+- Level progression (how far players get)
+
+**Red Flags:**
+- High quit rate on specific level → too hard
+- Low hint usage → not discoverable
+- High wrong-guess rate → confusing categories
+- Short session duration → not engaging
+
+---
+
+## Files to Create/Modify
+
+**New Files:**
+- `manifest.json` - PWA manifest
+- `service-worker.js` - Offline caching
+- `analytics.js` - Event tracking wrapper
+- `/icons/` - App icon directory (8 sizes)
+
+**Modified Files:**
+- `index.html` - Add manifest link, GoatCounter script, analytics script
+- `main.js` - Integrate analytics calls, register service worker
+- `styles.css` - (Optional) Add install button styling
+
+**Don't Touch:**
+- `physics-dictionary.js` - No changes needed
+- `game-logic.js` - No changes needed (analytics in UI layer)
+
+---
+
+## Testing Commands
+
+**Local testing:**
+```bash
+# Serve with HTTPS (required for service workers)
+npx http-server -S -C localhost.pem -K localhost-key.pem
+
+# Or use Python
+python -m http.server 8000 --bind localhost
 ```
-physics-word-solitaire/
-├── index.html                  # (Updated: manifest link, SW meta tags)
-├── styles.css                  # (Unchanged)
-├── physics-dictionary.js       # (Updated: abbreviations from V2)
-├── game-logic.js              # (Unchanged)
-├── main.js                    # (Updated: analytics + SW registration)
-├── manifest.json              # (New: PWA manifest)
-├── service-worker.js          # (New: offline support)
-├── icons/                     # (New: app icons)
-│   ├── icon-72x72.png
-│   ├── icon-96x96.png
-│   ├── icon-128x128.png
-│   ├── icon-144x144.png
-│   ├── icon-152x152.png
-│   ├── icon-192x192.png
-│   ├── icon-384x384.png
-│   └── icon-512x512.png
-├── screenshots/               # (Optional: for app stores)
-│   └── gameplay.png
-├── README.md
-└── TOUCH_OPTIMIZATION.md
+
+**PWA validation:**
+```bash
+# Install Lighthouse CLI
+npm install -g lighthouse
+
+# Run PWA audit
+lighthouse http://localhost:8000 --view --preset=pwa
 ```
+
+**Service worker debugging:**
+- Chrome DevTools → Application → Service Workers
+- Click "Update" to force refresh
+- Check "Offline" to test offline mode
+- Click "Unregister" to reset
 
 ---
 
-## Priority Order for Implementation
+## Success Criteria
 
-**Critical Path (60 minutes):**
-1. Analytics setup (20 min)
-   - Add GoatCounter script
-   - Track core gameplay events
-   - Verify in dashboard
+**Analytics is successful when:**
+- ✅ Pageviews tracking in GoatCounter dashboard
+- ✅ Game events appear in real-time
+- ✅ No performance impact (async loading)
+- ✅ Privacy-compliant (no PII collected)
 
-2. PWA manifest (10 min)
-   - Create manifest.json
-   - Link in HTML
-   - Add meta tags
+**PWA is successful when:**
+- ✅ Lighthouse PWA score > 90
+- ✅ Installable on iOS and Android
+- ✅ Works offline (all core features)
+- ✅ Launches in standalone mode
+- ✅ Service worker caches all assets
+- ✅ Icon shows correctly on home screen
 
-3. Generate icons (10 min)
-   - Design/generate all sizes
-   - Save to /icons/
+---
 
-4. Service worker (20 min)
-   - Create service-worker.js
-   - Register in main.js
-   - Test offline mode
+## Privacy & Compliance Notes
 
-**Nice-to-Have (30 minutes):**
-5. Install prompt UI (15 min)
-6. Advanced analytics (15 min)
-   - Confusion tracking
-   - Session depth metrics
+**GoatCounter is GDPR/CCPA compliant:**
+- No cookies required
+- No personal data collected
+- No IP address tracking
+- No third-party data sharing
+- Open source and transparent
+
+**What is tracked:**
+- Page views (anonymized)
+- Custom events (game actions)
+- Browser/device type (aggregate)
+- Session duration (anonymous)
+
+**What is NOT tracked:**
+- Names, emails, user IDs
+- IP addresses
+- Precise location
+- Cross-site activity
+
+**No consent banner needed** (privacy-friendly by default)
 
 ---
 
 ## Notes for Claude Code
 
-- **Analytics first:** Easiest to implement, immediate value
-- **PWA second:** More complex but huge UX improvement
-- **Test locally:** Service workers require HTTPS or localhost
-- **Version cache name:** Increment `CACHE_NAME` when updating files
-- **GoatCounter account:** Free tier is generous (100k pageviews/month)
-- **Icon design:** Keep it simple, recognizable at small sizes
-- **Privacy:** Both features are privacy-friendly (no tracking IDs)
+- **Start with analytics Level 1** - Just get pageviews working first
+- **Test service worker thoroughly** - Offline bugs are hard to debug
+- **Don't over-track** - Only track actionable events
+- **Icons are critical** - PWA won't install without proper icons
+- **Cache strategy** - Cache-first for assets, network-first for API (if added later)
+- **Update manifest version** - Bump cache name when deploying updates
+- **GoatCounter is free** - No API limits, perfect for indie games
 
-This transforms the game from a web page into a **professional, installable, data-informed educational game** that feels like a native mobile app!
+This completes the game's technical foundation: playable (V1), readable (V2), measurable (V3), and installable (V3)!

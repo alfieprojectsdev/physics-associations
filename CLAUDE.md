@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Physics Associations is a mobile-first word game combining solitaire mechanics with physics terminology. Players sort physics terms into category foundations before running out of moves. The game is built with vanilla JavaScript, HTML, and CSS - no build tools or dependencies required.
+Ground State is a mobile-first word game combining solitaire mechanics with physics terminology. Players sort physics terms into category foundations before running out of moves. The game is built with vanilla JavaScript, HTML, and CSS - no build tools or dependencies required.
 
 Live demo: https://alfieprojectsdev.github.io/physics-associations/
 
