@@ -44,6 +44,11 @@ Clear the board by sorting every word card into its corresponding category found
 - **Hint System** - Shows missing categories and next best move
 - **Score System** - Word-based points (3-12 points per word)
 - **Mobile-First** - Touch-optimized for phones and tablets
+- **Drag & Drop** - Intuitive card dragging with haptic feedback
+- **Smooth Animations** - Card flip, dealing, and sorting effects (Phase 4)
+- **PWA Support** - Install on home screen, works offline (Phase 5)
+- **Privacy-Friendly Analytics** - GoatCounter tracking (no cookies, no personal data)
+- **Accessibility** - WCAG 2.1 AA compliant, screen reader support
 
 ## 🚀 Quick Start
 
@@ -61,12 +66,18 @@ python -m http.server 8000
 ## 📂 Project Structure
 
 ```
-physics-word-solitaire/
+ground-state/
 ├── index.html              # Main HTML structure
+├── about.html              # About page (birthday gift story)
 ├── styles.css              # Mobile-first responsive design
 ├── physics-dictionary.js   # Category definitions & word database
 ├── game-logic.js          # Associations-style game mechanics
 ├── main.js                # UI controller & event handling
+├── analytics.js           # GoatCounter analytics wrapper
+├── manifest.json          # PWA configuration
+├── service-worker.js      # Offline support and caching
+├── icons/                 # PWA icons (72px to 512px)
+├── ROADMAP.md             # Future features roadmap
 └── README.md              # This file
 ```
 
@@ -243,18 +254,24 @@ Level 10+:   Expert mode, 6 categories, minimal margin for error
 
 ## 🐛 Known Issues & Roadmap
 
+### Current Status (v1.0 - Jan 1, 2026)
+- ✅ Core gameplay mechanics complete
+- ✅ Phase 4: Animations (flip, deal, stagger, bounce, shake, pulse)
+- ✅ Phase 5: PWA + Analytics (offline support, GoatCounter tracking)
+- ✅ Drag-and-drop with haptic feedback
+- ✅ Accessibility (WCAG 2.1 AA compliant)
+- ✅ Performance optimizations (low-performance mode detection)
+
 ### Current Limitations
+- Abbreviated mode only (full words abbreviated to 4-6 characters)
 - No save/load system (progress resets on refresh)
 - Single-device only (no cloud sync)
-- No sound effects or haptic feedback
+- No sound effects (haptic feedback only)
 
-### Planned Features
-- [ ] LocalStorage persistence
-- [ ] Sound toggle with victory/error audio
-- [ ] Colorblind-friendly category indicators
-- [ ] Statistics tracking (win rate, best score)
-- [ ] "Quick Restart" button
-- [ ] Difficulty presets (Easy/Normal/Hard)
+### Planned Features (See ROADMAP.md)
+- **v2.0 (Late January):** Icon + Label display mode
+- **v3.0 (Feb-March):** Classroom features (teacher dashboard, student tracking)
+- **v4.0 (Q2 2026):** Educational expansion (Chemistry, Biology, Math decks)
 
 ## 🎨 Design Philosophy
 

@@ -319,7 +319,7 @@ function handleTouchEnd(e) {
     const cardId = draggedCard.dataset.cardId;
 
     try {
-      const result = game.sortWordToFoundation(cardId, categoryId);
+      const result = game.sortWord(cardId, categoryId);
 
       if (result.success) {
         const fullWord = draggedCard.dataset.fullWord || cardId;

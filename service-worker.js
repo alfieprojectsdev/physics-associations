@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ground-state-v1.0.0';
+const CACHE_NAME = 'ground-state-v1.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,6 +7,7 @@ const urlsToCache = [
   '/game-logic.js',
   '/main.js',
   '/analytics.js',
+  '/about.html',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
@@ -19,7 +20,12 @@ self.addEventListener('install', (event) => {
         console.log('Opened cache');
         return cache.addAll(urlsToCache);
       })
+      .catch((error) => {
+        console.error('Cache installation failed:', error);
+      })
   );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 // Serve cached content when offline
@@ -68,6 +74,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // Take control of all pages immediately
+      return self.clients.claim();
     })
   );
 });
