@@ -219,6 +219,50 @@ body {
     color: var(--text-light);
 }
 
+/* Pile slot visualization for visual progress */
+.pile-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.pile-slot {
+    height: 6px;
+    width: 100%;
+    border-radius: 3px;
+    transition: background 0.3s ease;
+}
+
+.pile-slot.filled {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    box-shadow: 0 1px 2px rgba(99, 102, 241, 0.3);
+}
+
+.pile-slot.filled.just-added {
+    animation: snapIntoPlace 0.4s ease-out;
+}
+
+.pile-slot.empty {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px dashed rgba(0, 0, 0, 0.1);
+}
+
+@keyframes snapIntoPlace {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
 .foundation-placeholder {
     width: var(--card-width);
     height: var(--card-height);

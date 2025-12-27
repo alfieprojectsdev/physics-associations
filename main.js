@@ -20,6 +20,7 @@ let frameCount = 0;
 let lowPerformanceMode = false;
 let isInitialDeal = true; // Track first render for stagger animation
 let previousTableauState = []; // Track face-down cards for flip animation
+let previousFoundationCounts = {}; // Track sorted counts for snap animation
 
 // PWA Install Prompt (Phase 5)
 let deferredInstallPrompt = null;
@@ -394,6 +395,7 @@ function startNewGame(level = 1) {
     game = new PhysicsAssociations();
     game.initLevel(level);
     isInitialDeal = true; // Reset for stagger animation (Phase 4)
+    previousFoundationCounts = {}; // Reset foundation tracking
 
     // Track level start
     if (typeof GameAnalytics !== 'undefined') {
@@ -458,11 +460,32 @@ function renderFoundations(foundations, placedCategories) {
         const foundationEl = document.createElement('div');
         foundationEl.className = 'foundation-stack foundation-slot'; // Add foundation-slot for drag-and-drop
         foundationEl.dataset.categoryId = catId; // Add data attribute for drag-and-drop
+
+        // Build pile visualization with empty slots
+        let pileHTML = '';
+        const previousCount = previousFoundationCounts[catId] || 0;
+        const justAddedIndex = previousCount < sortedCount ? sortedCount - 1 : -1;
+
+        for (let i = 0; i < totalCount; i++) {
+            if (i < sortedCount) {
+                const isJustAdded = i === justAddedIndex ? ' just-added' : '';
+                pileHTML += `<div class="pile-slot filled${isJustAdded}"></div>`;
+            } else {
+                pileHTML += '<div class="pile-slot empty"></div>';
+            }
+        }
+
+        // Update tracking
+        previousFoundationCounts[catId] = sortedCount;
+
         foundationEl.innerHTML = `
             <div class="foundation-header">
                 <div class="foundation-icon">${category.icon}</div>
                 <div class="foundation-name">${category.name}</div>
                 <div class="foundation-count">${sortedCount}/${totalCount}</div>
+            </div>
+            <div class="pile-slots">
+                ${pileHTML}
             </div>
         `;
 
@@ -700,7 +723,7 @@ function handleSortResult(result) {
         triggerHaptic('success');
         // Show full word in feedback, not abbreviation
         const fullWord = selectedWordCard.word;
-        showFeedback(`"${fullWord}" sorted! +${result.points}`, 'success');
+        showFeedback(`"${fullWord}" sorted!`, 'success');
         renderGame();
     } else {
         triggerHaptic('error');
@@ -834,10 +857,6 @@ function handleShowMenu() {
                     <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 0.75rem; color: var(--text-light);">Level</div>
                         <div style="font-size: 1.5rem; font-weight: bold;">${state.level}</div>
-                    </div>
-                    <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
-                        <div style="font-size: 0.75rem; color: var(--text-light);">Score</div>
-                        <div style="font-size: 1.5rem; font-weight: bold;">${state.score}</div>
                     </div>
                     <div style="background: var(--bg-light); padding: 12px; border-radius: 8px; text-align: center;">
                         <div style="font-size: 0.75rem; color: var(--text-light);">Moves Left</div>
