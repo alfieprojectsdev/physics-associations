@@ -437,7 +437,7 @@ function renderGame() {
 
 function renderFoundations(foundations, placedCategories) {
     elements.foundationsArea.innerHTML = '';
-    
+
     if (placedCategories.length === 0) {
         elements.foundationsArea.innerHTML = `
             <div class="foundation-placeholder">
@@ -447,10 +447,14 @@ function renderFoundations(foundations, placedCategories) {
         `;
         return;
     }
-    
+
     placedCategories.forEach(catId => {
         const foundation = foundations[catId];
         const category = foundation.category;
+
+        // Calculate progress: sorted words / total words in deck for this category
+        const sortedCount = foundation.words.length;
+        const totalCount = game.countWordsForCategory(catId);
 
         const foundationEl = document.createElement('div');
         foundationEl.className = 'foundation-stack foundation-slot'; // Add foundation-slot for drag-and-drop
@@ -459,12 +463,7 @@ function renderFoundations(foundations, placedCategories) {
             <div class="foundation-header">
                 <div class="foundation-icon">${category.icon}</div>
                 <div class="foundation-name">${category.name}</div>
-                <div class="foundation-description">${category.description}</div>
-            </div>
-            <div class="foundation-words" id="foundation-${catId}">
-                ${foundation.words.map(word => `
-                    <div class="word-chip">${word.word} (+${word.points})</div>
-                `).join('')}
+                <div class="foundation-count">${sortedCount}/${totalCount}</div>
             </div>
         `;
 
@@ -486,29 +485,38 @@ function renderTableau(tableau, playableCards) {
         columnEl.className = 'tableau-column';
         const columnState = [];
 
-        column.forEach((card, cardIndex) => {
-            const cardEl = createCardElement(card);
+        // Handle empty column with ghost placeholder
+        if (column.length === 0) {
+            const emptyPlaceholder = document.createElement('div');
+            emptyPlaceholder.className = 'tableau-column-empty';
+            emptyPlaceholder.innerHTML = '<div class="empty-slot-outline"></div>';
+            columnEl.appendChild(emptyPlaceholder);
+        } else {
+            // Render cards in column
+            column.forEach((card, cardIndex) => {
+                const cardEl = createCardElement(card);
 
-            // Set CSS custom property for cascading stack positioning
-            cardEl.style.setProperty('--card-index', cardIndex);
+                // Set CSS custom property for cascading stack positioning
+                cardEl.style.setProperty('--card-index', cardIndex);
 
-            // Track card state
-            columnState.push({ id: card.id, faceUp: card.faceUp });
+                // Track card state
+                columnState.push({ id: card.id, faceUp: card.faceUp });
 
-            // Only top and bottom cards are playable
-            const isTopCard = cardIndex === column.length - 1;
-            const isBottomCard = cardIndex === 0;
+                // Only top and bottom cards are playable
+                const isTopCard = cardIndex === column.length - 1;
+                const isBottomCard = cardIndex === 0;
 
-            if ((isTopCard || isBottomCard) && card.faceUp) {
-                cardEl.classList.add('playable');
-                cardEl.addEventListener('click', () => handleCardClick(card));
-            } else {
-                // Middle cards: no playable class, no event handlers
-                cardEl.classList.remove('playable');
-            }
+                if ((isTopCard || isBottomCard) && card.faceUp) {
+                    cardEl.classList.add('playable');
+                    cardEl.addEventListener('click', () => handleCardClick(card));
+                } else {
+                    // Middle cards: no playable class, no event handlers
+                    cardEl.classList.remove('playable');
+                }
 
-            columnEl.appendChild(cardEl);
-        });
+                columnEl.appendChild(cardEl);
+            });
+        }
 
         tableauState.push(columnState);
         columnsContainer.appendChild(columnEl);
