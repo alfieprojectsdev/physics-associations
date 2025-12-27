@@ -489,14 +489,22 @@ function renderTableau(tableau, playableCards) {
         column.forEach((card, cardIndex) => {
             const cardEl = createCardElement(card);
 
+            // Set CSS custom property for cascading stack positioning
+            cardEl.style.setProperty('--card-index', cardIndex);
+
             // Track card state
             columnState.push({ id: card.id, faceUp: card.faceUp });
 
-            // Check if playable
-            const isPlayable = playableCards.some(pc => pc.id === card.id);
-            if (isPlayable) {
+            // Only top and bottom cards are playable
+            const isTopCard = cardIndex === column.length - 1;
+            const isBottomCard = cardIndex === 0;
+
+            if ((isTopCard || isBottomCard) && card.faceUp) {
                 cardEl.classList.add('playable');
                 cardEl.addEventListener('click', () => handleCardClick(card));
+            } else {
+                // Middle cards: no playable class, no event handlers
+                cardEl.classList.remove('playable');
             }
 
             columnEl.appendChild(cardEl);

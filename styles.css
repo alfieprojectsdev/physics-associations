@@ -48,6 +48,7 @@ body {
     flex-direction: column;
     padding: var(--spacing);
     gap: var(--spacing);
+    background: linear-gradient(180deg, #2d5016 0%, #1a3d0f 100%);
 }
 
 /* ===== HEADER ===== */
@@ -133,11 +134,24 @@ body {
 
 /* ===== FOUNDATIONS AREA ===== */
 .foundations-area {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: var(--card-radius);
-    padding: var(--spacing);
-    box-shadow: 0 2px 8px var(--card-shadow);
-    min-height: 120px;
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+}
+
+/* Hide scrollbar but keep functionality */
+.foundations-area::-webkit-scrollbar {
+    display: none;
+}
+
+.foundations-area {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .foundations-scroll {
@@ -148,6 +162,16 @@ body {
     scroll-snap-type: x proximity;
     padding-bottom: 8px;
     scrollbar-width: thin;
+}
+
+.foundation-slot {
+    flex-shrink: 0;
+    width: 100px;
+    min-height: 120px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 8px;
+    scroll-snap-align: start;
 }
 
 .foundation-stack {
@@ -166,14 +190,18 @@ body {
 }
 
 .foundation-icon {
-    font-size: 1.5rem;
-    margin-bottom: 4px;
+    font-size: 2rem;
 }
 
 .foundation-name {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: bold;
-    color: var(--text-dark);
+    color: white;
+}
+
+.foundation-count {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .foundation-description {
@@ -239,10 +267,9 @@ body {
 }
 
 .tableau-column {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    position: relative;
     min-width: var(--card-width);
+    min-height: 200px;
 }
 
 /* ===== CARD STYLES ===== */
@@ -257,9 +284,11 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.2s ease-out;
     user-select: none;
-    position: relative;
+    position: absolute;
+    top: calc(var(--card-index) * 25px);
+    z-index: var(--card-index);
     padding: 6px;
 }
 
@@ -277,6 +306,7 @@ body {
     cursor: pointer;
     transform: scale(1); /* Base for animation */
     transition: transform 0.15s ease-out;
+    box-shadow: 0 0 0 3px #10b981, 0 4px 8px rgba(0,0,0,0.15);
     /* Animation applied via @keyframes pulseGlow in Phase 4 animations section */
 }
 
@@ -287,6 +317,11 @@ body {
 .card.category {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
     color: white;
+}
+
+.card:last-child {
+    position: relative;
+    top: auto;
 }
 
 .card-icon {
@@ -577,15 +612,25 @@ body {
 }
 
 /* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .card {
+        top: calc(var(--card-index) * 20px);
+    }
+}
+
 @media (min-width: 768px) {
     .game-container {
         max-width: 800px;
         margin: 0 auto;
     }
-    
+
     :root {
         --card-width: 80px;
         --card-height: 100px;
+    }
+
+    .card {
+        top: calc(var(--card-index) * 30px);
     }
 }
 
@@ -877,8 +922,8 @@ body {
 }
 
 .card.playable {
-  /* Static glow instead of infinite animation */
-  box-shadow: 0 0 0 3px var(--success), 0 0 15px rgba(16, 185, 129, 0.75);
+  /* Green glow for playable cards */
+  box-shadow: 0 0 0 3px #10b981, 0 4px 8px rgba(0,0,0,0.15);
   /* Single-play animation when card becomes playable */
   animation: pulseGlowOnce 0.6s ease-out;
 }
