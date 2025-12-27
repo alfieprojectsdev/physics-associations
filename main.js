@@ -496,9 +496,8 @@ function renderTableau(tableau, playableCards) {
                 // Determine if card is covered (middle cards in stack)
                 const isTopCard = cardIndex === column.length - 1;
                 const isBottomCard = cardIndex === 0;
-                const isCovered = !isTopCard && !isBottomCard && column.length > 2;
 
-                const cardEl = createCardElement(card, isCovered);
+                const cardEl = createCardElement(card);
 
                 // Track card state
                 columnState.push({ id: card.id, faceUp: card.faceUp });
@@ -559,22 +558,22 @@ function renderWaste(waste) {
         return;
     }
     
-    const cardEl = createCardElement(waste, false); // Waste cards never covered
+    const cardEl = createCardElement(waste);
     cardEl.classList.add('playable');
     cardEl.addEventListener('click', () => handleCardClick(waste));
     elements.wasteSlot.appendChild(cardEl);
 }
 
-function createCardElement(card, isCovered = false) {
+function createCardElement(card) {
     const cardEl = document.createElement('div');
     cardEl.className = 'card';
     cardEl.dataset.cardId = card.id;
-    
+
     if (!card.faceUp) {
         cardEl.classList.add('face-down');
         return cardEl;
     }
-    
+
     if (card.type === 'category') {
         cardEl.classList.add('category');
         cardEl.innerHTML = `
@@ -584,29 +583,24 @@ function createCardElement(card, isCovered = false) {
     } else if (card.type === 'word') {
         cardEl.classList.add('word');
 
-        if (isCovered) {
-            // Mini-mode for covered cards: show only first character or symbol
-            cardEl.classList.add('mini-mode');
-            const displayText = getCardDisplayText(card.word, currentDisplayMode);
-            const miniText = displayText.charAt(0).toUpperCase();
+        // Two-zone layout: header index (top 15%) + body (bottom 85%)
+        // Index is ALWAYS visible when stacked, body gets covered
+        const displayText = getCardDisplayText(card.word, currentDisplayMode);
 
-            cardEl.innerHTML = `
-                <div class="mini-label">${miniText}</div>
-            `;
-        } else {
-            // Full mode for uncovered cards
-            const displayText = getCardDisplayText(card.word, currentDisplayMode);
-
-            cardEl.innerHTML = `
-                <div class="card-title">${displayText}</div>
+        cardEl.innerHTML = `
+            <div class="card-header-index">
+                <span class="index-text">${displayText}</span>
+            </div>
+            <div class="card-body">
+                <div class="body-text">${displayText}</div>
                 <div class="card-points">${card.points}</div>
-            `;
-        }
+            </div>
+        `;
 
         // Add data attribute for full word (for tooltips/sorting feedback)
         cardEl.dataset.fullWord = card.word;
     }
-    
+
     return cardEl;
 }
 
