@@ -216,7 +216,19 @@ const PhysicsWords = {
         { word: 'kinetic', difficulty: 'intermediate', points: 7 },
         { word: 'potential', difficulty: 'intermediate', points: 9 },
         { word: 'collision', difficulty: 'intermediate', points: 9 },
-        { word: 'elastic', difficulty: 'intermediate', points: 7 }
+        { word: 'elastic', difficulty: 'intermediate', points: 7 },
+        // Symbols and acronyms
+        { word: 'F', type: 'symbol', definition: 'Force', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'm', type: 'symbol', definition: 'Mass', validCategories: ['mechanics'], difficulty: 'basic', points: 3 },
+        { word: 'v⃗', type: 'symbol', definition: 'Velocity', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'a⃗', type: 'symbol', definition: 'Acceleration', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'p⃗', type: 'symbol', definition: 'Momentum', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: 'KE', type: 'acronym', definition: 'Kinetic Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'PE', type: 'acronym', definition: 'Potential Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'μ', type: 'symbol', definition: 'Coefficient of Friction', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: 'τ', type: 'symbol', definition: 'Torque', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: 'ω', type: 'symbol', definition: 'Angular Velocity', validCategories: ['mechanics'], difficulty: 'advanced', points: 6 },
+        { word: 'COM', type: 'acronym', definition: 'Center of Mass', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 }
     ],
     
     thermodynamics: [
@@ -231,7 +243,15 @@ const PhysicsWords = {
         { word: 'volume', difficulty: 'intermediate', points: 6 },
         { word: 'temperature', difficulty: 'intermediate', points: 11 },
         { word: 'celsius', difficulty: 'intermediate', points: 7 },
-        { word: 'kelvin', difficulty: 'intermediate', points: 6 }
+        { word: 'kelvin', difficulty: 'intermediate', points: 6 },
+        // Symbols and acronyms
+        { word: 'T', type: 'symbol', definition: 'Temperature OR Period', validCategories: ['thermodynamics', 'waves'], difficulty: 'basic', points: 5 },
+        { word: 'Q', type: 'symbol', definition: 'Heat', validCategories: ['thermodynamics'], difficulty: 'basic', points: 4 },
+        { word: 'S', type: 'symbol', definition: 'Entropy', validCategories: ['thermodynamics'], difficulty: 'intermediate', points: 5 },
+        { word: 'P', type: 'symbol', definition: 'Pressure', validCategories: ['thermodynamics'], difficulty: 'basic', points: 4 },
+        { word: 'V', type: 'symbol', definition: 'Volume OR Voltage', validCategories: ['thermodynamics', 'electromagnetism'], difficulty: 'basic', points: 5 },
+        { word: 'k_B', type: 'symbol', definition: 'Boltzmann Constant', validCategories: ['thermodynamics'], difficulty: 'advanced', points: 7 },
+        { word: 'η', type: 'symbol', definition: 'Efficiency', validCategories: ['thermodynamics'], difficulty: 'intermediate', points: 5 }
     ],
     
     electromagnetism: [
@@ -246,7 +266,16 @@ const PhysicsWords = {
         { word: 'voltage', difficulty: 'intermediate', points: 7 },
         { word: 'resistance', difficulty: 'intermediate', points: 10 },
         { word: 'capacitor', difficulty: 'intermediate', points: 9 },
-        { word: 'inductor', difficulty: 'intermediate', points: 8 }
+        { word: 'inductor', difficulty: 'intermediate', points: 8 },
+        // Symbols and acronyms (V is shared with thermodynamics)
+        { word: 'I', type: 'symbol', definition: 'Current', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
+        { word: 'R', type: 'symbol', definition: 'Resistance', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
+        { word: 'q', type: 'symbol', definition: 'Charge', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
+        { word: 'C', type: 'symbol', definition: 'Capacitance', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
+        { word: 'B', type: 'symbol', definition: 'Magnetic Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
+        { word: 'E⃗', type: 'symbol', definition: 'Electric Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 6 },
+        { word: 'Ω', type: 'symbol', definition: 'Ohm', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
+        { word: 'EMF', type: 'acronym', definition: 'Electromotive Force', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 }
     ],
     
     quantum: [
@@ -258,7 +287,13 @@ const PhysicsWords = {
         { word: 'neutron', difficulty: 'intermediate', points: 7 },
         { word: 'electron', difficulty: 'intermediate', points: 8 },
         { word: 'quantum', difficulty: 'intermediate', points: 7 },
-        { word: 'particle', difficulty: 'intermediate', points: 8 }
+        { word: 'particle', difficulty: 'intermediate', points: 8 },
+        // Symbols and acronyms
+        { word: 'ψ', type: 'symbol', definition: 'Wavefunction', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
+        { word: 'h', type: 'symbol', definition: 'Planck\'s Constant', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
+        { word: 'ℏ', type: 'symbol', definition: 'Reduced Planck Constant', validCategories: ['quantum'], difficulty: 'advanced', points: 7 },
+        { word: 'n', type: 'symbol', definition: 'Quantum Number OR Refractive Index', validCategories: ['quantum', 'waves'], difficulty: 'intermediate', points: 5 },
+        { word: 'eV', type: 'symbol', definition: 'Electron Volt', validCategories: ['quantum'], difficulty: 'intermediate', points: 5 }
     ],
     
     relativity: [
@@ -268,7 +303,12 @@ const PhysicsWords = {
         { word: 'velocity', difficulty: 'intermediate', points: 8 },
         { word: 'spacetime', difficulty: 'advanced', points: 9 },
         { word: 'relativity', difficulty: 'advanced', points: 10 },
-        { word: 'einstein', difficulty: 'advanced', points: 8 }
+        { word: 'einstein', difficulty: 'advanced', points: 8 },
+        // Symbols and acronyms
+        { word: 'c', type: 'symbol', definition: 'Speed of Light', validCategories: ['relativity'], difficulty: 'basic', points: 4 },
+        { word: 'E=mc²', type: 'symbol', definition: 'Mass-Energy Equivalence', validCategories: ['relativity'], difficulty: 'basic', points: 6 },
+        { word: 'γ', type: 'symbol', definition: 'Lorentz Factor', validCategories: ['relativity'], difficulty: 'advanced', points: 7 },
+        { word: 'G', type: 'symbol', definition: 'Gravitational Constant', validCategories: ['relativity'], difficulty: 'intermediate', points: 6 }
     ],
     
     waves: [
@@ -281,7 +321,12 @@ const PhysicsWords = {
         { word: 'frequency', difficulty: 'intermediate', points: 9 },
         { word: 'wavelength', difficulty: 'intermediate', points: 10 },
         { word: 'refraction', difficulty: 'intermediate', points: 10 },
-        { word: 'reflection', difficulty: 'intermediate', points: 10 }
+        { word: 'reflection', difficulty: 'intermediate', points: 10 },
+        // Symbols and acronyms (T and n are shared with other categories)
+        { word: 'λ', type: 'symbol', definition: 'Wavelength', validCategories: ['waves'], difficulty: 'basic', points: 4 },
+        { word: 'f', type: 'symbol', definition: 'Frequency', validCategories: ['waves'], difficulty: 'basic', points: 4 },
+        { word: 'A', type: 'symbol', definition: 'Amplitude', validCategories: ['waves'], difficulty: 'basic', points: 4 },
+        { word: 'Hz', type: 'symbol', definition: 'Hertz', validCategories: ['waves'], difficulty: 'basic', points: 4 }
     ]
 };
 
@@ -350,14 +395,24 @@ function generateLevelDeck(level = 1) {
             .slice(0, wordsPerCategory);
         
         selectedWords.forEach((wordData, index) => {
-            deck.wordCards.push({
+            const card = {
                 id: `word-${cat.id}-${index}`,
                 type: 'word',
                 word: wordData.word,
-                categoryId: cat.id,
                 points: wordData.points,
                 difficulty: wordData.difficulty
-            });
+            };
+
+            // Support both legacy single category and new ambiguous symbols
+            if (wordData.validCategories) {
+                // New format: ambiguous symbols with multiple valid categories
+                card.validCategories = wordData.validCategories;
+            } else {
+                // Legacy format: single categoryId for regular words
+                card.categoryId = cat.id;
+            }
+
+            deck.wordCards.push(card);
         });
     });
     

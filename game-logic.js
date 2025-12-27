@@ -1,5 +1,48 @@
 // Game Logic - Associations-style Category Sorting
 
+/**
+ * Validates if a card can be sorted to a target category
+ * Supports both legacy single category and new ambiguous symbol arrays
+ *
+ * @param {Object} card - Card object with either categoryId or validCategories
+ * @param {string} targetCategory - Category ID to validate against
+ * @returns {boolean} True if card belongs to targetCategory
+ */
+function checkMatch(card, targetCategory) {
+    // Legacy support: words with single categoryId property
+    if (card.categoryId && card.categoryId === targetCategory) {
+        return true;
+    }
+
+    // New support: ambiguous symbols/acronyms with validCategories array
+    if (card.validCategories && card.validCategories.includes(targetCategory)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Gets valid category IDs for a card
+ * Supports both legacy single category and new ambiguous symbol arrays
+ *
+ * @param {Object} card - Card object with either categoryId or validCategories
+ * @returns {Array<string>} Array of category IDs the card belongs to
+ */
+function getValidCategories(card) {
+    // Legacy support: single categoryId becomes single-element array
+    if (card.categoryId) {
+        return [card.categoryId];
+    }
+
+    // New support: ambiguous symbols with validCategories array
+    if (card.validCategories && Array.isArray(card.validCategories)) {
+        return card.validCategories;
+    }
+
+    return [];
+}
+
 class PhysicsAssociations {
     constructor() {
         this.level = 1;
@@ -149,47 +192,60 @@ class PhysicsAssociations {
     /**
      * Sort a word card to its category foundation
      * Following Associations rules: wrong category = wasted move
+     * Supports ambiguous symbols with multiple valid categories
      */
     sortWord(wordCardId, categoryId) {
         const playable = this.getPlayableCards();
         const card = playable.find(c => c.id === wordCardId);
-        
+
         if (!card || card.type !== 'word') {
             return { success: false, message: 'Invalid word card' };
         }
-        
+
         // Check if category is placed
         if (!this.placedCategories.includes(categoryId)) {
             return { success: false, message: 'Place that category card first!' };
         }
-        
+
         // Validate word belongs to category
+        // Uses checkMatch() to support both legacy categoryId and new validCategories array
         // In Associations: Wrong match costs a move but doesn't sort the card
-        if (card.categoryId !== categoryId) {
+        if (!checkMatch(card, categoryId)) {
             this.movesRemaining--; // Move penalty for wrong guess
-            
-            // Get the correct category name for feedback
-            const correctCategory = PhysicsCategories.find(c => c.id === card.categoryId);
+
+            // Get the correct category name(s) for feedback
+            // For ambiguous symbols, show all valid categories
+            let correctCategoryName = '';
+            if (card.categoryId) {
+                const correctCategory = PhysicsCategories.find(c => c.id === card.categoryId);
+                correctCategoryName = correctCategory.name;
+            } else if (card.validCategories) {
+                const validCatNames = card.validCategories
+                    .map(catId => PhysicsCategories.find(c => c.id === catId).name)
+                    .join(' or ');
+                correctCategoryName = validCatNames;
+            }
+
             const attemptedCategory = PhysicsCategories.find(c => c.id === categoryId);
-            
-            return { 
-                success: false, 
-                message: `Wrong! "${card.word}" belongs to ${correctCategory.name}, not ${attemptedCategory.name}. -1 move`,
-                correctCategory: correctCategory.name
+
+            return {
+                success: false,
+                message: `Wrong! "${card.word}" belongs to ${correctCategoryName}, not ${attemptedCategory.name}. -1 move`,
+                correctCategory: correctCategoryName
             };
         }
-        
+
         // Correct match - remove from source and add to foundation
         this.removeCardFromSource(card);
         this.foundations[categoryId].words.push(card);
         this.score += card.points;
-        
+
         this.movesRemaining--;
         this.revealCards();
         this.checkGameState();
-        
-        return { 
-            success: true, 
+
+        return {
+            success: true,
             message: `"${card.word}" sorted correctly! +${card.points}`,
             points: card.points
         };
@@ -285,10 +341,13 @@ class PhysicsAssociations {
         // Loss: No valid moves available
         const playable = this.getPlayableCards();
         const hasCategory = playable.some(c => c.type === 'category');
-        const hasValidWord = playable.some(c => 
-            c.type === 'word' && this.placedCategories.includes(c.categoryId)
-        );
-        
+        const hasValidWord = playable.some(c => {
+            if (c.type !== 'word') return false;
+            // Check if any valid category for this card is placed
+            const validCats = getValidCategories(c);
+            return validCats.some(cat => this.placedCategories.includes(cat));
+        });
+
         if (!hasCategory && !hasValidWord && this.stockPile.length === 0) {
             this.gameState = 'lost';
         }
@@ -297,20 +356,21 @@ class PhysicsAssociations {
     /**
      * Get strategic hint following Associations gameplay tips
      * Priority: 1) Use tableau cards, 2) Reveal hidden cards, 3) Draw from stock
+     * Handles both legacy and ambiguous symbol cards
      */
     getHint() {
         const playable = this.getPlayableCards();
-        
+
         // PRIORITY 1: Place missing categories if available
-        const playableCategories = playable.filter(c => 
+        const playableCategories = playable.filter(c =>
             c.type === 'category' && !this.placedCategories.includes(c.categoryId)
         );
-        
+
         if (playableCategories.length > 0) {
             // Prefer categories from tableau over waste (reveals more cards)
             const tableauCategory = playableCategories.find(c => c.source === 'tableau');
             const category = tableauCategory || playableCategories[0];
-            
+
             return {
                 type: 'category',
                 message: `Place "${category.name}" category to unlock ${this.countWordsForCategory(category.categoryId)} words`,
@@ -318,17 +378,22 @@ class PhysicsAssociations {
                 source: category.source
             };
         }
-        
+
         // PRIORITY 2: Sort tableau words (reveals hidden cards)
-        const tableauWords = playable.filter(c => 
-            c.type === 'word' && 
-            c.source === 'tableau' &&
-            this.placedCategories.includes(c.categoryId)
-        );
-        
+        // Check if any valid category for the card is placed
+        const tableauWords = playable.filter(c => {
+            if (c.type !== 'word' || c.source !== 'tableau') return false;
+            const validCats = getValidCategories(c);
+            return validCats.some(cat => this.placedCategories.includes(cat));
+        });
+
         if (tableauWords.length > 0) {
             const word = tableauWords[0];
-            const category = PhysicsCategories.find(c => c.id === word.categoryId);
+            // Get first placed valid category for this word
+            const validCats = getValidCategories(word);
+            const targetCategoryId = validCats.find(cat => this.placedCategories.includes(cat));
+            const category = PhysicsCategories.find(c => c.id === targetCategoryId);
+
             return {
                 type: 'word',
                 message: `Sort "${word.word}" to ${category.name} (reveals hidden cards)`,
@@ -337,17 +402,21 @@ class PhysicsAssociations {
                 priority: 'high'
             };
         }
-        
+
         // PRIORITY 3: Sort waste words (if no tableau moves)
-        const wasteWords = playable.filter(c => 
-            c.type === 'word' && 
-            c.source === 'waste' &&
-            this.placedCategories.includes(c.categoryId)
-        );
-        
+        const wasteWords = playable.filter(c => {
+            if (c.type !== 'word' || c.source !== 'waste') return false;
+            const validCats = getValidCategories(c);
+            return validCats.some(cat => this.placedCategories.includes(cat));
+        });
+
         if (wasteWords.length > 0) {
             const word = wasteWords[0];
-            const category = PhysicsCategories.find(c => c.id === word.categoryId);
+            // Get first placed valid category for this word
+            const validCats = getValidCategories(word);
+            const targetCategoryId = validCats.find(cat => this.placedCategories.includes(cat));
+            const category = PhysicsCategories.find(c => c.id === targetCategoryId);
+
             return {
                 type: 'word',
                 message: `Sort drawn card "${word.word}" to ${category.name}`,
@@ -356,11 +425,11 @@ class PhysicsAssociations {
                 priority: 'medium'
             };
         }
-        
+
         // PRIORITY 4: Draw from stock (only when no other moves)
-        const hint = getHint(this.placedCategories, 
+        const hint = getHint(this.placedCategories,
             playable.filter(c => c.type === 'word'));
-        
+
         return {
             type: 'draw',
             message: 'No valid moves on board - draw from stock',
@@ -371,16 +440,17 @@ class PhysicsAssociations {
     
     /**
      * Helper: Count how many words belong to a category
+     * Handles both legacy categoryId and new validCategories array for ambiguous symbols
      */
     countWordsForCategory(categoryId) {
-        const tableauWords = this.tableau.flat().filter(c => 
-            c.type === 'word' && c.categoryId === categoryId
+        const tableauWords = this.tableau.flat().filter(c =>
+            c.type === 'word' && checkMatch(c, categoryId)
         );
-        const wasteWords = (this.waste && this.waste.type === 'word' && this.waste.categoryId === categoryId) ? 1 : 0;
-        const stockWords = this.stockPile.filter(c => 
-            c.type === 'word' && c.categoryId === categoryId
+        const wasteWords = (this.waste && this.waste.type === 'word' && checkMatch(this.waste, categoryId)) ? 1 : 0;
+        const stockWords = this.stockPile.filter(c =>
+            c.type === 'word' && checkMatch(c, categoryId)
         ).length;
-        
+
         return tableauWords.length + wasteWords + stockWords;
     }
 
