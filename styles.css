@@ -300,22 +300,22 @@ body {
     margin-top: 0;
 }
 
-/* Z-index stacking: first card (top of visual stack) renders on top */
-.tableau-column .card:nth-child(1) { z-index: 10; }
-.tableau-column .card:nth-child(2) { z-index: 9; }
-.tableau-column .card:nth-child(3) { z-index: 8; }
-.tableau-column .card:nth-child(4) { z-index: 7; }
-.tableau-column .card:nth-child(5) { z-index: 6; }
-.tableau-column .card:nth-child(6) { z-index: 5; }
-.tableau-column .card:nth-child(7) { z-index: 4; }
-.tableau-column .card:nth-child(8) { z-index: 3; }
-.tableau-column .card:nth-child(9) { z-index: 2; }
-.tableau-column .card:nth-child(10) { z-index: 1; }
-.tableau-column .card:nth-child(11) { z-index: 0; }
-.tableau-column .card:nth-child(12) { z-index: -1; }
-.tableau-column .card:nth-child(13) { z-index: -2; }
-.tableau-column .card:nth-child(14) { z-index: -3; }
-.tableau-column .card:nth-child(15) { z-index: -4; }
+/* Z-index stacking: later cards (bottom of visual stack) render on top */
+.tableau-column .card:nth-child(1) { z-index: 1; }
+.tableau-column .card:nth-child(2) { z-index: 2; }
+.tableau-column .card:nth-child(3) { z-index: 3; }
+.tableau-column .card:nth-child(4) { z-index: 4; }
+.tableau-column .card:nth-child(5) { z-index: 5; }
+.tableau-column .card:nth-child(6) { z-index: 6; }
+.tableau-column .card:nth-child(7) { z-index: 7; }
+.tableau-column .card:nth-child(8) { z-index: 8; }
+.tableau-column .card:nth-child(9) { z-index: 9; }
+.tableau-column .card:nth-child(10) { z-index: 10; }
+.tableau-column .card:nth-child(11) { z-index: 11; }
+.tableau-column .card:nth-child(12) { z-index: 12; }
+.tableau-column .card:nth-child(13) { z-index: 13; }
+.tableau-column .card:nth-child(14) { z-index: 14; }
+.tableau-column .card:nth-child(15) { z-index: 15; }
 
 .card.face-down {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -665,9 +665,6 @@ body {
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 480px) {
-    .card {
-        top: calc(var(--card-index) * 20px);
-    }
 }
 
 @media (min-width: 768px) {
@@ -679,10 +676,6 @@ body {
     :root {
         --card-width: 70px;
         --card-height: 105px;
-    }
-
-    .card {
-        top: calc(var(--card-index) * 30px);
     }
 }
 
