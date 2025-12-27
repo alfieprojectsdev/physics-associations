@@ -135,9 +135,9 @@ body {
 /* ===== FOUNDATIONS AREA ===== */
 .foundations-area {
     display: flex;
-    gap: 12px;
+    gap: var(--spacing);
     overflow-x: auto;
-    padding: 12px;
+    padding: var(--spacing) 0;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     -webkit-overflow-scrolling: touch;
@@ -160,32 +160,33 @@ body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scroll-snap-type: x proximity;
-    padding-bottom: 8px;
+    padding: 0 var(--spacing) var(--spacing) var(--spacing);
     scrollbar-width: thin;
 }
 
 .foundation-slot {
     flex-shrink: 0;
-    width: 100px;
+    width: var(--card-width);
     min-height: 80px;
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    border-radius: var(--card-radius);
     padding: 8px;
     scroll-snap-align: start;
 }
 
 .foundation-stack {
     flex-shrink: 0;
-    min-width: 120px;
+    width: var(--card-width);
     background: var(--card-bg);
     border: 2px solid var(--border-light);
     border-radius: var(--card-radius);
-    padding: 12px 8px;
+    padding: 8px 6px;
     scroll-snap-align: start;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 4px;
 }
 
 .foundation-header {
@@ -198,20 +199,22 @@ body {
 }
 
 .foundation-name {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: bold;
     color: var(--text-dark);
-    margin-top: 4px;
+    text-align: center;
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 .foundation-count {
-    font-size: 0.875rem;
+    font-size: 0.75rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.85);
-    margin-top: 6px;
     background: rgba(99, 102, 241, 0.8);
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 3px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
 }
 
 .foundation-description {
@@ -220,8 +223,8 @@ body {
 }
 
 .foundation-placeholder {
-    min-width: 140px;
-    height: 100px;
+    width: var(--card-width);
+    min-height: 80px;
     border: 2px dashed var(--border-light);
     border-radius: var(--card-radius);
     display: flex;
@@ -229,6 +232,7 @@ body {
     align-items: center;
     justify-content: center;
     color: var(--text-light);
+    flex-shrink: 0;
 }
 
 .placeholder-icon {
