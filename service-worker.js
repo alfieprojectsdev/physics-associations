@@ -1,15 +1,15 @@
 const CACHE_NAME = 'ground-state-v1.0.1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/styles.css',
-  '/physics-dictionary.js',
-  '/game-logic.js',
-  '/main.js',
-  '/analytics.js',
-  '/about.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  './',
+  './index.html',
+  './styles.css',
+  './physics-dictionary.js',
+  './game-logic.js',
+  './main.js',
+  './analytics.js',
+  './about.html',
+  './icons/icon-192.png',
+  './icons/icon-512.png'
 ];
 
 // Install service worker and cache assets

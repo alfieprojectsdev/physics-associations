@@ -275,7 +275,7 @@ body {
 
 /* ===== CARD STYLES ===== */
 .card {
-    width: 22vw;
+    width: 21vw;
     max-width: 80px;
     aspect-ratio: 2 / 3;
     background: var(--card-bg);
@@ -289,13 +289,30 @@ body {
     transition: all 0.2s ease-out;
     user-select: none;
     position: relative;
-    margin-top: -60px;
+    margin-top: -115%;
     padding: 6px;
 }
 
 .card:first-child {
     margin-top: 0;
 }
+
+/* Z-index stacking: first card (bottom of visual stack) renders on top */
+.tableau-column .card:nth-child(1) { z-index: 10; }
+.tableau-column .card:nth-child(2) { z-index: 9; }
+.tableau-column .card:nth-child(3) { z-index: 8; }
+.tableau-column .card:nth-child(4) { z-index: 7; }
+.tableau-column .card:nth-child(5) { z-index: 6; }
+.tableau-column .card:nth-child(6) { z-index: 5; }
+.tableau-column .card:nth-child(7) { z-index: 4; }
+.tableau-column .card:nth-child(8) { z-index: 3; }
+.tableau-column .card:nth-child(9) { z-index: 2; }
+.tableau-column .card:nth-child(10) { z-index: 1; }
+.tableau-column .card:nth-child(11) { z-index: 0; }
+.tableau-column .card:nth-child(12) { z-index: -1; }
+.tableau-column .card:nth-child(13) { z-index: -2; }
+.tableau-column .card:nth-child(14) { z-index: -3; }
+.tableau-column .card:nth-child(15) { z-index: -4; }
 
 .card.face-down {
     background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
@@ -348,8 +365,34 @@ body {
     font-weight: 700;
     line-height: 1;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Times New Roman', serif;
     padding: 2px;
+}
+
+/* Mini-mode for covered cards in stacks */
+.card.mini-mode {
+    padding: 2px 4px;
+}
+
+.card.mini-mode .mini-label {
+    font-size: clamp(0.5rem, 2.5vw, 0.7rem);
+    font-weight: 700;
+    text-align: center;
+    line-height: 1;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0;
+    position: absolute;
+    top: 3px;
+    left: 0;
+    right: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Times New Roman', serif;
+}
+
+/* Hide full-mode elements when in mini-mode */
+.card.mini-mode .card-title,
+.card.mini-mode .card-points {
+    display: none;
 }
 
 /* Show full word on hover/long-press (desktop/mobile) */

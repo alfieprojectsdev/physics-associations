@@ -24,7 +24,7 @@ const abbreviations = {
   'friction': 'f',
   'gravity': 'g',
   'inertia': 'inertia',
-  'torque': 'τ',          // Greek tau
+  'torque': '\u03C4',          // Greek tau
   'kinetic': 'KE',
   'potential': 'PE',
   'collision': 'collis.',
@@ -91,7 +91,7 @@ const abbreviations = {
   'planck': 'Planck',
   'heisenberg': 'Heisen.',
   'schrodinger': 'Schrö.',
-  'eigenvalue': 'λ',      // Eigenvalue notation
+  'eigenvalue': '\u03BB',      // Eigenvalue notation
   'spin': 'spin',
 
   // === RELATIVITY ===
@@ -117,7 +117,7 @@ const abbreviations = {
   'sound': 'sound',
   'amplitude': 'A',
   'frequency': 'f',       // Standard notation
-  'wavelength': 'λ',      // Greek lambda (standard)
+  'wavelength': '\u03BB',      // Greek lambda (standard)
   'spectrum': 'spectr.',
   'refraction': 'refr.',
   'reflection': 'refl.',
@@ -225,9 +225,9 @@ const PhysicsWords = {
         { word: 'p⃗', type: 'symbol', definition: 'Momentum', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
         { word: 'KE', type: 'acronym', definition: 'Kinetic Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: 'PE', type: 'acronym', definition: 'Potential Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
-        { word: 'μ', type: 'symbol', definition: 'Coefficient of Friction', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
-        { word: 'τ', type: 'symbol', definition: 'Torque', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
-        { word: 'ω', type: 'symbol', definition: 'Angular Velocity', validCategories: ['mechanics'], difficulty: 'advanced', points: 6 },
+        { word: '\u03BC', type: 'symbol', definition: 'Coefficient of Friction', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: '\u03C4', type: 'symbol', definition: 'Torque', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: '\u03C9', type: 'symbol', definition: 'Angular Velocity', validCategories: ['mechanics'], difficulty: 'advanced', points: 6 },
         { word: 'COM', type: 'acronym', definition: 'Center of Mass', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 }
     ],
     
@@ -289,7 +289,7 @@ const PhysicsWords = {
         { word: 'quantum', difficulty: 'intermediate', points: 7 },
         { word: 'particle', difficulty: 'intermediate', points: 8 },
         // Symbols and acronyms
-        { word: 'ψ', type: 'symbol', definition: 'Wavefunction', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
+        { word: '\u03C8', type: 'symbol', definition: 'Wavefunction', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
         { word: 'h', type: 'symbol', definition: 'Planck\'s Constant', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
         { word: 'ℏ', type: 'symbol', definition: 'Reduced Planck Constant', validCategories: ['quantum'], difficulty: 'advanced', points: 7 },
         { word: 'n', type: 'symbol', definition: 'Quantum Number OR Refractive Index', validCategories: ['quantum', 'waves'], difficulty: 'intermediate', points: 5 },
@@ -323,7 +323,7 @@ const PhysicsWords = {
         { word: 'refraction', difficulty: 'intermediate', points: 10 },
         { word: 'reflection', difficulty: 'intermediate', points: 10 },
         // Symbols and acronyms (T and n are shared with other categories)
-        { word: 'λ', type: 'symbol', definition: 'Wavelength', validCategories: ['waves'], difficulty: 'basic', points: 4 },
+        { word: '\u03BB', type: 'symbol', definition: 'Wavelength', validCategories: ['waves'], difficulty: 'basic', points: 4 },
         { word: 'f', type: 'symbol', definition: 'Frequency', validCategories: ['waves'], difficulty: 'basic', points: 4 },
         { word: 'A', type: 'symbol', definition: 'Amplitude', validCategories: ['waves'], difficulty: 'basic', points: 4 },
         { word: 'Hz', type: 'symbol', definition: 'Hertz', validCategories: ['waves'], difficulty: 'basic', points: 4 }
