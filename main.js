@@ -453,12 +453,13 @@ function renderFoundations(foundations, placedCategories) {
         const foundation = foundations[catId];
         const category = foundation.category;
 
-        // Calculate progress: sorted words / total words in deck for this category
+        // Calculate progress: sorted words / capacity (Phase 2 uses foundation.capacity)
         const sortedCount = foundation.words.length;
-        const totalCount = game.countWordsForCategory(catId);
+        const totalCount = foundation.capacity;
 
         const foundationEl = document.createElement('div');
-        foundationEl.className = 'foundation-stack foundation-slot'; // Add foundation-slot for drag-and-drop
+        const isFull = sortedCount >= totalCount;
+        foundationEl.className = `foundation-stack foundation-slot${isFull ? ' pile-full' : ''}`; // Add pile-full class when complete
         foundationEl.dataset.categoryId = catId; // Add data attribute for drag-and-drop
 
         // Build pile visualization with empty slots

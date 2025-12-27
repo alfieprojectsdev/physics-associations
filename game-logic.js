@@ -131,26 +131,30 @@ class PhysicsAssociations {
 
     /**
      * Get all playable cards (top of each column + waste)
+     * Phase 2: Limited to 3-4 cards for spatial constraint
      */
     getPlayableCards() {
-        const playable = [];
-        
+        const allPlayable = [];
+
         // Top card from each column
         this.tableau.forEach((column, colIndex) => {
             if (column.length > 0) {
                 const topCard = column[column.length - 1];
                 if (topCard.faceUp) {
-                    playable.push({ ...topCard, source: 'tableau', colIndex });
+                    allPlayable.push({ ...topCard, source: 'tableau', colIndex });
                 }
             }
         });
-        
-        // Waste pile card
+
+        // Waste pile card (always prioritized)
         if (this.waste && this.waste.faceUp) {
-            playable.push({ ...this.waste, source: 'waste' });
+            allPlayable.unshift({ ...this.waste, source: 'waste' }); // Add to front
         }
-        
-        return playable;
+
+        // Phase 2: Limit to 4 exposed cards for spatial constraint
+        // Waste card + max 3 tableau cards
+        const MAX_EXPOSED = 4;
+        return allPlayable.slice(0, MAX_EXPOSED);
     }
 
     /**
@@ -171,11 +175,13 @@ class PhysicsAssociations {
         
         // Remove from source
         this.removeCardFromSource(card);
-        
-        // Create foundation stack
+
+        // Create foundation stack with capacity tracking (Phase 2)
+        const capacity = this.countWordsForCategory(card.categoryId);
         this.foundations[card.categoryId] = {
             category: card,
-            words: []
+            words: [],
+            capacity: capacity
         };
         this.placedCategories.push(card.categoryId);
         
@@ -205,6 +211,16 @@ class PhysicsAssociations {
         // Check if category is placed
         if (!this.placedCategories.includes(categoryId)) {
             return { success: false, message: 'Place that category card first!' };
+        }
+
+        // Phase 2: Check capacity blocking (pile full = cannot accept)
+        const foundation = this.foundations[categoryId];
+        if (foundation.words.length >= foundation.capacity) {
+            this.movesRemaining--; // Penalty for attempting impossible move
+            return {
+                success: false,
+                message: `That pile is full! (${foundation.capacity}/${foundation.capacity})`
+            };
         }
 
         // Validate word belongs to category

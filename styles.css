@@ -184,6 +184,12 @@ body {
     align-items: center;
     justify-content: center;
     gap: 4px;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+.foundation-stack.pile-full {
+    border-color: var(--success);
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.1) 100%);
 }
 
 .foundation-header {
@@ -381,6 +387,13 @@ body {
 
 .card.playable:active {
     transform: scale(0.92);
+}
+
+/* Phase 2: Non-playable face-up cards (blocked by spatial constraints) */
+.card:not(.playable):not(.face-down) {
+    opacity: 0.6;
+    cursor: not-allowed;
+    filter: grayscale(0.3);
 }
 
 .card.category {
