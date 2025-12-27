@@ -22,7 +22,7 @@
     --border-light: #e2e8f0;
     --bg-light: #f8fafc;
 
-    --card-width: 70px;
+    --card-width: 60px;
     --card-height: 90px;
     --card-radius: 10px;
     --spacing: 12px;
@@ -635,8 +635,8 @@ body {
     }
 
     :root {
-        --card-width: 80px;
-        --card-height: 100px;
+        --card-width: 70px;
+        --card-height: 105px;
     }
 
     .card {
