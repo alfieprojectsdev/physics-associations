@@ -155,13 +155,10 @@ body {
 }
 
 .foundations-scroll {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: var(--spacing);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x proximity;
     padding: 0 var(--spacing) var(--spacing) var(--spacing);
-    scrollbar-width: thin;
 }
 
 .foundation-slot {
@@ -224,24 +221,16 @@ body {
 
 .foundation-placeholder {
     width: var(--card-width);
-    min-height: 80px;
-    border: 2px dashed var(--border-light);
+    height: var(--card-height);
     border-radius: var(--card-radius);
+    background: rgba(0, 0, 0, 0.1);
+    border: 2px dashed rgba(255, 255, 255, 0.2);
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: var(--text-light);
     flex-shrink: 0;
-}
-
-.placeholder-icon {
-    font-size: 2rem;
-    opacity: 0.5;
-}
-
-.placeholder-text {
-    font-size: 0.75rem;
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
     text-align: center;
 }
 
@@ -262,7 +251,9 @@ body {
 }
 
 .tableau-column {
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     min-width: var(--card-width);
     min-height: 200px;
 }
@@ -284,8 +275,9 @@ body {
 
 /* ===== CARD STYLES ===== */
 .card {
-    width: var(--card-width);
-    height: var(--card-height);
+    width: 22vw;
+    max-width: 80px;
+    aspect-ratio: 2 / 3;
     background: var(--card-bg);
     border-radius: var(--card-radius);
     box-shadow: 0 2px 6px var(--card-shadow);
@@ -296,10 +288,13 @@ body {
     cursor: pointer;
     transition: all 0.2s ease-out;
     user-select: none;
-    position: absolute;
-    top: calc(var(--card-index) * 25px);
-    z-index: var(--card-index);
+    position: relative;
+    margin-top: -60px;
     padding: 6px;
+}
+
+.card:first-child {
+    margin-top: 0;
 }
 
 .card.face-down {
@@ -347,13 +342,14 @@ body {
 }
 
 .card.word .card-title {
-    font-size: 1rem;  /* Reduced from 1.5rem for better mobile readability */
+    font-size: clamp(0.65rem, 3vw, 0.9rem);
     text-transform: uppercase;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     font-weight: 700;
     line-height: 1;
     text-align: center;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* Modern sans-serif with Greek letter support */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    padding: 2px;
 }
 
 /* Show full word on hover/long-press (desktop/mobile) */

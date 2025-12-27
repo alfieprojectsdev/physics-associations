@@ -441,8 +441,7 @@ function renderFoundations(foundations, placedCategories) {
     if (placedCategories.length === 0) {
         elements.foundationsArea.innerHTML = `
             <div class="foundation-placeholder">
-                <div class="placeholder-text">Place Category Cards Here</div>
-                <div class="placeholder-icon">📚</div>
+                <span class="placeholder-label">Category</span>
             </div>
         `;
         return;
@@ -495,9 +494,6 @@ function renderTableau(tableau, playableCards) {
             // Render cards in column
             column.forEach((card, cardIndex) => {
                 const cardEl = createCardElement(card);
-
-                // Set CSS custom property for cascading stack positioning
-                cardEl.style.setProperty('--card-index', cardIndex);
 
                 // Track card state
                 columnState.push({ id: card.id, faceUp: card.faceUp });
