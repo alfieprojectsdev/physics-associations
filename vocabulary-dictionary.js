@@ -341,6 +341,231 @@ const DomainData = {
                 points: 5
             }
         ]
+    },
+
+    chemistry: {
+        name: 'Chemistry',
+        icon: '⚗️',
+        description: 'Elements, compounds, reactions, and bonding',
+
+        categories: [
+            {
+                id: 'elements',
+                name: 'Elements',
+                icon: '🔬',
+                description: 'Periodic table elements'
+            },
+            {
+                id: 'organic',
+                name: 'Organic Chemistry',
+                icon: '🧪',
+                description: 'Carbon-based compounds'
+            },
+            {
+                id: 'reactions',
+                name: 'Reactions',
+                icon: '⚡',
+                description: 'Chemical reactions and processes'
+            },
+            {
+                id: 'bonding',
+                name: 'Bonding',
+                icon: '🔗',
+                description: 'Molecular structure and bonds'
+            },
+            {
+                id: 'states',
+                name: 'States of Matter',
+                icon: '💧',
+                description: 'Solids, liquids, gases, plasma'
+            },
+            {
+                id: 'acids-bases',
+                name: 'Acids & Bases',
+                icon: '⚖️',
+                description: 'pH, acids, bases, salts'
+            }
+        ],
+
+        words: {
+            elements: [
+                // Basic elements
+                { word: 'hydrogen', difficulty: 'basic', points: 4 },
+                { word: 'oxygen', difficulty: 'basic', points: 4 },
+                { word: 'carbon', difficulty: 'basic', points: 4 },
+                { word: 'nitrogen', difficulty: 'basic', points: 5 },
+                { word: 'helium', difficulty: 'basic', points: 4 },
+                { word: 'iron', difficulty: 'basic', points: 3 },
+                { word: 'gold', difficulty: 'basic', points: 3 },
+                { word: 'silver', difficulty: 'basic', points: 4 },
+                // Intermediate
+                { word: 'sodium', difficulty: 'intermediate', points: 6 },
+                { word: 'chlorine', difficulty: 'intermediate', points: 6 },
+                { word: 'calcium', difficulty: 'intermediate', points: 6 },
+                { word: 'uranium', difficulty: 'intermediate', points: 7 },
+                { word: 'aluminum', difficulty: 'intermediate', points: 8 },
+                { word: 'copper', difficulty: 'intermediate', points: 6 },
+                // Symbols
+                { word: 'H', type: 'symbol', definition: 'Hydrogen', validCategories: ['elements'], difficulty: 'basic', points: 3 },
+                { word: 'O', type: 'symbol', definition: 'Oxygen', validCategories: ['elements'], difficulty: 'basic', points: 3 },
+                { word: 'C', type: 'symbol', definition: 'Carbon', validCategories: ['elements'], difficulty: 'basic', points: 3 },
+                { word: 'N', type: 'symbol', definition: 'Nitrogen', validCategories: ['elements'], difficulty: 'basic', points: 3 },
+                { word: 'Fe', type: 'symbol', definition: 'Iron', validCategories: ['elements'], difficulty: 'intermediate', points: 4 },
+                { word: 'Au', type: 'symbol', definition: 'Gold', validCategories: ['elements'], difficulty: 'intermediate', points: 4 },
+                { word: 'Na', type: 'symbol', definition: 'Sodium', validCategories: ['elements'], difficulty: 'intermediate', points: 4 },
+                { word: 'Cl', type: 'symbol', definition: 'Chlorine', validCategories: ['elements'], difficulty: 'intermediate', points: 4 }
+            ],
+
+            organic: [
+                { word: 'methane', difficulty: 'basic', points: 5 },
+                { word: 'ethanol', difficulty: 'basic', points: 5 },
+                { word: 'glucose', difficulty: 'intermediate', points: 6 },
+                { word: 'protein', difficulty: 'intermediate', points: 6 },
+                { word: 'benzene', difficulty: 'intermediate', points: 7 },
+                { word: 'polymer', difficulty: 'intermediate', points: 7 },
+                { word: 'alkane', difficulty: 'advanced', points: 8 },
+                { word: 'carboxyl', difficulty: 'advanced', points: 8 },
+                { word: 'amino acid', difficulty: 'intermediate', points: 9 },
+                { word: 'lipid', difficulty: 'intermediate', points: 5 },
+                // Symbols
+                { word: 'CH₄', type: 'symbol', definition: 'Methane', validCategories: ['organic'], difficulty: 'basic', points: 5 },
+                { word: 'H₂O', type: 'symbol', definition: 'Water', validCategories: ['organic'], difficulty: 'basic', points: 4 },
+                { word: 'CO₂', type: 'symbol', definition: 'Carbon Dioxide', validCategories: ['organic'], difficulty: 'basic', points: 5 }
+            ],
+
+            reactions: [
+                { word: 'combustion', difficulty: 'basic', points: 6 },
+                { word: 'oxidation', difficulty: 'intermediate', points: 7 },
+                { word: 'reduction', difficulty: 'intermediate', points: 7 },
+                { word: 'catalyst', difficulty: 'intermediate', points: 8 },
+                { word: 'exothermic', difficulty: 'intermediate', points: 9 },
+                { word: 'endothermic', difficulty: 'intermediate', points: 9 },
+                { word: 'synthesis', difficulty: 'intermediate', points: 8 },
+                { word: 'decomposition', difficulty: 'advanced', points: 11 },
+                { word: 'equilibrium', difficulty: 'advanced', points: 10 }
+            ],
+
+            bonding: [
+                { word: 'covalent', difficulty: 'intermediate', points: 7 },
+                { word: 'ionic', difficulty: 'intermediate', points: 6 },
+                { word: 'molecule', difficulty: 'basic', points: 6 },
+                { word: 'atom', difficulty: 'basic', points: 4 },
+                { word: 'electron', difficulty: 'basic', points: 6 },
+                { word: 'valence', difficulty: 'advanced', points: 7 },
+                { word: 'bond', difficulty: 'basic', points: 4 },
+                { word: 'polar', difficulty: 'intermediate', points: 5 },
+                { word: 'nonpolar', difficulty: 'intermediate', points: 7 }
+            ],
+
+            states: [
+                { word: 'solid', difficulty: 'basic', points: 4 },
+                { word: 'liquid', difficulty: 'basic', points: 4 },
+                { word: 'gas', difficulty: 'basic', points: 3 },
+                { word: 'plasma', difficulty: 'intermediate', points: 6 },
+                { word: 'sublimation', difficulty: 'advanced', points: 10 },
+                { word: 'condensation', difficulty: 'intermediate', points: 10 },
+                { word: 'evaporation', difficulty: 'intermediate', points: 10 },
+                { word: 'melting', difficulty: 'basic', points: 6 },
+                { word: 'freezing', difficulty: 'basic', points: 6 }
+            ],
+
+            'acids-bases': [
+                { word: 'acid', difficulty: 'basic', points: 4 },
+                { word: 'base', difficulty: 'basic', points: 4 },
+                { word: 'pH', type: 'symbol', definition: 'Acidity measure', validCategories: ['acids-bases'], difficulty: 'basic', points: 4 },
+                { word: 'neutral', difficulty: 'basic', points: 6 },
+                { word: 'alkaline', difficulty: 'intermediate', points: 7 },
+                { word: 'buffer', difficulty: 'intermediate', points: 6 },
+                { word: 'indicator', difficulty: 'intermediate', points: 9 },
+                { word: 'titration', difficulty: 'advanced', points: 9 },
+                { word: 'hydronium', difficulty: 'advanced', points: 8 }
+            ]
+        },
+
+        abbreviations: {
+            // Elements
+            'hydrogen': 'H',
+            'oxygen': 'O',
+            'carbon': 'C',
+            'nitrogen': 'N',
+            'helium': 'He',
+            'iron': 'Fe',
+            'gold': 'Au',
+            'silver': 'Ag',
+            'sodium': 'Na',
+            'chlorine': 'Cl',
+            'calcium': 'Ca',
+            'uranium': 'U',
+            'aluminum': 'Al',
+            'copper': 'Cu',
+
+            // Organic
+            'methane': 'CH₄',
+            'ethanol': 'EtOH',
+            'glucose': 'C₆H₁₂O₆',
+            'protein': 'protein',
+            'benzene': 'C₆H₆',
+            'polymer': 'polymer',
+            'alkane': 'alkane',
+            'carboxyl': 'COOH',
+            'amino acid': 'amino',
+            'lipid': 'lipid',
+
+            // Reactions
+            'combustion': 'combust',
+            'oxidation': 'oxidat.',
+            'reduction': 'reduct.',
+            'catalyst': 'catalys',
+            'exothermic': 'exo',
+            'endothermic': 'endo',
+            'synthesis': 'synth.',
+            'decomposition': 'decomp',
+            'equilibrium': 'equilib',
+
+            // Bonding
+            'covalent': 'covalen',
+            'ionic': 'ionic',
+            'molecule': 'molecul',
+            'atom': 'atom',
+            'electron': 'e⁻',
+            'valence': 'valence',
+            'bond': 'bond',
+            'polar': 'polar',
+            'nonpolar': 'nonpol',
+
+            // States
+            'solid': 'solid',
+            'liquid': 'liquid',
+            'gas': 'gas',
+            'plasma': 'plasma',
+            'sublimation': 'sublim',
+            'condensation': 'condens',
+            'evaporation': 'evapor',
+            'melting': 'melting',
+            'freezing': 'freezin',
+
+            // Acids & Bases
+            'acid': 'acid',
+            'base': 'base',
+            'neutral': 'neutral',
+            'alkaline': 'alkalin',
+            'buffer': 'buffer',
+            'indicator': 'indicat',
+            'titration': 'titrat.',
+            'hydronium': 'H₃O⁺'
+        },
+
+        ambiguousSymbols: [
+            // C = Carbon or Capacitance (cross-domain with physics/electromagnetism)
+            {
+                word: 'C',
+                type: 'symbol',
+                definition: 'Carbon OR Capacitance',
+                validCategories: ['elements', 'electromagnetism'],
+                difficulty: 'basic',
+                points: 4
+            }
+        ]
     }
 };
 
