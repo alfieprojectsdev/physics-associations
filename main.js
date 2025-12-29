@@ -413,6 +413,14 @@ function renderGame() {
     elements.score.textContent = state.score;
     elements.movesRemaining.textContent = state.movesRemaining;
     elements.stockCount.textContent = state.stockCount;
+
+    // Add visual state classes for stock count
+    elements.stockCount.classList.remove('low', 'empty');
+    if (state.stockCount === 0) {
+        elements.stockCount.classList.add('empty');
+    } else if (state.stockCount <= 3) {
+        elements.stockCount.classList.add('low');
+    }
     
     // Update moves color based on urgency
     if (state.movesRemaining <= 5) {
@@ -459,7 +467,8 @@ function renderFoundations(foundations, placedCategories) {
 
         const foundationEl = document.createElement('div');
         const isFull = sortedCount >= totalCount;
-        foundationEl.className = `foundation-stack foundation-slot${isFull ? ' pile-full' : ''}`; // Add pile-full class when complete
+        const isLocked = foundation.isLocked || false;
+        foundationEl.className = `foundation-stack foundation-slot${isFull ? ' pile-full' : ''}${isLocked ? ' locked' : ''}`; // Add pile-full and locked classes
         foundationEl.dataset.categoryId = catId; // Add data attribute for drag-and-drop
 
         // Build pile visualization with empty slots
@@ -483,6 +492,7 @@ function renderFoundations(foundations, placedCategories) {
             <div class="foundation-header">
                 <div class="foundation-icon">${category.icon}</div>
                 <div class="foundation-name">${category.name}</div>
+                ${isLocked ? '<div class="lock-indicator">👑</div>' : ''}
                 <div class="foundation-count">${sortedCount}/${totalCount}</div>
             </div>
             <div class="pile-slots">

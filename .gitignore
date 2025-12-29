@@ -6,3 +6,8 @@
 .claude/agents/*.md
 docs/*.md
 test-abbreviations.html
+test-locked-foundations.html
+screenshots/
+screenshots/*.jpeg
+screenshots/*.jpg
+screenshots/*.png

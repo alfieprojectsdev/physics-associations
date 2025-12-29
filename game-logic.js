@@ -181,7 +181,8 @@ class PhysicsAssociations {
         this.foundations[card.categoryId] = {
             category: card,
             words: [],
-            capacity: capacity
+            capacity: capacity,
+            isLocked: false
         };
         this.placedCategories.push(card.categoryId);
         
@@ -213,8 +214,17 @@ class PhysicsAssociations {
             return { success: false, message: 'Place that category card first!' };
         }
 
-        // Phase 2: Check capacity blocking (pile full = cannot accept)
+        // Phase 3: Check if foundation is locked (complete piles cannot accept more cards)
         const foundation = this.foundations[categoryId];
+        if (foundation.isLocked) {
+            this.movesRemaining--; // Penalty for attempting to sort to locked pile
+            return {
+                success: false,
+                message: `That pile is locked! (Complete)`
+            };
+        }
+
+        // Phase 2: Check capacity blocking (pile full = cannot accept)
         if (foundation.words.length >= foundation.capacity) {
             this.movesRemaining--; // Penalty for attempting impossible move
             return {
@@ -255,6 +265,11 @@ class PhysicsAssociations {
         this.removeCardFromSource(card);
         this.foundations[categoryId].words.push(card);
         this.score += card.points;
+
+        // Phase 3: Lock foundation when it reaches capacity
+        if (this.foundations[categoryId].words.length >= this.foundations[categoryId].capacity) {
+            this.foundations[categoryId].isLocked = true;
+        }
 
         this.movesRemaining--;
         this.revealCards();
@@ -336,35 +351,49 @@ class PhysicsAssociations {
         // Win: All word cards sorted
         const totalWordsSorted = Object.values(this.foundations)
             .reduce((sum, foundation) => sum + foundation.words.length, 0);
-        
+
         const totalWordsInGame = this.tableau
             .flat()
             .filter(c => c.type === 'word').length
             + (this.waste && this.waste.type === 'word' ? 1 : 0)
             + this.stockPile.filter(c => c.type === 'word').length;
-        
+
         if (totalWordsInGame === 0 && totalWordsSorted > 0) {
             this.gameState = 'won';
             return;
         }
-        
+
         // Loss: No moves remaining
         if (this.movesRemaining <= 0) {
             this.gameState = 'lost';
             return;
         }
-        
-        // Loss: No valid moves available
+
+        // Phase 3: Dead board detection - no valid moves possible
         const playable = this.getPlayableCards();
-        const hasCategory = playable.some(c => c.type === 'category');
-        const hasValidWord = playable.some(c => {
+
+        // Check if there are any valid category placements
+        const hasPlaceableCategory = playable.some(c =>
+            c.type === 'category' && !this.placedCategories.includes(c.categoryId)
+        );
+
+        // Check if there are any valid word sorts
+        const hasValidWordMove = playable.some(c => {
             if (c.type !== 'word') return false;
-            // Check if any valid category for this card is placed
+            // Check if any valid category for this card is placed AND not locked AND not full
             const validCats = getValidCategories(c);
-            return validCats.some(cat => this.placedCategories.includes(cat));
+            return validCats.some(cat => {
+                const isPlaced = this.placedCategories.includes(cat);
+                const foundation = this.foundations[cat];
+                if (!foundation) return false;
+                const isNotLocked = !foundation.isLocked;
+                const isNotFull = foundation.words.length < foundation.capacity;
+                return isPlaced && isNotLocked && isNotFull;
+            });
         });
 
-        if (!hasCategory && !hasValidWord && this.stockPile.length === 0) {
+        // Dead board: no valid moves and stock is empty
+        if (!hasPlaceableCategory && !hasValidWordMove && this.stockPile.length === 0) {
             this.gameState = 'lost';
         }
     }
@@ -396,18 +425,32 @@ class PhysicsAssociations {
         }
 
         // PRIORITY 2: Sort tableau words (reveals hidden cards)
-        // Check if any valid category for the card is placed
+        // Check if any valid category for the card is placed AND not locked AND not full
         const tableauWords = playable.filter(c => {
             if (c.type !== 'word' || c.source !== 'tableau') return false;
             const validCats = getValidCategories(c);
-            return validCats.some(cat => this.placedCategories.includes(cat));
+            return validCats.some(cat => {
+                const isPlaced = this.placedCategories.includes(cat);
+                const foundation = this.foundations[cat];
+                if (!foundation) return false;
+                const isNotLocked = !foundation.isLocked;
+                const isNotFull = foundation.words.length < foundation.capacity;
+                return isPlaced && isNotLocked && isNotFull;
+            });
         });
 
         if (tableauWords.length > 0) {
             const word = tableauWords[0];
-            // Get first placed valid category for this word
+            // Get first placed valid category for this word that is not locked and not full
             const validCats = getValidCategories(word);
-            const targetCategoryId = validCats.find(cat => this.placedCategories.includes(cat));
+            const targetCategoryId = validCats.find(cat => {
+                const isPlaced = this.placedCategories.includes(cat);
+                const foundation = this.foundations[cat];
+                if (!foundation) return false;
+                const isNotLocked = !foundation.isLocked;
+                const isNotFull = foundation.words.length < foundation.capacity;
+                return isPlaced && isNotLocked && isNotFull;
+            });
             const category = PhysicsCategories.find(c => c.id === targetCategoryId);
 
             return {
@@ -423,14 +466,28 @@ class PhysicsAssociations {
         const wasteWords = playable.filter(c => {
             if (c.type !== 'word' || c.source !== 'waste') return false;
             const validCats = getValidCategories(c);
-            return validCats.some(cat => this.placedCategories.includes(cat));
+            return validCats.some(cat => {
+                const isPlaced = this.placedCategories.includes(cat);
+                const foundation = this.foundations[cat];
+                if (!foundation) return false;
+                const isNotLocked = !foundation.isLocked;
+                const isNotFull = foundation.words.length < foundation.capacity;
+                return isPlaced && isNotLocked && isNotFull;
+            });
         });
 
         if (wasteWords.length > 0) {
             const word = wasteWords[0];
-            // Get first placed valid category for this word
+            // Get first placed valid category for this word that is not locked and not full
             const validCats = getValidCategories(word);
-            const targetCategoryId = validCats.find(cat => this.placedCategories.includes(cat));
+            const targetCategoryId = validCats.find(cat => {
+                const isPlaced = this.placedCategories.includes(cat);
+                const foundation = this.foundations[cat];
+                if (!foundation) return false;
+                const isNotLocked = !foundation.isLocked;
+                const isNotFull = foundation.words.length < foundation.capacity;
+                return isPlaced && isNotLocked && isNotFull;
+            });
             const category = PhysicsCategories.find(c => c.id === targetCategoryId);
 
             return {
