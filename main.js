@@ -75,12 +75,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Register service worker for PWA offline support (Phase 5)
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('./service-worker.js')
             .then((registration) => {
                 console.log('ServiceWorker registered:', registration.scope);
             })
             .catch((error) => {
-                console.log('ServiceWorker registration failed:', error);
+                console.error('ServiceWorker registration failed:', error);
             });
     }
 
