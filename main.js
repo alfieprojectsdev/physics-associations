@@ -612,8 +612,9 @@ function createCardElement(card) {
         // Build ambiguity badge HTML if needed
         let ambiguityBadge = '';
         if (card.isAmbiguous) {
+            const domainCategories = getCurrentDomainData().categories;
             const validCatNames = card.validCategories
-                .map(catId => PhysicsCategories.find(c => c.id === catId)?.name)
+                .map(catId => domainCategories.find(c => c.id === catId)?.name)
                 .filter(Boolean)
                 .join(' / ');
             ambiguityBadge = `<span class="ambiguity-badge" title="${validCatNames}">?</span>`;
@@ -635,8 +636,9 @@ function createCardElement(card) {
 
         // Add tooltip for ambiguous symbols
         if (card.isAmbiguous) {
+            const domainCategories = getCurrentDomainData().categories;
             const validCatNames = card.validCategories
-                .map(catId => PhysicsCategories.find(c => c.id === catId)?.name)
+                .map(catId => domainCategories.find(c => c.id === catId)?.name)
                 .filter(Boolean)
                 .join(' or ');
             cardEl.title = `${card.word} - Can belong to: ${validCatNames}`;
@@ -715,9 +717,10 @@ function triggerHaptic(type = 'light') {
 
 function showCategorySelector(placedCategories) {
     elements.categoryOptions.innerHTML = '';
-    
+    const domainCategories = getCurrentDomainData().categories;
+
     placedCategories.forEach(catId => {
-        const category = PhysicsCategories.find(c => c.id === catId);
+        const category = domainCategories.find(c => c.id === catId);
         const btn = document.createElement('button');
         btn.className = 'category-option';
         btn.innerHTML = `${category.icon}<br>${category.name}`;
@@ -728,7 +731,7 @@ function showCategorySelector(placedCategories) {
         });
         elements.categoryOptions.appendChild(btn);
     });
-    
+
     elements.categorySelector.classList.remove('hidden');
 }
 
