@@ -583,11 +583,31 @@ function createCardElement(card) {
     } else if (card.type === 'word') {
         cardEl.classList.add('word');
 
+        // Add visual indicators for special card types
+        if (card.isVector) {
+            cardEl.classList.add('vector-symbol');
+        }
+
+        if (card.isAmbiguous || (card.validCategories && card.validCategories.length > 1)) {
+            cardEl.classList.add('ambiguous-symbol');
+        }
+
         // Two-zone layout: header index (top 15%) + body (bottom 85%)
         // Index is ALWAYS visible when stacked, body gets covered
         const displayText = getCardDisplayText(card.word, currentDisplayMode);
 
+        // Build ambiguity badge HTML if needed
+        let ambiguityBadge = '';
+        if (card.isAmbiguous) {
+            const validCatNames = card.validCategories
+                .map(catId => PhysicsCategories.find(c => c.id === catId)?.name)
+                .filter(Boolean)
+                .join(' / ');
+            ambiguityBadge = `<span class="ambiguity-badge" title="${validCatNames}">?</span>`;
+        }
+
         cardEl.innerHTML = `
+            ${ambiguityBadge}
             <div class="card-header-index">
                 <span class="index-text">${displayText}</span>
             </div>
@@ -599,6 +619,15 @@ function createCardElement(card) {
 
         // Add data attribute for full word (for tooltips/sorting feedback)
         cardEl.dataset.fullWord = card.word;
+
+        // Add tooltip for ambiguous symbols
+        if (card.isAmbiguous) {
+            const validCatNames = card.validCategories
+                .map(catId => PhysicsCategories.find(c => c.id === catId)?.name)
+                .filter(Boolean)
+                .join(' or ');
+            cardEl.title = `${card.word} - Can belong to: ${validCatNames}`;
+        }
     }
 
     return cardEl;

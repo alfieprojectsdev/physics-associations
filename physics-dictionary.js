@@ -6,6 +6,37 @@ const displayModes = {
   ICON_LABEL: 'icon_label'  // Future feature
 };
 
+/**
+ * Ambiguous symbols that can belong to multiple categories
+ * These are added to ALL levels that include AT LEAST ONE of their valid categories
+ */
+const AmbiguousSymbols = [
+    {
+        word: 'T',
+        type: 'symbol',
+        definition: 'Temperature OR Period',
+        validCategories: ['thermodynamics', 'waves'],
+        difficulty: 'basic',
+        points: 5
+    },
+    {
+        word: 'V',
+        type: 'symbol',
+        definition: 'Volume OR Voltage',
+        validCategories: ['thermodynamics', 'electromagnetism'],
+        difficulty: 'basic',
+        points: 5
+    },
+    {
+        word: 'n',
+        type: 'symbol',
+        definition: 'Quantum Number OR Refractive Index',
+        validCategories: ['quantum', 'waves'],
+        difficulty: 'intermediate',
+        points: 5
+    }
+];
+
 // Abbreviation rules by word length and physics convention
 const abbreviations = {
   // === MECHANICS ===
@@ -220,9 +251,9 @@ const PhysicsWords = {
         // Symbols and acronyms
         { word: 'F', type: 'symbol', definition: 'Force', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: 'm', type: 'symbol', definition: 'Mass', validCategories: ['mechanics'], difficulty: 'basic', points: 3 },
-        { word: 'v⃗', type: 'symbol', definition: 'Velocity', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
-        { word: 'a⃗', type: 'symbol', definition: 'Acceleration', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
-        { word: 'p⃗', type: 'symbol', definition: 'Momentum', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: 'v', type: 'symbol', definition: 'Velocity (vector)', isVector: true, validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'a', type: 'symbol', definition: 'Acceleration (vector)', isVector: true, validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
+        { word: 'p', type: 'symbol', definition: 'Momentum (vector)', isVector: true, validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
         { word: 'KE', type: 'acronym', definition: 'Kinetic Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: 'PE', type: 'acronym', definition: 'Potential Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: '\u03BC', type: 'symbol', definition: 'Coefficient of Friction', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
@@ -245,11 +276,10 @@ const PhysicsWords = {
         { word: 'celsius', difficulty: 'intermediate', points: 7 },
         { word: 'kelvin', difficulty: 'intermediate', points: 6 },
         // Symbols and acronyms
-        { word: 'T', type: 'symbol', definition: 'Temperature OR Period', validCategories: ['thermodynamics', 'waves'], difficulty: 'basic', points: 5 },
+        // Note: 'T' and 'V' moved to AmbiguousSymbols array (shared with other categories)
         { word: 'Q', type: 'symbol', definition: 'Heat', validCategories: ['thermodynamics'], difficulty: 'basic', points: 4 },
         { word: 'S', type: 'symbol', definition: 'Entropy', validCategories: ['thermodynamics'], difficulty: 'intermediate', points: 5 },
         { word: 'P', type: 'symbol', definition: 'Pressure', validCategories: ['thermodynamics'], difficulty: 'basic', points: 4 },
-        { word: 'V', type: 'symbol', definition: 'Volume OR Voltage', validCategories: ['thermodynamics', 'electromagnetism'], difficulty: 'basic', points: 5 },
         { word: 'k_B', type: 'symbol', definition: 'Boltzmann Constant', validCategories: ['thermodynamics'], difficulty: 'advanced', points: 7 },
         { word: 'η', type: 'symbol', definition: 'Efficiency', validCategories: ['thermodynamics'], difficulty: 'intermediate', points: 5 }
     ],
@@ -273,7 +303,7 @@ const PhysicsWords = {
         { word: 'q', type: 'symbol', definition: 'Charge', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
         { word: 'C', type: 'symbol', definition: 'Capacitance', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
         { word: 'B', type: 'symbol', definition: 'Magnetic Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
-        { word: 'E⃗', type: 'symbol', definition: 'Electric Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 6 },
+        { word: 'E', type: 'symbol', definition: 'Electric Field (vector)', isVector: true, validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 6 },
         { word: 'Ω', type: 'symbol', definition: 'Ohm', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
         { word: 'EMF', type: 'acronym', definition: 'Electromotive Force', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 }
     ],
@@ -289,10 +319,10 @@ const PhysicsWords = {
         { word: 'quantum', difficulty: 'intermediate', points: 7 },
         { word: 'particle', difficulty: 'intermediate', points: 8 },
         // Symbols and acronyms
+        // Note: 'n' moved to AmbiguousSymbols array (shared with waves)
         { word: '\u03C8', type: 'symbol', definition: 'Wavefunction', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
         { word: 'h', type: 'symbol', definition: 'Planck\'s Constant', validCategories: ['quantum'], difficulty: 'intermediate', points: 6 },
-        { word: 'ℏ', type: 'symbol', definition: 'Reduced Planck Constant', validCategories: ['quantum'], difficulty: 'advanced', points: 7 },
-        { word: 'n', type: 'symbol', definition: 'Quantum Number OR Refractive Index', validCategories: ['quantum', 'waves'], difficulty: 'intermediate', points: 5 },
+        { word: 'ħ', type: 'symbol', definition: 'Reduced Planck Constant (h-bar)', validCategories: ['quantum'], difficulty: 'advanced', points: 7 },
         { word: 'eV', type: 'symbol', definition: 'Electron Volt', validCategories: ['quantum'], difficulty: 'intermediate', points: 5 }
     ],
     
@@ -365,7 +395,11 @@ function generateLevelDeck(level = 1) {
     const shuffledCategories = [...PhysicsCategories]
         .sort(() => Math.random() - 0.5)
         .slice(0, numCategories);
-    
+
+    // Get active category IDs for this level
+    const activeCategoryIds = shuffledCategories.map(cat => cat.id);
+
+    // Add category cards
     shuffledCategories.forEach(cat => {
         deck.categoryCards.push({
             id: `cat-${cat.id}`,
@@ -376,24 +410,25 @@ function generateLevelDeck(level = 1) {
             description: cat.description
         });
     });
-    
+
+    // Add regular words from each category
     shuffledCategories.forEach(cat => {
         const categoryWords = PhysicsWords[cat.id];
         const wordsPerCategory = Math.min(4 + level, 12);
         let availableWords = categoryWords;
-        
+
         if (level <= 3) {
             availableWords = categoryWords.filter(w => w.difficulty === 'basic');
         } else if (level <= 6) {
-            availableWords = categoryWords.filter(w => 
+            availableWords = categoryWords.filter(w =>
                 w.difficulty === 'basic' || w.difficulty === 'intermediate'
             );
         }
-        
+
         const selectedWords = [...availableWords]
             .sort(() => Math.random() - 0.5)
             .slice(0, wordsPerCategory);
-        
+
         selectedWords.forEach((wordData, index) => {
             const card = {
                 id: `word-${cat.id}-${index}`,
@@ -412,10 +447,50 @@ function generateLevelDeck(level = 1) {
                 card.categoryId = cat.id;
             }
 
+            // Preserve isVector flag if present
+            if (wordData.isVector) {
+                card.isVector = true;
+            }
+
             deck.wordCards.push(card);
         });
     });
-    
+
+    // Add ambiguous symbols if ANY of their valid categories are active
+    AmbiguousSymbols.forEach((symbolData, index) => {
+        // Check if at least one valid category is in this level
+        const isRelevant = symbolData.validCategories.some(catId =>
+            activeCategoryIds.includes(catId)
+        );
+
+        if (isRelevant) {
+            // Check difficulty filter
+            let shouldInclude = false;
+            if (level <= 3) {
+                shouldInclude = symbolData.difficulty === 'basic';
+            } else if (level <= 6) {
+                shouldInclude = symbolData.difficulty === 'basic' ||
+                               symbolData.difficulty === 'intermediate';
+            } else {
+                shouldInclude = true;  // Advanced levels include all
+            }
+
+            if (shouldInclude) {
+                const card = {
+                    id: `ambiguous-${index}`,
+                    type: 'word',
+                    word: symbolData.word,
+                    points: symbolData.points,
+                    difficulty: symbolData.difficulty,
+                    validCategories: symbolData.validCategories,
+                    isAmbiguous: true  // Flag for UI visual distinction
+                };
+
+                deck.wordCards.push(card);
+            }
+        }
+    });
+
     deck.wordCards.sort(() => Math.random() - 0.5);
     return deck;
 }
