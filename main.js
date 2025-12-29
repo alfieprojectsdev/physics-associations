@@ -57,6 +57,8 @@ const elements = {
     drawBtn: null,
     hintBtn: null,
     menuBtn: null,
+    domainBtn: null,
+    domainIcon: null,
     modal: null,
     modalOverlay: null,
     modalTitle: null,
@@ -71,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadDisplayPreference();
     initializeElements();
     setupEventListeners();
+    updateDomainIcon(); // Set initial domain icon
     startNewGame();
     startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
 
@@ -113,6 +116,8 @@ function initializeElements() {
     elements.drawBtn = document.getElementById('draw-btn');
     elements.hintBtn = document.getElementById('hint-btn');
     elements.menuBtn = document.getElementById('menu-btn');
+    elements.domainBtn = document.getElementById('domain-btn');
+    elements.domainIcon = document.getElementById('domain-icon');
     elements.modal = document.getElementById('modal');
     elements.modalOverlay = document.getElementById('modal-overlay');
     elements.modalTitle = document.getElementById('modal-title');
@@ -127,6 +132,7 @@ function setupEventListeners() {
     elements.drawBtn.addEventListener('click', handleDrawCard);
     elements.hintBtn.addEventListener('click', handleShowHint);
     elements.menuBtn.addEventListener('click', handleShowMenu);
+    elements.domainBtn.addEventListener('click', handleShowDomainSelector);
     elements.modalClose.addEventListener('click', closeModal);
     elements.modalOverlay.addEventListener('click', closeModal);
     elements.cancelSort.addEventListener('click', hideCategorySelector);
@@ -135,6 +141,13 @@ function setupEventListeners() {
     elements.gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
     elements.gameBoard.addEventListener('touchmove', handleTouchMove, { passive: false });
     elements.gameBoard.addEventListener('touchend', handleTouchEnd, { passive: false });
+}
+
+function updateDomainIcon() {
+    const domainData = getCurrentDomainData();
+    if (elements.domainIcon && domainData) {
+        elements.domainIcon.textContent = domainData.icon;
+    }
 }
 
 // Check FPS and enable low-performance mode if needed (Phase 4)
@@ -947,6 +960,70 @@ function showMenuTab(tab) {
     event.target.classList.add('active');
 }
 
+function handleShowDomainSelector() {
+    stopPerformanceMonitoring();
+
+    elements.modalTitle.textContent = 'Choose Your Domain';
+
+    // Build domain options HTML
+    const domainOptions = Object.entries(DomainData).map(([domainKey, domain]) => {
+        const isActive = domainKey === currentDomain;
+        return `
+            <div class="domain-card ${isActive ? 'active' : ''}" onclick="handleDomainSelect('${domainKey}')">
+                <div class="domain-icon-large">${domain.icon}</div>
+                <div class="domain-info">
+                    <h3>${domain.name}</h3>
+                    <p>${domain.description}</p>
+                    <div class="domain-meta">${domain.categories.length} categories</div>
+                </div>
+                ${isActive ? '<div class="domain-badge">Current</div>' : ''}
+            </div>
+        `;
+    }).join('');
+
+    elements.modalBody.innerHTML = `
+        <div class="domain-selector-grid">
+            ${domainOptions}
+        </div>
+        <div class="domain-note">
+            <p><strong>Note:</strong> Changing domain will start a new game from Level 1.</p>
+        </div>
+    `;
+
+    showModal();
+}
+
+function handleDomainSelect(domainKey) {
+    if (domainKey === currentDomain) {
+        // Same domain - just close modal
+        closeModal();
+        return;
+    }
+
+    // Confirm if game is in progress
+    const state = game ? game.getGameState() : null;
+    if (state && state.gameState === 'playing') {
+        if (!confirm(`Switch to ${DomainData[domainKey].name}? Current progress will be lost.`)) {
+            return;
+        }
+    }
+
+    // Switch domain
+    setCurrentDomain(domainKey);
+
+    // Update domain icon in header
+    elements.domainIcon.textContent = DomainData[domainKey].icon;
+
+    // Track domain change
+    if (typeof GameAnalytics !== 'undefined') {
+        GameAnalytics.domainChanged(domainKey);
+    }
+
+    // Close modal and start new game
+    closeModal();
+    startNewGame(1);
+}
+
 function confirmNewGame() {
     if (confirm('Start a new game? Current progress will be lost.')) {
         closeModal();
@@ -1039,6 +1116,7 @@ window.confirmNewGame = confirmNewGame;
 window.nextLevel = nextLevel;
 window.retryLevel = retryLevel;
 window.showMenuTab = showMenuTab;
+window.handleDomainSelect = handleDomainSelect;
 
 // PWA Install Functions (Phase 5)
 
