@@ -241,18 +241,19 @@ class PhysicsAssociations {
 
             // Get the correct category name(s) for feedback
             // For ambiguous symbols, show all valid categories
+            const domainData = getCurrentDomainData();
             let correctCategoryName = '';
             if (card.categoryId) {
-                const correctCategory = PhysicsCategories.find(c => c.id === card.categoryId);
+                const correctCategory = domainData.categories.find(c => c.id === card.categoryId);
                 correctCategoryName = correctCategory.name;
             } else if (card.validCategories) {
                 const validCatNames = card.validCategories
-                    .map(catId => PhysicsCategories.find(c => c.id === catId).name)
+                    .map(catId => domainData.categories.find(c => c.id === catId).name)
                     .join(' or ');
                 correctCategoryName = validCatNames;
             }
 
-            const attemptedCategory = PhysicsCategories.find(c => c.id === categoryId);
+            const attemptedCategory = domainData.categories.find(c => c.id === categoryId);
 
             return {
                 success: false,
@@ -451,7 +452,8 @@ class PhysicsAssociations {
                 const isNotFull = foundation.words.length < foundation.capacity;
                 return isPlaced && isNotLocked && isNotFull;
             });
-            const category = PhysicsCategories.find(c => c.id === targetCategoryId);
+            const domainData = getCurrentDomainData();
+            const category = domainData.categories.find(c => c.id === targetCategoryId);
 
             return {
                 type: 'word',
@@ -488,7 +490,8 @@ class PhysicsAssociations {
                 const isNotFull = foundation.words.length < foundation.capacity;
                 return isPlaced && isNotLocked && isNotFull;
             });
-            const category = PhysicsCategories.find(c => c.id === targetCategoryId);
+            const domainData = getCurrentDomainData();
+            const category = domainData.categories.find(c => c.id === targetCategoryId);
 
             return {
                 type: 'word',
