@@ -6,8 +6,10 @@
 
 ### v1.0 Features:
 - Abbreviated display mode with authentic physics notation (p, λ, F, τ)
+- **Solitaire-style mechanics** (limited moves, locked foundations, dead board detection, finite stock)
+- **Multi-domain vocabulary** (Physics, Chemistry, Computer Science - 18 categories, 300+ terms)
 - Drag-and-drop with touch animations
-- PWA support (offline-capable, installable)
+- PWA support (offline-capable, installable, GitHub Pages deployment ready)
 - Privacy-friendly analytics (GoatCounter)
 - WCAG 2.1 AA accessible
 - Performance optimized for budget Android devices (30+ FPS)
@@ -96,36 +98,48 @@
 
 ---
 
-## v4.0: Educational Expansion (Planned: Q2 2026)
+## v4.0: Educational Expansion (Partially Complete)
 
-**Goal:** Expand beyond physics to other STEM subjects
+**Status:** ✅ Chemistry & Computer Science vocabularies integrated (December 2025)
+**Remaining:** Biology and Mathematics (Planned: Q2 2026)
 
-### Planned Subjects
+### Completed Ahead of Schedule
 
-1. **Chemistry Associations**
-   - Elements, compounds, reactions
-   - Periodic table categories
-   - Lab equipment terms
+1. **Chemistry Associations** ✅ (Completed December 2025)
+   - 6 categories: Elements, Organic Chemistry, Reactions, Bonding, States of Matter, Acids & Bases
+   - 100+ chemistry terms with difficulty progression (basic → advanced)
+   - Symbol disambiguation system (H, O, C, N, pH, etc.)
+   - Full integration with solitaire mechanics
 
-2. **Biology Associations**
+2. **Computer Science Associations** ✅ (Completed December 2025)
+   - 6 categories: Data Structures, Algorithms, Programming, Networks, Databases, Security
+   - 90+ CS terms covering fundamentals to advanced concepts
+   - Acronym support (API, SQL, JSON, etc.)
+   - Full integration with game engine
+
+### Still Planned
+
+3. **Biology Associations** (Q2 2026)
    - Cell structures, systems
    - Taxonomy categories
    - Genetics terminology
 
-3. **Mathematics Associations**
+4. **Mathematics Associations** (Q2 2026)
    - Algebra, geometry, calculus terms
    - Theorem categories
    - Mathematical symbols
 
 ### Technical Requirements
-- Multi-subject architecture
-- Subject selection UI
-- Separate dictionaries per subject
-- Unified game engine
-- Cross-subject achievements
 
-**Estimated Total:** 80-100 hours
-**Target Launch:** June 2026
+- ✅ Multi-subject architecture (DomainData system implemented)
+- ⏳ Subject selection UI (infrastructure exists, UI pending)
+- ✅ Separate dictionaries per subject (vocabulary-dictionary.js)
+- ✅ Unified game engine (domain-agnostic game logic)
+- ⏳ Cross-subject achievements (planned for v3.0)
+
+**Completed Work:** 40-50 hours (Chemistry + CS integration)
+**Remaining Estimate:** 40-50 hours (Biology + Math)
+**Target Launch for Remaining:** June 2026
 
 ---
 
@@ -199,12 +213,14 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 ### v1.0.0 (January 1, 2026)
 - Initial release
-- Abbreviated display mode
-- PWA support
-- Drag-and-drop gameplay
-- 110 physics terms across 21 categories
+- Solitaire-style mechanics (Phases 1-3: limited moves, locked foundations, dead board detection)
+- Multi-domain vocabulary system (Physics, Chemistry, Computer Science)
+- 18 categories with 300+ terms across 3 domains
+- Abbreviated display mode with authentic notation
+- PWA support (offline-capable, installable, GitHub Pages ready)
+- Drag-and-drop gameplay with touch animations
 - WCAG 2.1 AA accessible
-- Privacy-friendly analytics
+- Privacy-friendly analytics (GoatCounter)
 
 ---
 
