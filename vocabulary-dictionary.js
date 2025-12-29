@@ -566,6 +566,265 @@ const DomainData = {
                 points: 4
             }
         ]
+    },
+
+    'computer-science': {
+        name: 'Computer Science',
+        icon: '💻',
+        description: 'Algorithms, data structures, and computing',
+
+        categories: [
+            {
+                id: 'data-structures',
+                name: 'Data Structures',
+                icon: '📊',
+                description: 'Arrays, trees, graphs, queues'
+            },
+            {
+                id: 'algorithms',
+                name: 'Algorithms',
+                icon: '🔄',
+                description: 'Sorting, searching, optimization'
+            },
+            {
+                id: 'programming',
+                name: 'Programming',
+                icon: '⌨️',
+                description: 'Languages, paradigms, syntax'
+            },
+            {
+                id: 'networks',
+                name: 'Networks',
+                icon: '🌐',
+                description: 'Internet, protocols, communication'
+            },
+            {
+                id: 'databases',
+                name: 'Databases',
+                icon: '🗄️',
+                description: 'SQL, NoSQL, storage'
+            },
+            {
+                id: 'security',
+                name: 'Security',
+                icon: '🔒',
+                description: 'Encryption, authentication, safety'
+            }
+        ],
+
+        words: {
+            'data-structures': [
+                // Basic
+                { word: 'array', difficulty: 'basic', points: 4 },
+                { word: 'list', difficulty: 'basic', points: 3 },
+                { word: 'stack', difficulty: 'basic', points: 4 },
+                { word: 'queue', difficulty: 'basic', points: 4 },
+                { word: 'tree', difficulty: 'basic', points: 4 },
+                { word: 'graph', difficulty: 'basic', points: 5 },
+                { word: 'node', difficulty: 'basic', points: 4 },
+                // Intermediate
+                { word: 'hash table', difficulty: 'intermediate', points: 8 },
+                { word: 'linked list', difficulty: 'intermediate', points: 9 },
+                { word: 'binary tree', difficulty: 'intermediate', points: 9 },
+                { word: 'heap', difficulty: 'intermediate', points: 5 },
+                { word: 'dictionary', difficulty: 'intermediate', points: 9 },
+                // Advanced
+                { word: 'red-black tree', difficulty: 'advanced', points: 12 },
+                { word: 'trie', difficulty: 'advanced', points: 6 }
+            ],
+
+            algorithms: [
+                // Basic
+                { word: 'sort', difficulty: 'basic', points: 4 },
+                { word: 'search', difficulty: 'basic', points: 5 },
+                { word: 'loop', difficulty: 'basic', points: 4 },
+                { word: 'iteration', difficulty: 'basic', points: 8 },
+                // Intermediate
+                { word: 'binary search', difficulty: 'intermediate', points: 11 },
+                { word: 'quicksort', difficulty: 'intermediate', points: 8 },
+                { word: 'merge sort', difficulty: 'intermediate', points: 9 },
+                { word: 'recursion', difficulty: 'intermediate', points: 8 },
+                { word: 'greedy', difficulty: 'intermediate', points: 6 },
+                { word: 'divide and conquer', difficulty: 'intermediate', points: 16 },
+                // Advanced
+                { word: 'dynamic programming', difficulty: 'advanced', points: 16 },
+                { word: 'backtracking', difficulty: 'advanced', points: 11 },
+                // Big-O notation symbols
+                { word: 'O(n)', type: 'symbol', definition: 'Linear time complexity', validCategories: ['algorithms'], difficulty: 'intermediate', points: 6 },
+                { word: 'O(log n)', type: 'symbol', definition: 'Logarithmic time', validCategories: ['algorithms'], difficulty: 'advanced', points: 8 },
+                { word: 'O(1)', type: 'symbol', definition: 'Constant time', validCategories: ['algorithms'], difficulty: 'intermediate', points: 6 }
+            ],
+
+            programming: [
+                // Basic
+                { word: 'variable', difficulty: 'basic', points: 6 },
+                { word: 'function', difficulty: 'basic', points: 6 },
+                { word: 'loop', difficulty: 'basic', points: 4 },
+                { word: 'string', difficulty: 'basic', points: 5 },
+                { word: 'integer', difficulty: 'basic', points: 6 },
+                { word: 'boolean', difficulty: 'basic', points: 6 },
+                // Intermediate
+                { word: 'class', difficulty: 'intermediate', points: 5 },
+                { word: 'object', difficulty: 'intermediate', points: 6 },
+                { word: 'inheritance', difficulty: 'intermediate', points: 10 },
+                { word: 'encapsulation', difficulty: 'intermediate', points: 12 },
+                { word: 'API', type: 'acronym', definition: 'Application Programming Interface', validCategories: ['programming'], difficulty: 'intermediate', points: 5 },
+                { word: 'compiler', difficulty: 'intermediate', points: 8 },
+                { word: 'interpreter', difficulty: 'intermediate', points: 10 },
+                // Advanced
+                { word: 'polymorphism', difficulty: 'advanced', points: 11 },
+                { word: 'closure', difficulty: 'advanced', points: 7 },
+                { word: 'lambda', difficulty: 'advanced', points: 6 }
+            ],
+
+            networks: [
+                // Basic
+                { word: 'internet', difficulty: 'basic', points: 6 },
+                { word: 'web', difficulty: 'basic', points: 3 },
+                { word: 'server', difficulty: 'basic', points: 6 },
+                { word: 'client', difficulty: 'basic', points: 6 },
+                { word: 'router', difficulty: 'basic', points: 6 },
+                // Intermediate
+                { word: 'HTTP', type: 'acronym', definition: 'HyperText Transfer Protocol', validCategories: ['networks'], difficulty: 'basic', points: 5 },
+                { word: 'TCP', type: 'acronym', definition: 'Transmission Control Protocol', validCategories: ['networks'], difficulty: 'intermediate', points: 5 },
+                { word: 'IP', type: 'acronym', definition: 'Internet Protocol', validCategories: ['networks'], difficulty: 'basic', points: 4 },
+                { word: 'DNS', type: 'acronym', definition: 'Domain Name System', validCategories: ['networks'], difficulty: 'intermediate', points: 5 },
+                { word: 'URL', type: 'acronym', definition: 'Uniform Resource Locator', validCategories: ['networks'], difficulty: 'basic', points: 5 },
+                { word: 'firewall', difficulty: 'intermediate', points: 7 },
+                { word: 'bandwidth', difficulty: 'intermediate', points: 8 },
+                { word: 'latency', difficulty: 'intermediate', points: 7 },
+                // Advanced
+                { word: 'protocol', difficulty: 'advanced', points: 8 },
+                { word: 'packet', difficulty: 'advanced', points: 6 }
+            ],
+
+            databases: [
+                // Basic
+                { word: 'table', difficulty: 'basic', points: 4 },
+                { word: 'row', difficulty: 'basic', points: 3 },
+                { word: 'column', difficulty: 'basic', points: 6 },
+                { word: 'data', difficulty: 'basic', points: 4 },
+                // Intermediate
+                { word: 'SQL', type: 'acronym', definition: 'Structured Query Language', validCategories: ['databases'], difficulty: 'basic', points: 5 },
+                { word: 'query', difficulty: 'basic', points: 5 },
+                { word: 'index', difficulty: 'intermediate', points: 6 },
+                { word: 'join', difficulty: 'intermediate', points: 5 },
+                { word: 'transaction', difficulty: 'intermediate', points: 10 },
+                { word: 'primary key', difficulty: 'intermediate', points: 9 },
+                { word: 'foreign key', difficulty: 'intermediate', points: 9 },
+                { word: 'NoSQL', type: 'acronym', definition: 'Not Only SQL', validCategories: ['databases'], difficulty: 'intermediate', points: 6 },
+                // Advanced
+                { word: 'normalization', difficulty: 'advanced', points: 12 },
+                { word: 'ACID', type: 'acronym', definition: 'Atomicity, Consistency, Isolation, Durability', validCategories: ['databases'], difficulty: 'advanced', points: 6 }
+            ],
+
+            security: [
+                // Basic
+                { word: 'password', difficulty: 'basic', points: 6 },
+                { word: 'username', difficulty: 'basic', points: 6 },
+                { word: 'login', difficulty: 'basic', points: 5 },
+                { word: 'authentication', difficulty: 'basic', points: 12 },
+                // Intermediate
+                { word: 'encryption', difficulty: 'intermediate', points: 9 },
+                { word: 'hash', difficulty: 'intermediate', points: 5 },
+                { word: 'SSL', type: 'acronym', definition: 'Secure Sockets Layer', validCategories: ['security'], difficulty: 'intermediate', points: 5 },
+                { word: 'firewall', difficulty: 'intermediate', points: 7 },
+                { word: 'malware', difficulty: 'basic', points: 6 },
+                { word: 'virus', difficulty: 'basic', points: 5 },
+                { word: 'token', difficulty: 'intermediate', points: 5 },
+                // Advanced
+                { word: 'cryptography', difficulty: 'advanced', points: 11 },
+                { word: 'RSA', type: 'acronym', definition: 'Rivest-Shamir-Adleman encryption', validCategories: ['security'], difficulty: 'advanced', points: 5 },
+                { word: 'OAuth', type: 'acronym', definition: 'Open Authorization', validCategories: ['security'], difficulty: 'advanced', points: 7 }
+            ]
+        },
+
+        abbreviations: {
+            // Data Structures
+            'array': 'arr',
+            'list': 'list',
+            'stack': 'stack',
+            'queue': 'queue',
+            'tree': 'tree',
+            'graph': 'graph',
+            'node': 'node',
+            'hash table': 'hash',
+            'linked list': 'linked',
+            'binary tree': 'binary',
+            'heap': 'heap',
+            'dictionary': 'dict',
+            'red-black tree': 'RB tree',
+            'trie': 'trie',
+
+            // Algorithms
+            'sort': 'sort',
+            'search': 'search',
+            'loop': 'loop',
+            'iteration': 'iter',
+            'binary search': 'binsrch',
+            'quicksort': 'qsort',
+            'merge sort': 'msort',
+            'recursion': 'recur',
+            'greedy': 'greedy',
+            'divide and conquer': 'D&C',
+            'dynamic programming': 'DP',
+            'backtracking': 'backtr',
+
+            // Programming
+            'variable': 'var',
+            'function': 'fn',
+            'string': 'str',
+            'integer': 'int',
+            'boolean': 'bool',
+            'class': 'class',
+            'object': 'obj',
+            'inheritance': 'inherit',
+            'encapsulation': 'encap',
+            'compiler': 'compile',
+            'interpreter': 'interp',
+            'polymorphism': 'polymor',
+            'closure': 'closure',
+            'lambda': 'λ',
+
+            // Networks
+            'internet': 'net',
+            'web': 'web',
+            'server': 'server',
+            'client': 'client',
+            'router': 'router',
+            'firewall': 'firewal',
+            'bandwidth': 'bandwid',
+            'latency': 'latency',
+            'protocol': 'proto',
+            'packet': 'packet',
+
+            // Databases
+            'table': 'table',
+            'row': 'row',
+            'column': 'col',
+            'data': 'data',
+            'query': 'query',
+            'index': 'index',
+            'join': 'join',
+            'transaction': 'transac',
+            'primary key': 'PK',
+            'foreign key': 'FK',
+            'normalization': 'normal',
+
+            // Security
+            'password': 'passwd',
+            'username': 'user',
+            'login': 'login',
+            'authentication': 'auth',
+            'encryption': 'encrypt',
+            'hash': 'hash',
+            'malware': 'malware',
+            'virus': 'virus',
+            'token': 'token',
+            'cryptography': 'crypto'
+        },
+
+        ambiguousSymbols: []
     }
 };
 
