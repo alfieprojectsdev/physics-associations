@@ -707,9 +707,10 @@ function triggerHaptic(type = 'light') {
 
 function showCategorySelector(placedCategories) {
     elements.categoryOptions.innerHTML = '';
-    
+
+    const domainCategories = getCurrentDomainData().categories;
     placedCategories.forEach(catId => {
-        const category = PhysicsCategories.find(c => c.id === catId);
+        const category = domainCategories.find(c => c.id === catId);
         const btn = document.createElement('button');
         btn.className = 'category-option';
         btn.innerHTML = `${category.icon}<br>${category.name}`;
