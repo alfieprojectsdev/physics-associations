@@ -425,10 +425,12 @@ function startNewGame(level = 1) {
 
 function renderGame() {
     const state = game.getGameState();
-    
+
     // Update header
     elements.level.textContent = state.level;
-    elements.score.textContent = state.score;
+    if (elements.score) {
+        elements.score.textContent = state.score;
+    }
     elements.movesRemaining.textContent = state.movesRemaining;
     elements.stockCount.textContent = state.stockCount;
 
@@ -604,12 +606,12 @@ function renderTableau(tableau, playableCards) {
 
 function renderWaste(waste) {
     elements.wasteSlot.innerHTML = '';
-    
+
     if (!waste) {
         elements.wasteSlot.innerHTML = '<div class="empty-slot">Empty</div>';
         return;
     }
-    
+
     const cardEl = createCardElement(waste);
     cardEl.classList.add('playable');
     cardEl.addEventListener('click', () => handleCardClick(waste));
@@ -765,7 +767,7 @@ function handleSortResult(result) {
 function handleDrawCard() {
     triggerHaptic('light');
     const result = game.drawFromStock();
-    
+
     if (result.success) {
         triggerHaptic('medium');
         showFeedback(result.message, 'info');
