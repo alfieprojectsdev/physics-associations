@@ -965,30 +965,63 @@ function handleShowDomainSelector() {
 
     elements.modalTitle.textContent = 'Choose Your Domain';
 
-    // Build domain options HTML
-    const domainOptions = Object.entries(DomainData).map(([domainKey, domain]) => {
-        const isActive = domainKey === currentDomain;
-        return `
-            <div class="domain-card ${isActive ? 'active' : ''}" onclick="handleDomainSelect('${domainKey}')">
-                <div class="domain-icon-large">${domain.icon}</div>
-                <div class="domain-info">
-                    <h3>${domain.name}</h3>
-                    <p>${domain.description}</p>
-                    <div class="domain-meta">${domain.categories.length} categories</div>
-                </div>
-                ${isActive ? '<div class="domain-badge">Current</div>' : ''}
-            </div>
-        `;
-    }).join('');
+    // Build domain options using safe DOM API
+    const domainContainer = document.createElement('div');
+    domainContainer.className = 'domain-selector-grid';
 
-    elements.modalBody.innerHTML = `
-        <div class="domain-selector-grid">
-            ${domainOptions}
-        </div>
-        <div class="domain-note">
-            <p><strong>Note:</strong> Changing domain will start a new game from Level 1.</p>
-        </div>
-    `;
+    Object.entries(DomainData).forEach(([domainKey, domain]) => {
+        const isActive = domainKey === currentDomain;
+
+        const card = document.createElement('div');
+        card.className = isActive ? 'domain-card active' : 'domain-card';
+        card.addEventListener('click', () => handleDomainSelect(domainKey));
+
+        const iconLarge = document.createElement('div');
+        iconLarge.className = 'domain-icon-large';
+        iconLarge.textContent = domain.icon;
+
+        const info = document.createElement('div');
+        info.className = 'domain-info';
+
+        const name = document.createElement('h3');
+        name.textContent = domain.name;
+
+        const desc = document.createElement('p');
+        desc.textContent = domain.description;
+
+        const meta = document.createElement('div');
+        meta.className = 'domain-meta';
+        meta.textContent = `${domain.categories.length} categories`;
+
+        info.appendChild(name);
+        info.appendChild(desc);
+        info.appendChild(meta);
+
+        card.appendChild(iconLarge);
+        card.appendChild(info);
+
+        if (isActive) {
+            const badge = document.createElement('div');
+            badge.className = 'domain-badge';
+            badge.textContent = 'Current';
+            card.appendChild(badge);
+        }
+
+        domainContainer.appendChild(card);
+    });
+
+    const noteDiv = document.createElement('div');
+    noteDiv.className = 'domain-note';
+    const noteP = document.createElement('p');
+    const noteStrong = document.createElement('strong');
+    noteStrong.textContent = 'Note:';
+    noteP.appendChild(noteStrong);
+    noteP.appendChild(document.createTextNode(' Changing domain will start a new game from Level 1.'));
+    noteDiv.appendChild(noteP);
+
+    elements.modalBody.innerHTML = '';
+    elements.modalBody.appendChild(domainContainer);
+    elements.modalBody.appendChild(noteDiv);
 
     showModal();
 }
@@ -1116,7 +1149,6 @@ window.confirmNewGame = confirmNewGame;
 window.nextLevel = nextLevel;
 window.retryLevel = retryLevel;
 window.showMenuTab = showMenuTab;
-window.handleDomainSelect = handleDomainSelect;
 
 // PWA Install Functions (Phase 5)
 
