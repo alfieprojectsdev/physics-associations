@@ -4,7 +4,21 @@
 .claude/*.md
 .claude/agents/*
 .claude/agents/*.md
-docs/*.md
+docs/visual-first environment specification.md
+docs/UX_COMPARISON.md
+docs/terminal-snapshot.md
+docs/mechanics-first environment specification.md
+docs/Context Handover V6.md
+docs/Context Handover V5.md
+docs/Context Handover V4 - Addendum.md.md
+docs/Context Handover V4.md
+docs/Context Handover V3 - Addendum.md
+docs/Context Handover V3.md
+docs/Context Handover V2.md
+docs/Context Handover V1.md
+docs/claude_code_web-tasks.md
+docs/bridge document.md
+docs/3D_CARD_EFFECTS.md
 test-abbreviations.html
 test-locked-foundations.html
 screenshots/
