@@ -1151,6 +1151,7 @@ function handleDomainSelect(domainKey) {
     const state = game ? game.getGameState() : null;
     if (state && state.gameState === 'playing') {
         if (!confirm(`Switch to ${DomainData[domainKey].name}? Current progress will be lost.`)) {
+            closeModal(); // Close modal if user cancels domain switch
             return;
         }
     }
