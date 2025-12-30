@@ -1,0 +1,61 @@
+[build]
+  # No build command needed (vanilla JS)
+  publish = "."
+  
+[build.environment]
+  NODE_VERSION = "18"
+
+# Redirects and rewrites
+[[redirects]]
+  # Handle about page routing
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  # Fallback for service worker scope
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  conditions = {Role = ["admin"]}
+
+# Headers for PWA and security
+[[headers]]
+  for = "/*"
+  [headers.values]
+    # PWA requirements
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+[[headers]]
+  for = "/service-worker.js"
+  [headers.values]
+    # Service Worker must be served with correct MIME type
+    Content-Type = "application/javascript; charset=utf-8"
+    # Don't cache service worker (allow updates)
+    Cache-Control = "public, max-age=0, must-revalidate"
+    
+[[headers]]
+  for = "/manifest.json"
+  [headers.values]
+    Content-Type = "application/manifest+json; charset=utf-8"
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/icons/*"
+  [headers.values]
+    # Cache icons for 1 year (they're versioned via SW cache name)
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    # Cache JS for 1 hour (allow quick updates)
+    Cache-Control = "public, max-age=3600, must-revalidate"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"

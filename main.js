@@ -1,7 +1,6 @@
 // Main.js - UI Controller for Ground State
 
 let game = null;
-let selectedWordCard = null;
 let currentDisplayMode = displayModes.ABBREVIATED;
 
 // Drag-and-drop state
@@ -68,10 +67,7 @@ const elements = {
     modalOverlay: null,
     modalTitle: null,
     modalBody: null,
-    modalClose: null,
-    categorySelector: null,
-    categoryOptions: null,
-    cancelSort: null
+    modalClose: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -128,9 +124,6 @@ function initializeElements() {
     elements.modalTitle = document.getElementById('modal-title');
     elements.modalBody = document.getElementById('modal-body');
     elements.modalClose = document.getElementById('modal-close');
-    elements.categorySelector = document.getElementById('category-selector');
-    elements.categoryOptions = document.getElementById('category-options');
-    elements.cancelSort = document.getElementById('cancel-sort');
 }
 
 function setupEventListeners() {
@@ -140,7 +133,6 @@ function setupEventListeners() {
     elements.domainBtn.addEventListener('click', handleShowDomainSelector);
     elements.modalClose.addEventListener('click', closeModal);
     elements.modalOverlay.addEventListener('click', closeModal);
-    elements.cancelSort.addEventListener('click', hideCategorySelector);
 
     // Drag-and-drop touch event listeners
     elements.gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -774,22 +766,16 @@ function handleCategoryClick(card) {
 
 function handleWordClick(card) {
     const state = game.getGameState();
-    
+
     if (state.placedCategories.length === 0) {
         triggerHaptic('error');
         showFeedback('Place a category card first!', 'error');
         return;
     }
-    
-    if (state.placedCategories.length === 1) {
-        // Only one category, auto-sort
-        const result = game.sortWord(card.id, state.placedCategories[0]);
-        handleSortResult(result);
-    } else {
-        // Multiple categories, show selector
-        selectedWordCard = card;
-        showCategorySelector(state.placedCategories);
-    }
+
+    // Hint for mobile users to use drag-and-drop
+    triggerHaptic('light');
+    showFeedback('Drag cards to sort them', 'info');
 }
 
 /**
@@ -812,45 +798,6 @@ function triggerHaptic(type = 'light') {
         navigator.vibrate(patterns[type] || 10);
     } catch (e) {
         // Haptics not supported, fail silently
-    }
-}
-
-function showCategorySelector(placedCategories) {
-    elements.categoryOptions.innerHTML = '';
-
-    const domainCategories = getCurrentDomainData().categories;
-    placedCategories.forEach(catId => {
-        const category = domainCategories.find(c => c.id === catId);
-        const btn = document.createElement('button');
-        btn.className = 'category-option';
-        btn.innerHTML = `${category.icon}<br>${category.name}`;
-        btn.addEventListener('click', () => {
-            const result = game.sortWord(selectedWordCard.id, catId);
-            handleSortResult(result);
-            hideCategorySelector();
-        });
-        elements.categoryOptions.appendChild(btn);
-    });
-    
-    elements.categorySelector.classList.remove('hidden');
-}
-
-function hideCategorySelector() {
-    elements.categorySelector.classList.add('hidden');
-    selectedWordCard = null;
-}
-
-function handleSortResult(result) {
-    if (result.success) {
-        triggerHaptic('success');
-        // Show full word in feedback, not abbreviation
-        const fullWord = selectedWordCard.word;
-        showFeedback(`"${fullWord}" sorted!`, 'success');
-        renderGame();
-    } else {
-        triggerHaptic('error');
-        showFeedback(result.message, 'error'); // Already has full word from game logic
-        renderGame(); // Still render to show move count decrease
     }
 }
 
