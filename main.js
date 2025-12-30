@@ -147,6 +147,11 @@ function updateDomainIcon() {
     const domainData = getCurrentDomainData();
     if (elements.domainIcon && domainData) {
         elements.domainIcon.textContent = domainData.icon;
+        // Add dynamic aria-label
+        const btn = elements.domainBtn;
+        if (btn) {
+            btn.setAttribute('aria-label', `Change domain. Current: ${domainData.name}`);
+        }
     }
 }
 
@@ -976,6 +981,16 @@ function handleShowDomainSelector() {
         card.className = isActive ? 'domain-card active' : 'domain-card';
         card.addEventListener('click', () => handleDomainSelect(domainKey));
 
+        // Make domain cards keyboard accessible
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleDomainSelect(domainKey);
+            }
+        });
+
         const iconLarge = document.createElement('div');
         iconLarge.className = 'domain-icon-large';
         iconLarge.textContent = domain.icon;
@@ -1005,6 +1020,13 @@ function handleShowDomainSelector() {
             badge.className = 'domain-badge';
             badge.textContent = 'Current';
             card.appendChild(badge);
+        }
+
+        // Add comprehensive ARIA labels
+        const ariaLabel = `${domain.name}: ${domain.description}. ${domain.categories.length} categories${isActive ? '. Currently selected' : ''}`;
+        card.setAttribute('aria-label', ariaLabel);
+        if (isActive) {
+            card.setAttribute('aria-current', 'true');
         }
 
         domainContainer.appendChild(card);
@@ -1055,6 +1077,9 @@ function handleDomainSelect(domainKey) {
     // Close modal and start new game
     closeModal();
     startNewGame(1);
+
+    // Announce domain switch to screen readers
+    announceToScreenReader(`Switched to ${DomainData[domainKey].name} domain. Starting new game at Level 1.`, 'polite');
 }
 
 function confirmNewGame() {

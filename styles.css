@@ -793,6 +793,11 @@ body {
     box-shadow: 0 2px 8px var(--card-shadow);
 }
 
+.domain-card:focus {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+}
+
 .domain-icon-large {
     font-size: 3rem;
     flex-shrink: 0;
