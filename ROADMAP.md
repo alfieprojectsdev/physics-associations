@@ -132,7 +132,7 @@
 ### Technical Requirements
 
 - ✅ Multi-subject architecture (DomainData system implemented)
-- ⏳ Subject selection UI (infrastructure exists, UI pending)
+- ✅ Subject selection UI (domain selector with localStorage persistence)
 - ✅ Separate dictionaries per subject (vocabulary-dictionary.js)
 - ✅ Unified game engine (domain-agnostic game logic)
 - ⏳ Cross-subject achievements (planned for v3.0)
@@ -216,6 +216,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for:
 - Solitaire-style mechanics (Phases 1-3: limited moves, locked foundations, dead board detection)
 - Multi-domain vocabulary system (Physics, Chemistry, Computer Science)
 - 18 categories with 300+ terms across 3 domains
+- Domain selector UI (modal-based with keyboard accessibility, screen reader support, localStorage persistence)
 - Abbreviated display mode with authentic notation
 - PWA support (offline-capable, installable, GitHub Pages ready)
 - Drag-and-drop gameplay with touch animations

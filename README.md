@@ -40,7 +40,7 @@ Clear the board by sorting every word card into its corresponding category found
 
 - **18 Categories Across 3 Domains** - Physics (6), Chemistry (6), Computer Science (6)
 - **300+ Terms** with progressive difficulty (basic → intermediate → advanced)
-- **Multi-Domain Support** - Play with Physics, Chemistry, or Computer Science vocabularies
+- **Domain Selector** - Easy UI to switch between Physics, Chemistry, and Computer Science with localStorage persistence
 - **Solitaire-Style Mechanics** - Limited moves, locked foundations, dead board detection
 - **Progressive Difficulty** - Levels 1-3 (basic), 4-6 (intermediate), 7+ (advanced)
 - **Move Management** - Strategic gameplay with limited actions
@@ -287,7 +287,6 @@ Level 10+:   Expert mode, 6 categories, minimal margin for error
 
 ### Current Limitations
 - Abbreviated mode only (full words abbreviated to 4-6 characters)
-- No domain switching UI (defaults to Physics; Chemistry and CS accessible via code only)
 - No save/load system (progress resets on refresh)
 - Single-device only (no cloud sync)
 - No sound effects (haptic feedback only)
