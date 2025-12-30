@@ -14,6 +14,11 @@ let touchStartY = 0;
 let currentTouchX = 0;
 let currentTouchY = 0;
 
+// 3D Card Effect state
+let cardRotationX = 0;
+let cardRotationY = 0;
+const MAX_ROTATION = 20; // Maximum rotation angle in degrees
+
 // Performance monitoring for budget devices (Phase 4)
 let lastFrameTime = performance.now();
 let frameCount = 0;
@@ -247,6 +252,51 @@ function addAnimationClass(element, className, cleanup = () => {}) {
     }, 700); // Increased from 600ms to 700ms (shake = 500ms max)
 }
 
+// ===== 3D CARD EFFECTS =====
+
+/**
+ * Calculate 3D rotation based on touch position relative to card center
+ * @param {number} touchX - Current touch X coordinate
+ * @param {number} touchY - Current touch Y coordinate
+ * @param {DOMRect} cardRect - Card's bounding rectangle
+ * @returns {{rotateX: number, rotateY: number, shadowIntensity: string}}
+ */
+function calculate3DRotation(touchX, touchY, cardRect) {
+    // Get touch position relative to card center
+    const cardCenterX = cardRect.left + cardRect.width / 2;
+    const cardCenterY = cardRect.top + cardRect.height / 2;
+
+    const offsetX = touchX - cardCenterX;
+    const offsetY = touchY - cardCenterY;
+
+    // Calculate rotation angles (inverse for natural feel)
+    // Negative Y offset (finger above center) → tilt back (negative rotateX)
+    const rotateX = -(offsetY / cardRect.height) * MAX_ROTATION;
+    // Positive X offset (finger right of center) → tilt right (positive rotateY)
+    const rotateY = (offsetX / cardRect.width) * MAX_ROTATION;
+
+    // Calculate shadow intensity based on total rotation magnitude
+    const rotationMagnitude = Math.sqrt(rotateX * rotateX + rotateY * rotateY);
+    let shadowIntensity = 'light';
+    if (rotationMagnitude > 15) {
+        shadowIntensity = 'heavy';
+    } else if (rotationMagnitude > 8) {
+        shadowIntensity = 'medium';
+    }
+
+    return { rotateX, rotateY, shadowIntensity };
+}
+
+/**
+ * Apply 3D transform to card element
+ * @param {HTMLElement} element - Card element to transform
+ * @param {number} rotateX - Rotation around X axis (degrees)
+ * @param {number} rotateY - Rotation around Y axis (degrees)
+ */
+function apply3DTransform(element, rotateX, rotateY) {
+    element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+}
+
 // Drag-and-drop: Touch start handler
 function handleTouchStart(e) {
   // Only drag word cards that are playable
@@ -292,7 +342,7 @@ function handleTouchMove(e) {
     // Create floating clone (shallow to avoid copying event listeners)
     dragClone = draggedCard.cloneNode(false); // Shallow clone
     dragClone.innerHTML = draggedCard.innerHTML; // Copy visual content only
-    dragClone.classList.add('dragging-clone');
+    dragClone.classList.add('dragging-clone', 'card-dragging');
     dragClone.style.position = 'fixed';
     dragClone.style.pointerEvents = 'none';
     dragClone.style.zIndex = '1000';
@@ -302,12 +352,37 @@ function handleTouchMove(e) {
 
     // Add dragging class to original
     draggedCard.classList.add('dragging');
+
+    // Enhanced haptic feedback for drag start
+    triggerHaptic('light');
   }
 
-  // Update clone position to follow finger
+  // Update clone position and 3D rotation to follow finger
   if (isDragging && dragClone) {
-    dragClone.style.left = (currentTouchX - dragClone.offsetWidth / 2) + 'px';
-    dragClone.style.top = (currentTouchY - dragClone.offsetHeight / 2) + 'px';
+    const cloneX = currentTouchX - dragClone.offsetWidth / 2;
+    const cloneY = currentTouchY - dragClone.offsetHeight / 2;
+
+    dragClone.style.left = cloneX + 'px';
+    dragClone.style.top = cloneY + 'px';
+
+    // Calculate and apply 3D rotation based on touch position
+    const cardRect = dragClone.getBoundingClientRect();
+    const { rotateX, rotateY, shadowIntensity } = calculate3DRotation(
+      currentTouchX,
+      currentTouchY,
+      cardRect
+    );
+
+    // Update global rotation state
+    cardRotationX = rotateX;
+    cardRotationY = rotateY;
+
+    // Apply 3D transform
+    apply3DTransform(dragClone, rotateX, rotateY);
+
+    // Update shadow intensity class
+    dragClone.classList.remove('shadow-light', 'shadow-medium', 'shadow-heavy');
+    dragClone.classList.add(`shadow-${shadowIntensity}`);
   }
 }
 
@@ -351,11 +426,21 @@ function handleTouchEnd(e) {
             GameAnalytics.wordSorted(true, categoryId);
         }
 
-        // Color feedback for visual learners
+        // Color feedback for visual learners + spring animation
         if (dragClone) {
+          dragClone.classList.add('card-returning');
+          // Reset rotation with spring easing
+          apply3DTransform(dragClone, 0, 0);
           dragClone.style.background = 'var(--success)';
           dragClone.style.color = 'white';
           addAnimationClass(dragClone, 'sorted-correct');
+
+          // Add spring bounce for success
+          setTimeout(() => {
+            if (dragClone && dragClone.parentNode) {
+              dragClone.classList.add('card-snap');
+            }
+          }, 100);
         }
       } else {
         triggerHaptic('error');
@@ -367,8 +452,11 @@ function handleTouchEnd(e) {
             GameAnalytics.wordSorted(false, categoryId);
         }
 
-        // Color feedback for visual learners
+        // Color feedback for visual learners + spring return
         if (dragClone) {
+          dragClone.classList.add('card-returning');
+          // Reset rotation with spring easing
+          apply3DTransform(dragClone, 0, 0);
           dragClone.style.background = 'var(--danger)';
           dragClone.style.color = 'white';
           addAnimationClass(dragClone, 'sorted-wrong');
@@ -381,9 +469,11 @@ function handleTouchEnd(e) {
       showFeedback('Sort operation failed', 'error');
     }
   } else {
-    // Snap back animation for invalid drop
+    // Snap back animation for invalid drop with spring easing
     if (dragClone) {
-      dragClone.classList.add('snap-back');
+      dragClone.classList.add('snap-back', 'card-returning');
+      // Reset rotation smoothly
+      apply3DTransform(dragClone, 0, 0);
       triggerHaptic('light');
     }
   }

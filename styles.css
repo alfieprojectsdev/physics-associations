@@ -49,6 +49,8 @@ body {
     padding: var(--spacing);
     gap: var(--spacing);
     background: linear-gradient(180deg, #2d5016 0%, #1a3d0f 100%);
+    perspective: 1000px; /* Enable 3D transforms for cards */
+    transform-style: preserve-3d;
 }
 
 /* ===== HEADER ===== */
@@ -374,11 +376,15 @@ body {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease-out;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), /* Spring easing */
+                box-shadow 0.3s ease-out,
+                filter 0.2s ease-out;
     user-select: none;
     position: relative;
     margin-top: -135%;
     padding: 6px;
+    transform-style: preserve-3d; /* Enable 3D transforms */
+    will-change: transform; /* Performance optimization */
 }
 
 .card:first-child {
@@ -875,6 +881,52 @@ body {
 
 .feedback.info {
     background: var(--primary);
+}
+
+/* ===== 3D CARD EFFECTS ===== */
+
+/* Card being dragged with 3D rotation */
+.card-dragging {
+    z-index: 1000 !important;
+    cursor: grabbing !important;
+    transition: none !important; /* Immediate response during drag */
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4) !important; /* Elevated shadow */
+}
+
+/* Dynamic shadow intensity based on rotation */
+.card-dragging.shadow-light {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25) !important;
+}
+
+.card-dragging.shadow-medium {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+.card-dragging.shadow-heavy {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Spring bounce animation for card snap */
+@keyframes springBounce {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.card-snap {
+    animation: springBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Smooth return animation when drag is released */
+.card-returning {
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.3s ease-out !important;
 }
 
 /* ===== ANIMATIONS ===== */
