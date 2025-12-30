@@ -1,6 +1,6 @@
 # Ground State
 
-A mobile-first category-sorting word game that combines classic solitaire mechanics with **multi-domain STEM terminology**. Sort terms from Physics, Chemistry, and Computer Science into their correct categories before running out of moves!
+A mobile-first category-sorting word game that combines classic solitaire mechanics with **multi-domain STEM terminology**. Sort terms from Physics, Chemistry, Computer Science, Biology, and Mathematics into their correct categories before running out of moves!
 
 ▶ Play here: https://alfieprojectsdev.github.io/physics-associations/
 
@@ -13,7 +13,7 @@ Clear the board by sorting every word card into its corresponding category found
 
 **Setup:**
 - Cards are arranged in a solitaire-style tableau (columns with face-up and face-down cards)
-- **18 categories across 3 domains:** Physics (6), Chemistry (6), Computer Science (6)
+- **30 categories across 5 domains:** Physics (6), Chemistry (6), Computer Science (6), Biology (6), Mathematics (6)
 - Each level contains 3-6 active categories with 4-12 words per category
 - 30% of cards reserved in stock pile for strategic drawing
 
@@ -38,9 +38,9 @@ Clear the board by sorting every word card into its corresponding category found
 
 ## 📱 Features
 
-- **18 Categories Across 3 Domains** - Physics (6), Chemistry (6), Computer Science (6)
-- **300+ Terms** with progressive difficulty (basic → intermediate → advanced)
-- **Domain Selector** - Easy UI to switch between Physics, Chemistry, and Computer Science with localStorage persistence
+- **30 Categories Across 5 Domains** - Physics (6), Chemistry (6), Computer Science (6), Biology (6), Mathematics (6)
+- **500+ Terms** with progressive difficulty (basic → intermediate → advanced)
+- **Domain Selector** - Easy UI to switch between Physics, Chemistry, Computer Science, Biology, and Mathematics with localStorage persistence
 - **Solitaire-Style Mechanics** - Limited moves, locked foundations, dead board detection
 - **Progressive Difficulty** - Levels 1-3 (basic), 4-6 (intermediate), 7+ (advanced)
 - **Move Management** - Strategic gameplay with limited actions
@@ -73,7 +73,7 @@ ground-state/
 ├── index.html              # Main HTML structure
 ├── about.html              # About page (birthday gift story)
 ├── styles.css              # Mobile-first responsive design
-├── vocabulary-dictionary.js # Multi-domain category & word database (Physics, Chemistry, CS)
+├── vocabulary-dictionary.js # Multi-domain category & word database (5 domains)
 ├── game-logic.js          # Associations-style game mechanics
 ├── main.js                # UI controller & event handling
 ├── analytics.js           # GoatCounter analytics wrapper
@@ -133,6 +133,22 @@ ground-state/
 - **Networks:** internet, protocol, TCP, IP, HTTP, DNS, router, packet
 - **Databases:** SQL, query, table, index, key, JOIN, transaction
 - **Security:** encryption, hash, password, firewall, authentication, SSL
+
+**Biology** 🧬 (Life, cells, evolution, and ecosystems)
+- **Cell Biology:** cell, nucleus, membrane, mitochondria, DNA, RNA, ATP, ribosome
+- **Genetics:** gene, allele, chromosome, mutation, genotype, phenotype, meiosis, mitosis
+- **Evolution:** evolution, species, natural selection, adaptation, speciation, fossil
+- **Ecology:** ecosystem, habitat, food chain, symbiosis, biodiversity, biomass
+- **Anatomy:** organ, tissue, heart, brain, nervous, circulatory, homeostasis
+- **Microbiology:** bacteria, virus, pathogen, vaccine, prokaryote, antibiotic
+
+**Mathematics** 📐 (Numbers, equations, shapes, and logic)
+- **Algebra:** variable, equation, polynomial, quadratic, exponent, logarithm
+- **Geometry:** angle, circle, triangle, area, perimeter, π, theorem, congruent
+- **Calculus:** limit, derivative, integral, ∫, d/dx, fundamental theorem
+- **Statistics:** mean, median, probability, distribution, variance, correlation
+- **Trigonometry:** sine, cosine, tangent, θ, radian, unit circle
+- **Logic:** set, union, intersection, ∈, ∀, ∃, proof, implication
 
 ### Scoring System
 
@@ -294,7 +310,7 @@ Level 10+:   Expert mode, 6 categories, minimal margin for error
 ### Planned Features (See ROADMAP.md)
 - **v2.0 (Late January):** Icon + Label display mode
 - **v3.0 (Feb-March):** Classroom features (teacher dashboard, student tracking)
-- **v4.0 (Q2 2026):** Biology and Mathematics vocabularies *(Chemistry and CS already integrated!)*
+- **v4.0 (COMPLETED):** Biology and Mathematics vocabularies *(all 5 domains now integrated!)*
 
 ## 🎨 Design Philosophy
 
@@ -319,13 +335,13 @@ Level 10+:   Expert mode, 6 categories, minimal margin for error
 ## 📚 STEM Education Value
 
 This game serves as a:
-- **Vocabulary Builder** - Reinforces STEM terminology across Physics, Chemistry, and Computer Science
+- **Vocabulary Builder** - Reinforces STEM terminology across Physics, Chemistry, Computer Science, Biology, and Mathematics
 - **Conceptual Organizer** - Groups terms by subdiscipline and domain
 - **Memory Aid** - Active recall through category matching
 - **Study Tool** - Makes review sessions engaging across multiple subjects
 
 Perfect for:
-- High school STEM students (Physics, Chemistry, CS courses)
+- High school STEM students (Physics, Chemistry, CS, Biology, Math courses)
 - College undergrads reviewing for exams
 - Teachers for classroom activities across multiple subjects
 - Lifelong learners exploring science and technology concepts
@@ -333,10 +349,9 @@ Perfect for:
 ## 🤝 Contributing Ideas
 
 Want to extend the game? Try:
-- Adding new domains (Biology, Mathematics)
-- Creating themed levels (Chemistry Week, CS Fundamentals Month)
-- Building a domain-switching UI (currently requires code changes)
-- Implementing cross-domain challenge modes
+- Creating themed levels (Chemistry Week, Biology Unit, Math Challenge Month)
+- Implementing cross-domain challenge modes (mixing terms from multiple domains)
+- Adding custom domain categories (environmental science, astronomy, etc.)
 - Building a word submission system for community terms
 - Implementing difficulty-based scoring multipliers
 

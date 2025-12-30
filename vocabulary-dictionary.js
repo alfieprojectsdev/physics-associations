@@ -10,7 +10,9 @@ const displayModes = {
 const Domains = {
     PHYSICS: 'physics',
     CHEMISTRY: 'chemistry',
-    CS: 'computer-science'
+    CS: 'computer-science',
+    BIOLOGY: 'biology',
+    MATHEMATICS: 'mathematics'
 };
 
 // Domain definitions
@@ -817,6 +819,829 @@ const DomainData = {
         },
 
         ambiguousSymbols: []
+    },
+
+    biology: {
+        name: 'Biology',
+        icon: '🧬',
+        description: 'Life, cells, evolution, and ecosystems',
+
+        categories: [
+            {
+                id: 'cell-biology',
+                name: 'Cell Biology',
+                icon: '🦠',
+                description: 'Cell structure, organelles, membranes'
+            },
+            {
+                id: 'genetics',
+                name: 'Genetics',
+                icon: '🧬',
+                description: 'Heredity, genes, and DNA'
+            },
+            {
+                id: 'evolution',
+                name: 'Evolution',
+                icon: '🦕',
+                description: 'Natural selection and adaptation'
+            },
+            {
+                id: 'ecology',
+                name: 'Ecology',
+                icon: '🌿',
+                description: 'Ecosystems and environments'
+            },
+            {
+                id: 'anatomy',
+                name: 'Anatomy',
+                icon: '🫀',
+                description: 'Body systems and functions'
+            },
+            {
+                id: 'microbiology',
+                name: 'Microbiology',
+                icon: '🦠',
+                description: 'Bacteria, viruses, and microbes'
+            }
+        ],
+
+        words: {
+            'cell-biology': [
+                // Basic terms
+                { word: 'cell', difficulty: 'basic', points: 4 },
+                { word: 'nucleus', difficulty: 'basic', points: 7 },
+                { word: 'membrane', difficulty: 'basic', points: 8 },
+                { word: 'cytoplasm', difficulty: 'basic', points: 9 },
+                { word: 'mitochondria', difficulty: 'basic', points: 12 },
+                { word: 'ribosome', difficulty: 'basic', points: 8 },
+                { word: 'DNA', type: 'acronym', definition: 'Deoxyribonucleic Acid', validCategories: ['cell-biology'], difficulty: 'basic', points: 5 },
+                { word: 'RNA', type: 'acronym', definition: 'Ribonucleic Acid', validCategories: ['cell-biology'], difficulty: 'basic', points: 5 },
+                { word: 'protein', difficulty: 'basic', points: 7 },
+                { word: 'enzyme', difficulty: 'basic', points: 6 },
+                // Intermediate terms
+                { word: 'endoplasmic reticulum', difficulty: 'intermediate', points: 18 },
+                { word: 'golgi apparatus', difficulty: 'intermediate', points: 13 },
+                { word: 'lysosome', difficulty: 'intermediate', points: 8 },
+                { word: 'vacuole', difficulty: 'intermediate', points: 7 },
+                { word: 'chloroplast', difficulty: 'intermediate', points: 11 },
+                { word: 'cell wall', difficulty: 'intermediate', points: 8 },
+                { word: 'ATP', type: 'acronym', definition: 'Adenosine Triphosphate', validCategories: ['cell-biology'], difficulty: 'intermediate', points: 5 },
+                { word: 'chromosome', difficulty: 'intermediate', points: 10 },
+                // Advanced terms
+                { word: 'telomere', difficulty: 'advanced', points: 8 },
+                { word: 'centrosome', difficulty: 'advanced', points: 10 },
+                { word: 'nucleolus', difficulty: 'advanced', points: 9 },
+                { word: 'cristae', difficulty: 'advanced', points: 7 },
+                { word: 'thylakoid', difficulty: 'advanced', points: 9 }
+            ],
+
+            genetics: [
+                // Basic terms
+                { word: 'gene', difficulty: 'basic', points: 4 },
+                { word: 'allele', difficulty: 'basic', points: 6 },
+                { word: 'trait', difficulty: 'basic', points: 5 },
+                { word: 'inherit', difficulty: 'basic', points: 7 },
+                { word: 'dominant', difficulty: 'basic', points: 8 },
+                { word: 'recessive', difficulty: 'basic', points: 9 },
+                { word: 'chromosome', difficulty: 'basic', points: 10 },
+                { word: 'mutation', difficulty: 'basic', points: 8 },
+                { word: 'DNA', type: 'acronym', definition: 'Deoxyribonucleic Acid', validCategories: ['genetics'], difficulty: 'basic', points: 5 },
+                { word: 'RNA', type: 'acronym', definition: 'Ribonucleic Acid', validCategories: ['genetics'], difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'genotype', difficulty: 'intermediate', points: 8 },
+                { word: 'phenotype', difficulty: 'intermediate', points: 9 },
+                { word: 'heterozygous', difficulty: 'intermediate', points: 12 },
+                { word: 'homozygous', difficulty: 'intermediate', points: 10 },
+                { word: 'punnett square', difficulty: 'intermediate', points: 13 },
+                { word: 'crossing over', difficulty: 'intermediate', points: 12 },
+                { word: 'meiosis', difficulty: 'intermediate', points: 7 },
+                { word: 'mitosis', difficulty: 'intermediate', points: 7 },
+                // Advanced terms
+                { word: 'epistasis', difficulty: 'advanced', points: 9 },
+                { word: 'pleiotropy', difficulty: 'advanced', points: 10 },
+                { word: 'linkage', difficulty: 'advanced', points: 7 },
+                { word: 'recombination', difficulty: 'advanced', points: 13 },
+                { word: 'transcription', difficulty: 'advanced', points: 13 },
+                { word: 'translation', difficulty: 'advanced', points: 11 }
+            ],
+
+            evolution: [
+                // Basic terms
+                { word: 'evolution', difficulty: 'basic', points: 9 },
+                { word: 'species', difficulty: 'basic', points: 7 },
+                { word: 'fossil', difficulty: 'basic', points: 6 },
+                { word: 'adapt', difficulty: 'basic', points: 5 },
+                { word: 'natural selection', difficulty: 'basic', points: 16 },
+                { word: 'survival', difficulty: 'basic', points: 8 },
+                { word: 'extinction', difficulty: 'basic', points: 10 },
+                { word: 'ancestor', difficulty: 'basic', points: 8 },
+                { word: 'descent', difficulty: 'basic', points: 7 },
+                // Intermediate terms
+                { word: 'speciation', difficulty: 'intermediate', points: 10 },
+                { word: 'adaptation', difficulty: 'intermediate', points: 10 },
+                { word: 'fitness', difficulty: 'intermediate', points: 7 },
+                { word: 'gene pool', difficulty: 'intermediate', points: 8 },
+                { word: 'genetic drift', difficulty: 'intermediate', points: 12 },
+                { word: 'mutation', difficulty: 'intermediate', points: 8 },
+                { word: 'homology', difficulty: 'intermediate', points: 8 },
+                { word: 'vestigial', difficulty: 'intermediate', points: 9 },
+                // Advanced terms
+                { word: 'allopatric', difficulty: 'advanced', points: 10 },
+                { word: 'sympatric', difficulty: 'advanced', points: 9 },
+                { word: 'convergent evolution', difficulty: 'advanced', points: 18 },
+                { word: 'divergent', difficulty: 'advanced', points: 9 },
+                { word: 'coevolution', difficulty: 'advanced', points: 11 },
+                { word: 'phylogeny', difficulty: 'advanced', points: 9 }
+            ],
+
+            ecology: [
+                // Basic terms
+                { word: 'ecosystem', difficulty: 'basic', points: 9 },
+                { word: 'habitat', difficulty: 'basic', points: 7 },
+                { word: 'niche', difficulty: 'basic', points: 5 },
+                { word: 'food chain', difficulty: 'basic', points: 9 },
+                { word: 'predator', difficulty: 'basic', points: 8 },
+                { word: 'prey', difficulty: 'basic', points: 4 },
+                { word: 'producer', difficulty: 'basic', points: 8 },
+                { word: 'consumer', difficulty: 'basic', points: 8 },
+                { word: 'biome', difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'food web', difficulty: 'intermediate', points: 7 },
+                { word: 'trophic level', difficulty: 'intermediate', points: 12 },
+                { word: 'biomass', difficulty: 'intermediate', points: 7 },
+                { word: 'symbiosis', difficulty: 'intermediate', points: 9 },
+                { word: 'mutualism', difficulty: 'intermediate', points: 9 },
+                { word: 'parasitism', difficulty: 'intermediate', points: 10 },
+                { word: 'commensalism', difficulty: 'intermediate', points: 12 },
+                { word: 'biodiversity', difficulty: 'intermediate', points: 12 },
+                // Advanced terms
+                { word: 'keystone species', difficulty: 'advanced', points: 15 },
+                { word: 'pioneer species', difficulty: 'advanced', points: 14 },
+                { word: 'succession', difficulty: 'advanced', points: 10 },
+                { word: 'eutrophication', difficulty: 'advanced', points: 14 },
+                { word: 'biogeochemical cycle', difficulty: 'advanced', points: 20 },
+                { word: 'carrying capacity', difficulty: 'advanced', points: 16 }
+            ],
+
+            anatomy: [
+                // Basic terms
+                { word: 'organ', difficulty: 'basic', points: 5 },
+                { word: 'tissue', difficulty: 'basic', points: 6 },
+                { word: 'muscle', difficulty: 'basic', points: 6 },
+                { word: 'bone', difficulty: 'basic', points: 4 },
+                { word: 'heart', difficulty: 'basic', points: 5 },
+                { word: 'lung', difficulty: 'basic', points: 4 },
+                { word: 'brain', difficulty: 'basic', points: 5 },
+                { word: 'blood', difficulty: 'basic', points: 5 },
+                { word: 'nerve', difficulty: 'basic', points: 5 },
+                { word: 'skin', difficulty: 'basic', points: 4 },
+                // Intermediate terms
+                { word: 'circulatory', difficulty: 'intermediate', points: 11 },
+                { word: 'respiratory', difficulty: 'intermediate', points: 11 },
+                { word: 'digestive', difficulty: 'intermediate', points: 9 },
+                { word: 'nervous', difficulty: 'intermediate', points: 7 },
+                { word: 'skeletal', difficulty: 'intermediate', points: 8 },
+                { word: 'muscular', difficulty: 'intermediate', points: 8 },
+                { word: 'cardiovascular', difficulty: 'intermediate', points: 14 },
+                { word: 'homeostasis', difficulty: 'intermediate', points: 11 },
+                // Advanced terms
+                { word: 'endocrine', difficulty: 'advanced', points: 9 },
+                { word: 'lymphatic', difficulty: 'advanced', points: 9 },
+                { word: 'integumentary', difficulty: 'advanced', points: 13 },
+                { word: 'neurotransmitter', difficulty: 'advanced', points: 16 },
+                { word: 'hormone', difficulty: 'advanced', points: 7 },
+                { word: 'synapse', difficulty: 'advanced', points: 7 },
+                { word: 'nephron', difficulty: 'advanced', points: 7 },
+                // Acronyms
+                { word: 'RBC', type: 'acronym', definition: 'Red Blood Cell', validCategories: ['anatomy'], difficulty: 'intermediate', points: 5 },
+                { word: 'WBC', type: 'acronym', definition: 'White Blood Cell', validCategories: ['anatomy'], difficulty: 'intermediate', points: 5 },
+                { word: 'CNS', type: 'acronym', definition: 'Central Nervous System', validCategories: ['anatomy'], difficulty: 'intermediate', points: 5 },
+                { word: 'PNS', type: 'acronym', definition: 'Peripheral Nervous System', validCategories: ['anatomy'], difficulty: 'intermediate', points: 5 }
+            ],
+
+            microbiology: [
+                // Basic terms
+                { word: 'bacteria', difficulty: 'basic', points: 8 },
+                { word: 'virus', difficulty: 'basic', points: 5 },
+                { word: 'microbe', difficulty: 'basic', points: 7 },
+                { word: 'germ', difficulty: 'basic', points: 4 },
+                { word: 'pathogen', difficulty: 'basic', points: 8 },
+                { word: 'infection', difficulty: 'basic', points: 9 },
+                { word: 'antibody', difficulty: 'basic', points: 8 },
+                { word: 'vaccine', difficulty: 'basic', points: 7 },
+                { word: 'fungus', difficulty: 'basic', points: 6 },
+                { word: 'yeast', difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'prokaryote', difficulty: 'intermediate', points: 10 },
+                { word: 'eukaryote', difficulty: 'intermediate', points: 9 },
+                { word: 'archaea', difficulty: 'intermediate', points: 7 },
+                { word: 'phage', difficulty: 'intermediate', points: 5 },
+                { word: 'plasmid', difficulty: 'intermediate', points: 7 },
+                { word: 'spore', difficulty: 'intermediate', points: 5 },
+                { word: 'culture', difficulty: 'intermediate', points: 7 },
+                { word: 'colony', difficulty: 'intermediate', points: 6 },
+                { word: 'antibiotic', difficulty: 'intermediate', points: 10 },
+                // Advanced terms
+                { word: 'gram-positive', difficulty: 'advanced', points: 13 },
+                { word: 'gram-negative', difficulty: 'advanced', points: 13 },
+                { word: 'capsid', difficulty: 'advanced', points: 6 },
+                { word: 'lysogenic', difficulty: 'advanced', points: 9 },
+                { word: 'lytic', difficulty: 'advanced', points: 5 },
+                { word: 'prion', difficulty: 'advanced', points: 5 },
+                { word: 'endospore', difficulty: 'advanced', points: 9 },
+                { word: 'conjugation', difficulty: 'advanced', points: 11 },
+                // Scientific names
+                { word: 'E. coli', type: 'symbol', definition: 'Escherichia coli', validCategories: ['microbiology'], difficulty: 'intermediate', points: 7 },
+                { word: 'COVID-19', type: 'symbol', definition: 'Coronavirus Disease 2019', validCategories: ['microbiology'], difficulty: 'basic', points: 8 },
+                { word: 'HIV', type: 'acronym', definition: 'Human Immunodeficiency Virus', validCategories: ['microbiology'], difficulty: 'intermediate', points: 5 }
+            ]
+        },
+
+        abbreviations: {
+            // Cell Biology
+            'cell': 'cell',
+            'nucleus': 'nucleus',
+            'membrane': 'membr.',
+            'cytoplasm': 'cytopla',
+            'mitochondria': 'mito',
+            'ribosome': 'ribosom',
+            'protein': 'protein',
+            'enzyme': 'enzyme',
+            'endoplasmic reticulum': 'ER',
+            'golgi apparatus': 'Golgi',
+            'lysosome': 'lyso',
+            'vacuole': 'vacuole',
+            'chloroplast': 'chloro',
+            'cell wall': 'wall',
+            'chromosome': 'chromo',
+            'telomere': 'telomer',
+            'centrosome': 'centro',
+            'nucleolus': 'nucleol',
+            'cristae': 'cristae',
+            'thylakoid': 'thylak',
+
+            // Genetics
+            'gene': 'gene',
+            'allele': 'allele',
+            'trait': 'trait',
+            'inherit': 'inherit',
+            'dominant': 'dom',
+            'recessive': 'rec',
+            'mutation': 'mutate',
+            'genotype': 'genotyp',
+            'phenotype': 'phenoty',
+            'heterozygous': 'hetero',
+            'homozygous': 'homo',
+            'punnett square': 'Punnett',
+            'crossing over': 'cross.',
+            'meiosis': 'meiosis',
+            'mitosis': 'mitosis',
+            'epistasis': 'epistasis',
+            'pleiotropy': 'pleio',
+            'linkage': 'linkage',
+            'recombination': 'recombi',
+            'transcription': 'transcr',
+            'translation': 'transla',
+
+            // Evolution
+            'evolution': 'evolut',
+            'species': 'species',
+            'fossil': 'fossil',
+            'adapt': 'adapt',
+            'natural selection': 'nat sel',
+            'survival': 'survive',
+            'extinction': 'extinct',
+            'ancestor': 'ancesto',
+            'descent': 'descent',
+            'speciation': 'speciat',
+            'adaptation': 'adaptat',
+            'fitness': 'fitness',
+            'gene pool': 'gene p.',
+            'genetic drift': 'drift',
+            'homology': 'homolog',
+            'vestigial': 'vestig',
+            'allopatric': 'allop',
+            'sympatric': 'symp',
+            'convergent evolution': 'converg',
+            'divergent': 'diverg',
+            'coevolution': 'coevol',
+            'phylogeny': 'phylo',
+
+            // Ecology
+            'ecosystem': 'ecosyst',
+            'habitat': 'habitat',
+            'niche': 'niche',
+            'food chain': 'fd chain',
+            'predator': 'predatr',
+            'prey': 'prey',
+            'producer': 'produce',
+            'consumer': 'consume',
+            'biome': 'biome',
+            'food web': 'fd web',
+            'trophic level': 'trophic',
+            'biomass': 'biomass',
+            'symbiosis': 'symbios',
+            'mutualism': 'mutual',
+            'parasitism': 'parasit',
+            'commensalism': 'commensal',
+            'biodiversity': 'biodiv',
+            'keystone species': 'keystone',
+            'pioneer species': 'pioneer',
+            'succession': 'success',
+            'eutrophication': 'eutro',
+            'biogeochemical cycle': 'biogeo',
+            'carrying capacity': 'carry',
+
+            // Anatomy
+            'organ': 'organ',
+            'tissue': 'tissue',
+            'muscle': 'muscle',
+            'bone': 'bone',
+            'heart': 'heart',
+            'lung': 'lung',
+            'brain': 'brain',
+            'blood': 'blood',
+            'nerve': 'nerve',
+            'skin': 'skin',
+            'circulatory': 'circula',
+            'respiratory': 'respira',
+            'digestive': 'digest',
+            'nervous': 'nervous',
+            'skeletal': 'skeleta',
+            'muscular': 'muscula',
+            'cardiovascular': 'cardio',
+            'homeostasis': 'homeo',
+            'endocrine': 'endocri',
+            'lymphatic': 'lymph',
+            'integumentary': 'integum',
+            'neurotransmitter': 'neurot',
+            'hormone': 'hormone',
+            'synapse': 'synapse',
+            'nephron': 'nephron',
+
+            // Microbiology
+            'bacteria': 'bacteri',
+            'virus': 'virus',
+            'microbe': 'microbe',
+            'germ': 'germ',
+            'pathogen': 'pathogn',
+            'infection': 'infect',
+            'antibody': 'antibod',
+            'vaccine': 'vaccine',
+            'fungus': 'fungus',
+            'yeast': 'yeast',
+            'prokaryote': 'prokary',
+            'eukaryote': 'eukary',
+            'archaea': 'archaea',
+            'phage': 'phage',
+            'plasmid': 'plasmid',
+            'spore': 'spore',
+            'culture': 'culture',
+            'colony': 'colony',
+            'antibiotic': 'antibio',
+            'gram-positive': 'gram+',
+            'gram-negative': 'gram-',
+            'capsid': 'capsid',
+            'lysogenic': 'lysogen',
+            'lytic': 'lytic',
+            'prion': 'prion',
+            'endospore': 'endospo',
+            'conjugation': 'conjuga'
+        },
+
+        ambiguousSymbols: [
+            {
+                word: 'DNA',
+                type: 'acronym',
+                definition: 'Deoxyribonucleic Acid',
+                validCategories: ['cell-biology', 'genetics'],
+                difficulty: 'basic',
+                points: 5
+            },
+            {
+                word: 'mutation',
+                type: 'word',
+                definition: 'Genetic change (genetics) OR Evolution driver (evolution)',
+                validCategories: ['genetics', 'evolution'],
+                difficulty: 'basic',
+                points: 8
+            }
+        ]
+    },
+
+    mathematics: {
+        name: 'Mathematics',
+        icon: '📐',
+        description: 'Numbers, equations, shapes, and logic',
+
+        categories: [
+            {
+                id: 'algebra',
+                name: 'Algebra',
+                icon: '🔢',
+                description: 'Variables, equations, and expressions'
+            },
+            {
+                id: 'geometry',
+                name: 'Geometry',
+                icon: '📐',
+                description: 'Shapes, angles, and space'
+            },
+            {
+                id: 'calculus',
+                name: 'Calculus',
+                icon: '∫',
+                description: 'Limits, derivatives, and integrals'
+            },
+            {
+                id: 'statistics',
+                name: 'Statistics',
+                icon: '📊',
+                description: 'Data analysis and chance'
+            },
+            {
+                id: 'trigonometry',
+                name: 'Trigonometry',
+                icon: '📐',
+                description: 'Triangles and circular functions'
+            },
+            {
+                id: 'logic',
+                name: 'Logic',
+                icon: '💭',
+                description: 'Sets, proofs, and reasoning'
+            }
+        ],
+
+        words: {
+            algebra: [
+                // Basic terms
+                { word: 'variable', difficulty: 'basic', points: 8 },
+                { word: 'equation', difficulty: 'basic', points: 8 },
+                { word: 'solve', difficulty: 'basic', points: 5 },
+                { word: 'exponent', difficulty: 'basic', points: 8 },
+                { word: 'factor', difficulty: 'basic', points: 6 },
+                { word: 'term', difficulty: 'basic', points: 4 },
+                // Intermediate terms
+                { word: 'polynomial', difficulty: 'intermediate', points: 10 },
+                { word: 'quadratic', difficulty: 'intermediate', points: 9 },
+                { word: 'coefficient', difficulty: 'intermediate', points: 11 },
+                { word: 'slope', difficulty: 'intermediate', points: 5 },
+                { word: 'inequality', difficulty: 'intermediate', points: 10 },
+                { word: 'linear', difficulty: 'intermediate', points: 6 },
+                // Advanced terms
+                { word: 'logarithm', difficulty: 'advanced', points: 9 },
+                { word: 'exponential', difficulty: 'advanced', points: 11 },
+                { word: 'asymptote', difficulty: 'advanced', points: 9 },
+                // Symbols
+                { word: 'x', type: 'symbol', definition: 'Variable x', validCategories: ['algebra'], difficulty: 'basic', points: 3 },
+                { word: 'y', type: 'symbol', definition: 'Variable y', validCategories: ['algebra'], difficulty: 'basic', points: 3 },
+                { word: '=', type: 'symbol', definition: 'Equals', validCategories: ['algebra'], difficulty: 'basic', points: 3 },
+                { word: '±', type: 'symbol', definition: 'Plus-minus', validCategories: ['algebra'], difficulty: 'basic', points: 3 },
+                { word: '√', type: 'symbol', definition: 'Square root', validCategories: ['algebra'], difficulty: 'basic', points: 3 },
+                { word: '∞', type: 'symbol', definition: 'Infinity', validCategories: ['algebra'], difficulty: 'intermediate', points: 4 },
+                { word: 'log', type: 'symbol', definition: 'Logarithm', validCategories: ['algebra'], difficulty: 'advanced', points: 5 }
+            ],
+
+            geometry: [
+                // Basic terms
+                { word: 'angle', difficulty: 'basic', points: 5 },
+                { word: 'circle', difficulty: 'basic', points: 6 },
+                { word: 'triangle', difficulty: 'basic', points: 8 },
+                { word: 'square', difficulty: 'basic', points: 6 },
+                { word: 'area', difficulty: 'basic', points: 4 },
+                { word: 'perimeter', difficulty: 'basic', points: 9 },
+                { word: 'line', difficulty: 'basic', points: 4 },
+                { word: 'point', difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'polygon', difficulty: 'intermediate', points: 7 },
+                { word: 'diameter', difficulty: 'intermediate', points: 8 },
+                { word: 'radius', difficulty: 'intermediate', points: 6 },
+                { word: 'circumference', difficulty: 'intermediate', points: 13 },
+                { word: 'volume', difficulty: 'intermediate', points: 6 },
+                { word: 'rhombus', difficulty: 'intermediate', points: 7 },
+                // Advanced terms
+                { word: 'congruent', difficulty: 'advanced', points: 9 },
+                { word: 'pythagorean', difficulty: 'advanced', points: 11 },
+                { word: 'theorem', difficulty: 'advanced', points: 7 },
+                // Symbols
+                { word: 'π', type: 'symbol', definition: 'Pi', validCategories: ['geometry'], difficulty: 'basic', points: 3 },
+                { word: '∠', type: 'symbol', definition: 'Angle', validCategories: ['geometry'], difficulty: 'basic', points: 3 },
+                { word: '°', type: 'symbol', definition: 'Degree', validCategories: ['geometry'], difficulty: 'basic', points: 3 },
+                { word: 'Δ', type: 'symbol', definition: 'Triangle/Delta', validCategories: ['geometry'], difficulty: 'intermediate', points: 4 },
+                { word: '≅', type: 'symbol', definition: 'Congruent', validCategories: ['geometry'], difficulty: 'advanced', points: 4 }
+            ],
+
+            calculus: [
+                // Basic terms
+                { word: 'limit', difficulty: 'basic', points: 5 },
+                { word: 'rate', difficulty: 'basic', points: 4 },
+                { word: 'derivative', difficulty: 'basic', points: 10 },
+                { word: 'integral', difficulty: 'basic', points: 8 },
+                { word: 'function', difficulty: 'basic', points: 8 },
+                { word: 'continuous', difficulty: 'basic', points: 10 },
+                { word: 'slope', difficulty: 'basic', points: 5 },
+                { word: 'change', difficulty: 'basic', points: 6 },
+                // Intermediate terms
+                { word: 'differentiation', difficulty: 'intermediate', points: 15 },
+                { word: 'integration', difficulty: 'intermediate', points: 11 },
+                { word: 'chain rule', difficulty: 'intermediate', points: 9 },
+                { word: 'antiderivative', difficulty: 'intermediate', points: 14 },
+                // Advanced terms
+                { word: 'Taylor series', difficulty: 'advanced', points: 12 },
+                { word: 'convergence', difficulty: 'advanced', points: 11 },
+                // Symbols
+                { word: 'd/dx', type: 'symbol', definition: 'Derivative', validCategories: ['calculus'], difficulty: 'intermediate', points: 6 },
+                { word: '∫', type: 'symbol', definition: 'Integral', validCategories: ['calculus'], difficulty: 'intermediate', points: 4 },
+                { word: '∂', type: 'symbol', definition: 'Partial derivative', validCategories: ['calculus'], difficulty: 'advanced', points: 5 },
+                { word: 'lim', type: 'symbol', definition: 'Limit', validCategories: ['calculus'], difficulty: 'basic', points: 5 }
+            ],
+
+            statistics: [
+                // Basic terms
+                { word: 'mean', difficulty: 'basic', points: 4 },
+                { word: 'median', difficulty: 'basic', points: 6 },
+                { word: 'mode', difficulty: 'basic', points: 4 },
+                { word: 'average', difficulty: 'basic', points: 7 },
+                { word: 'data', difficulty: 'basic', points: 4 },
+                { word: 'chance', difficulty: 'basic', points: 6 },
+                { word: 'graph', difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'probability', difficulty: 'intermediate', points: 11 },
+                { word: 'variance', difficulty: 'intermediate', points: 8 },
+                { word: 'distribution', difficulty: 'intermediate', points: 12 },
+                { word: 'correlation', difficulty: 'intermediate', points: 11 },
+                { word: 'sample', difficulty: 'intermediate', points: 6 },
+                // Advanced terms
+                { word: 'z-score', difficulty: 'advanced', points: 7 },
+                { word: 'regression', difficulty: 'advanced', points: 10 },
+                { word: 'hypothesis', difficulty: 'advanced', points: 10 },
+                // Symbols
+                { word: 'μ', type: 'symbol', definition: 'Population mean (mu)', validCategories: ['statistics'], difficulty: 'intermediate', points: 4 },
+                { word: 'σ', type: 'symbol', definition: 'Standard deviation (sigma)', validCategories: ['statistics'], difficulty: 'intermediate', points: 4 },
+                { word: 'σ²', type: 'symbol', definition: 'Variance', validCategories: ['statistics'], difficulty: 'intermediate', points: 5 },
+                { word: 'P(A)', type: 'symbol', definition: 'Probability of A', validCategories: ['statistics'], difficulty: 'intermediate', points: 6 }
+            ],
+
+            trigonometry: [
+                // Basic terms
+                { word: 'sine', difficulty: 'basic', points: 4 },
+                { word: 'cosine', difficulty: 'basic', points: 6 },
+                { word: 'tangent', difficulty: 'basic', points: 7 },
+                { word: 'angle', difficulty: 'basic', points: 5 },
+                { word: 'radian', difficulty: 'basic', points: 6 },
+                { word: 'hypotenuse', difficulty: 'basic', points: 10 },
+                { word: 'opposite', difficulty: 'basic', points: 8 },
+                { word: 'adjacent', difficulty: 'basic', points: 8 },
+                // Intermediate terms
+                { word: 'secant', difficulty: 'intermediate', points: 6 },
+                { word: 'unit circle', difficulty: 'intermediate', points: 10 },
+                { word: 'period', difficulty: 'intermediate', points: 6 },
+                { word: 'amplitude', difficulty: 'intermediate', points: 9 },
+                // Advanced terms
+                { word: 'law of sines', difficulty: 'advanced', points: 11 },
+                { word: 'law of cosines', difficulty: 'advanced', points: 13 },
+                // Symbols
+                { word: 'sin', type: 'symbol', definition: 'Sine', validCategories: ['trigonometry'], difficulty: 'basic', points: 5 },
+                { word: 'cos', type: 'symbol', definition: 'Cosine', validCategories: ['trigonometry'], difficulty: 'basic', points: 5 },
+                { word: 'tan', type: 'symbol', definition: 'Tangent', validCategories: ['trigonometry'], difficulty: 'basic', points: 5 },
+                { word: 'sec', type: 'symbol', definition: 'Secant', validCategories: ['trigonometry'], difficulty: 'intermediate', points: 5 },
+                { word: 'θ', type: 'symbol', definition: 'Theta (angle)', validCategories: ['trigonometry'], difficulty: 'basic', points: 4 },
+                { word: 'π', type: 'symbol', definition: 'Pi', validCategories: ['trigonometry'], difficulty: 'basic', points: 3 }
+            ],
+
+            logic: [
+                // Basic terms
+                { word: 'set', difficulty: 'basic', points: 3 },
+                { word: 'element', difficulty: 'basic', points: 7 },
+                { word: 'union', difficulty: 'basic', points: 5 },
+                { word: 'intersection', difficulty: 'basic', points: 12 },
+                { word: 'subset', difficulty: 'basic', points: 6 },
+                { word: 'true', difficulty: 'basic', points: 4 },
+                { word: 'false', difficulty: 'basic', points: 5 },
+                { word: 'logic', difficulty: 'basic', points: 5 },
+                // Intermediate terms
+                { word: 'complement', difficulty: 'intermediate', points: 10 },
+                { word: 'cardinality', difficulty: 'intermediate', points: 11 },
+                { word: 'implication', difficulty: 'intermediate', points: 11 },
+                { word: 'venn diagram', difficulty: 'intermediate', points: 11 },
+                // Advanced terms
+                { word: 'bijection', difficulty: 'advanced', points: 9 },
+                { word: 'induction', difficulty: 'advanced', points: 9 },
+                // Symbols
+                { word: '∈', type: 'symbol', definition: 'Element of', validCategories: ['logic'], difficulty: 'basic', points: 3 },
+                { word: '∪', type: 'symbol', definition: 'Union', validCategories: ['logic'], difficulty: 'basic', points: 3 },
+                { word: '∩', type: 'symbol', definition: 'Intersection', validCategories: ['logic'], difficulty: 'basic', points: 3 },
+                { word: '⊂', type: 'symbol', definition: 'Subset', validCategories: ['logic'], difficulty: 'basic', points: 3 },
+                { word: '∅', type: 'symbol', definition: 'Empty set', validCategories: ['logic'], difficulty: 'intermediate', points: 3 },
+                { word: '∀', type: 'symbol', definition: 'For all', validCategories: ['logic'], difficulty: 'intermediate', points: 4 },
+                { word: '∃', type: 'symbol', definition: 'There exists', validCategories: ['logic'], difficulty: 'intermediate', points: 4 },
+                { word: '⇒', type: 'symbol', definition: 'Implies', validCategories: ['logic'], difficulty: 'intermediate', points: 4 }
+            ]
+        },
+
+        abbreviations: {
+            // Algebra
+            'variable': 'var',
+            'equation': 'eq',
+            'solve': 'solve',
+            'add': 'add',
+            'subtract': 'sub',
+            'multiply': 'mult',
+            'divide': 'div',
+            'exponent': 'exp',
+            'factor': 'factor',
+            'term': 'term',
+            'polynomial': 'poly',
+            'quadratic': 'quad',
+            'binomial': 'binom',
+            'coefficient': 'coeff',
+            'linear': 'linear',
+            'slope': 'm',
+            'intercept': 'b',
+            'inequality': 'ineq',
+            'absolute value': '|x|',
+            'discriminant': 'Δ',
+            'conjugate': 'conjug',
+            'logarithm': 'log',
+            'exponential': 'e^x',
+            'asymptote': 'asympt',
+            'rational expression': 'ratio',
+
+            // Geometry
+            'shape': 'shape',
+            'angle': '∠',
+            'line': 'line',
+            'point': 'pt',
+            'circle': 'circle',
+            'triangle': 'Δ',
+            'square': 'square',
+            'rectangle': 'rect',
+            'area': 'A',
+            'perimeter': 'P',
+            'polygon': 'poly',
+            'parallelogram': 'parall',
+            'trapezoid': 'trapez',
+            'rhombus': 'rhomb',
+            'diameter': 'd',
+            'radius': 'r',
+            'circumference': 'C',
+            'volume': 'V',
+            'surface area': 'SA',
+            'congruent': '≅',
+            'similar': '∼',
+            'tangent': 'tan',
+            'secant': 'sec',
+            'chord': 'chord',
+            'arc': 'arc',
+            'pythagorean': 'Pythag',
+            'theorem': 'thm',
+            'proof': 'proof',
+
+            // Calculus
+            'limit': 'lim',
+            'rate': 'rate',
+            'change': 'Δ',
+            'slope': 'm',
+            'derivative': 'd/dx',
+            'integral': '∫',
+            'function': 'f(x)',
+            'graph': 'graph',
+            'continuous': 'contin',
+            'differentiation': 'differ',
+            'integration': 'integr',
+            'chain rule': 'chain',
+            'product rule': 'produc',
+            'quotient rule': 'quotie',
+            'antiderivative': 'antide',
+            'fundamental theorem': 'FTC',
+            'implicit differentiation': 'implic',
+            'partial derivative': '∂',
+            'Taylor series': 'Taylor',
+            'convergence': 'convge',
+
+            // Statistics
+            'mean': 'μ',
+            'median': 'median',
+            'mode': 'mode',
+            'range': 'range',
+            'average': 'avg',
+            'data': 'data',
+            'graph': 'graph',
+            'chart': 'chart',
+            'chance': 'chance',
+            'outcome': 'outcome',
+            'probability': 'P',
+            'variance': 'σ²',
+            'deviation': 'σ',
+            'distribution': 'dist',
+            'correlation': 'r',
+            'sample': 'sample',
+            'population': 'pop',
+            'outlier': 'outlie',
+            'normal distribution': 'normal',
+            'z-score': 'z',
+            'p-value': 'p',
+            'regression': 'regres',
+            'hypothesis': 'H₀',
+            'confidence interval': 'CI',
+            'chi-square': 'χ²',
+
+            // Trigonometry
+            'sine': 'sin',
+            'cosine': 'cos',
+            'tangent': 'tan',
+            'angle': '∠',
+            'degree': '°',
+            'radian': 'rad',
+            'hypotenuse': 'hyp',
+            'opposite': 'opp',
+            'adjacent': 'adj',
+            'right triangle': 'rt Δ',
+            'secant': 'sec',
+            'cosecant': 'csc',
+            'cotangent': 'cot',
+            'unit circle': 'unit ○',
+            'period': 'period',
+            'amplitude': 'A',
+            'frequency': 'f',
+            'phase shift': 'phase',
+            'inverse trig': 'inv',
+            'arctangent': 'arctan',
+            'law of sines': 'sin law',
+            'law of cosines': 'cos law',
+            'polar coordinates': 'polar',
+            'spherical': 'sphere',
+
+            // Logic & Set Theory
+            'set': 'set',
+            'element': 'elem',
+            'union': '∪',
+            'intersection': '∩',
+            'subset': '⊂',
+            'logic': 'logic',
+            'true': 'T',
+            'false': 'F',
+            'and': '∧',
+            'or': '∨',
+            'not': '¬',
+            'complement': 'c',
+            'universal set': 'U',
+            'empty set': '∅',
+            'cardinality': '|A|',
+            'venn diagram': 'Venn',
+            'implication': '⇒',
+            'converse': 'conver',
+            'De Morgan\'s laws': 'De Mrg',
+            'bijection': 'bijec',
+            'injection': 'injec',
+            'surjection': 'surjec',
+            'proof by contradiction': 'contra',
+            'induction': 'induct'
+        },
+
+        ambiguousSymbols: [
+            {
+                word: 'π',
+                type: 'symbol',
+                definition: 'Pi (geometry) OR Pi (trigonometry)',
+                validCategories: ['geometry', 'trigonometry'],
+                difficulty: 'basic',
+                points: 3
+            },
+            {
+                word: 'Δ',
+                type: 'symbol',
+                definition: 'Triangle (geometry) OR Delta/Change (calculus)',
+                validCategories: ['geometry', 'calculus'],
+                difficulty: 'intermediate',
+                points: 4
+            },
+            {
+                word: 'Σ',
+                type: 'symbol',
+                definition: 'Summation (calculus) OR Summation (statistics)',
+                validCategories: ['calculus', 'statistics'],
+                difficulty: 'intermediate',
+                points: 4
+            },
+            {
+                word: 'x',
+                type: 'symbol',
+                definition: 'Variable (algebra) OR Coordinate (geometry)',
+                validCategories: ['algebra', 'geometry'],
+                difficulty: 'basic',
+                points: 3
+            },
+            {
+                word: 'y',
+                type: 'symbol',
+                definition: 'Variable (algebra) OR Coordinate (geometry)',
+                validCategories: ['algebra', 'geometry'],
+                difficulty: 'basic',
+                points: 3
+            }
+        ]
     }
 };
 

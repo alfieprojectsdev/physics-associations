@@ -7,40 +7,68 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>About - Ground State</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ground State">
+    <link rel="apple-touch-icon" href="./icons/icon-152.png">
     <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+        }
         .about-container {
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            color: #1e293b;
         }
         .about-header {
             text-align: center;
             margin-bottom: 32px;
+        }
+        .about-header h1 {
+            color: #6366f1;
         }
         .about-section {
             margin-bottom: 24px;
             line-height: 1.6;
         }
         .about-section h2 {
-            color: var(--primary);
+            color: #1e293b;
             margin-bottom: 12px;
+            font-weight: 600;
         }
         .about-footer {
             margin-top: 40px;
             padding-top: 20px;
-            border-top: 1px solid var(--border-light);
+            border-top: 1px solid #e2e8f0;
             font-size: 0.875rem;
-            color: var(--text-light);
+            color: #64748b;
+        }
+        .about-footer a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+        .about-footer a:hover {
+            text-decoration: underline;
         }
         .back-link {
             display: inline-block;
             margin-top: 20px;
-            color: var(--primary);
+            padding: 12px 24px;
+            background: #6366f1;
+            color: #ffffff;
             text-decoration: none;
             font-weight: 600;
+            border-radius: 8px;
+            transition: background 0.2s;
         }
         .back-link:hover {
-            text-decoration: underline;
+            background: #4f46e5;
         }
     </style>
 </head>
@@ -98,5 +126,18 @@
 
         <a href="index.html" class="back-link">← Back to Game</a>
     </div>
+
+    <script src="analytics.js"></script>
+    <script>
+    // Register service worker for offline support
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./service-worker.js')
+            .catch(err => console.log('Service worker registration failed:', err));
+    }
+    </script>
+
+    <!-- GoatCounter Analytics - Privacy-friendly, no cookies -->
+    <script data-goatcounter="https://ithinkandicode.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
