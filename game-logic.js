@@ -238,26 +238,9 @@ class PhysicsAssociations {
         if (!checkMatch(card, categoryId)) {
             this.movesRemaining--; // Move penalty for wrong guess
 
-            // Get the correct category name(s) for feedback
-            // For ambiguous symbols, show all valid categories
-            const domainData = getCurrentDomainData();
-            let correctCategoryName = '';
-            if (card.categoryId) {
-                const correctCategory = domainData.categories.find(c => c.id === card.categoryId);
-                correctCategoryName = correctCategory.name;
-            } else if (card.validCategories) {
-                const validCatNames = card.validCategories
-                    .map(catId => domainData.categories.find(c => c.id === catId).name)
-                    .join(' or ');
-                correctCategoryName = validCatNames;
-            }
-
-            const attemptedCategory = domainData.categories.find(c => c.id === categoryId);
-
             return {
                 success: false,
-                message: `Wrong! "${card.word}" belongs to ${correctCategoryName}, not ${attemptedCategory.name}. -1 move`,
-                correctCategory: correctCategoryName
+                message: `Wrong category! -1 move`
             };
         }
 
