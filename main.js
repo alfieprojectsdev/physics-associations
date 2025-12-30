@@ -556,11 +556,11 @@ function renderTableau(tableau, playableCards) {
                 // Track card state
                 columnState.push({ id: card.id, faceUp: card.faceUp });
 
-                if ((isTopCard || isBottomCard) && card.faceUp) {
+                if (card.faceUp) {
                     cardEl.classList.add('playable');
                     cardEl.addEventListener('click', () => handleCardClick(card));
                 } else {
-                    // Middle cards: no playable class, no event handlers
+                    // Face-down cards: no playable class, no event handlers
                     cardEl.classList.remove('playable');
                 }
 

@@ -136,14 +136,13 @@ class PhysicsAssociations {
     getPlayableCards() {
         const allPlayable = [];
 
-        // Top card from each column
+        // ALL face-up cards from each column
         this.tableau.forEach((column, colIndex) => {
-            if (column.length > 0) {
-                const topCard = column[column.length - 1];
-                if (topCard.faceUp) {
-                    allPlayable.push({ ...topCard, source: 'tableau', colIndex });
+            column.forEach((card, cardIndex) => {
+                if (card.faceUp) {
+                    allPlayable.push({ ...card, source: 'tableau', colIndex, cardIndex });
                 }
-            }
+            });
         });
 
         // Waste pile card (always prioritized)
@@ -291,7 +290,7 @@ class PhysicsAssociations {
         if (this.stockPile.length === 0) {
             return { success: false, message: 'Stock pile is empty' };
         }
-        
+
         // Strategic tip: Warn if playable cards exist on tableau
         const playableOnBoard = this.getPlayableCards().filter(c => c.source === 'tableau');
         if (playableOnBoard.length > 0 && this.waste) {
@@ -299,35 +298,43 @@ class PhysicsAssociations {
             // This is generally a mistake in Associations
             console.warn('Drawing while playable cards exist - may waste moves');
         }
-        
+
         // If waste already has a card, it gets discarded (no move penalty in true Associations)
         // The move cost is ONLY for the draw action itself
         if (this.waste) {
             // In strict Associations, unplayed cards just cycle back or are lost
             // We'll allow it but the player spent a move to draw something they didn't use
         }
-        
+
         const card = this.stockPile.pop();
         card.faceUp = true;
         this.waste = card;
-        
+
         this.movesRemaining--; // Only the draw costs a move
-        
-        return { 
-            success: true, 
+
+        return {
+            success: true,
             message: `Drew: ${card.type === 'category' ? card.name : card.word}`,
-            card 
+            card
         };
     }
 
     /**
      * Remove a card from its source (tableau or waste)
+     * Uses ID-based lookup for defensive programming against stale indices
      */
     removeCardFromSource(card) {
         if (card.source === 'waste') {
             this.waste = null;
         } else if (card.source === 'tableau') {
-            this.tableau[card.colIndex].pop();
+            // Defensive: Find card by ID instead of trusting cardIndex
+            const column = this.tableau[card.colIndex];
+            const actualIndex = column.findIndex(c => c.id === card.id);
+            if (actualIndex === -1) {
+                console.error('Card not found in column:', card.id);
+                return; // Fail gracefully
+            }
+            column.splice(actualIndex, 1);
         }
     }
 
