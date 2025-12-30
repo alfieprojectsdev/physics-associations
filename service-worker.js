@@ -1,9 +1,9 @@
-const CACHE_NAME = 'ground-state-v1.0.1';
+const CACHE_NAME = 'ground-state-v1.0.2';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
-  './physics-dictionary.js',
+  './vocabulary-dictionary.js',
   './game-logic.js',
   './main.js',
   './analytics.js',
