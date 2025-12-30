@@ -355,6 +355,10 @@ Want to extend the game? Try:
 - Building a word submission system for community terms
 - Implementing difficulty-based scoring multipliers
 
+## 🙏 Credits
+
+3D card rotation and spring animation patterns inspired by [image-card-stack](https://github.com/mirayatech/image-card-stack) by [@mirayatech](https://github.com/mirayatech). Implementation is original, built with vanilla JavaScript.
+
 ## 📝 License
 
 Educational project - free to use, modify, and learn from!
