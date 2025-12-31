@@ -59,13 +59,14 @@
         .back-link {
             display: inline-block;
             margin-top: 20px;
-            padding: 12px 24px;
-            background: #6366f1;
-            color: #ffffff;
+            padding: 12px 24px; /* Larger touch target for mobile */
+            background: var(--primary);
+            color: white;
             text-decoration: none;
-            font-weight: 600;
             border-radius: 8px;
-            transition: background 0.2s;
+            font-weight: bold;
+            text-align: center;
+            width: 100%; /* Full width button on mobile */
         }
         .back-link:hover {
             background: #4f46e5;
@@ -81,13 +82,9 @@
         <div class="about-section">
             <p><strong>A small game that collapsed into existence.</strong></p>
 
-            <p>Ground State began as a response to a very serious problem: someone, somewhere, was trying to think about physics… and an ad popped up.</p>
-
-            <p>This is a word game about sorting physics terms into the places where they feel most at rest. No explosions, no leaderboards, no artificial urgency. Just concepts gently finding where they belong.</p>
-
             <p>The name comes from physics itself. The <em>ground state</em> is the lowest energy configuration of a system — not excited, not dramatic, just stable. Anyone who has stared at a problem set long enough has probably entered it by accident.</p>
 
-            <p>Here, words do the same thing. They wander around, bump into the wrong places, and eventually settle into their proper categories. When that happens, the system gets a little quieter.</p>
+            <p>Ground State is a STEM-focused word association game that combines solitaire mechanics with scientific terminology. Originally built for Physics, it has evolved into a comprehensive review tool for Chemistry, Computer Science, Biology, and Mathematics.</p>
         </div>
 
         <div class="about-section">
@@ -105,21 +102,22 @@
 
             <p>Use it, share it, project it, or let students play with it quietly while pretending to review for a quiz. There are no hidden mechanics, no dark patterns, and no permissions required.</p>
 
-            <p>If it helps even one student feel less intimidated by physics vocabulary, it’s doing its job.</p>
+            <p>If it helps even one student feel less intimidated by physics (or STEM-focused) vocabulary, it’s doing its job.</p>
         </div>
 
         <div class="about-section">
             <h2>Open Source</h2>
             <p>Ground State is open source under the MIT license.</p>
 
-            <p>Fork it. Break it. Turn it into chemistry, biology, linguistics, or something no one has formally named yet. Learning tools should be allowed to escape their original containers.</p>
+            <p>Fork it. Break it. Turn it into linguistics, or something no one has formally named yet. Learning tools should be allowed to escape their original containers.</p>
 
             <p>Entropy will handle the rest.</p>
         </div>
 
         <div class="about-footer">
             <p><strong>Built by:</strong> Alfie</p>
-            <p><strong>Inspired by:</strong> physics teachers who care, and institutions that tolerated too many late nights</p>
+            <p><strong>Inspired by:</strong> physics teachers (one, in particular) who care, and institutions that tolerated too many late nights</p>
+            <p style="font-size: 0.8rem; opacity: 0.7; margin-top: 10px;">Version 1.1.0 "Bhazel Edition" — Refined with ❤️ over 50+ commits.</p>
             <p><strong>Special thanks:</strong> anyone who has ever reached thermal equilibrium with a problem set</p>
             <p style="margin-top: 16px;"><strong>If this helped:</strong> ⭐ <a href="https://github.com/alfieprojectsdev/physics-associations" target="_blank">Star the repo</a> | 📢 Share</p>
         </div>
@@ -132,6 +130,10 @@
     // Register service worker for offline support
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./service-worker.js')
+            .then(reg => {
+                // Check for updates on every page load
+                reg.update();
+            })
             .catch(err => console.log('Service worker registration failed:', err));
     }
     </script>
