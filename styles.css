@@ -26,6 +26,12 @@
     --card-height: 90px;
     --card-radius: 10px;
     --spacing: 12px;
+
+    /* Spring easing curves for natural animations */
+    --spring-smooth: cubic-bezier(0.34, 1.35, 0.64, 1);     /* Gentle bounce */
+    --spring-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);     /* Standard bounce */
+    --spring-snappy: cubic-bezier(0.5, 1.8, 0.5, 1);        /* Quick bounce */
+    --spring-soft: cubic-bezier(0.25, 0.46, 0.45, 0.94);    /* Minimal bounce */
 }
 
 body {
@@ -420,10 +426,10 @@ body {
 
 .card.playable {
     cursor: pointer;
-    transform: scale(1); /* Base for animation */
+    transform: scale(1);
     transition: transform 0.15s ease-out;
     box-shadow: 0 0 0 3px #10b981, 0 4px 8px rgba(0,0,0,0.15);
-    /* Animation applied via @keyframes pulseGlow in Phase 4 animations section */
+    animation: pulseGlowOnce 0.6s ease-out;
 }
 
 .card.playable:active {
@@ -870,12 +876,12 @@ body {
 }
 
 .card-snap {
-    animation: springBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    animation: springBounce 0.4s var(--spring-bouncy);
 }
 
 /* Smooth return animation when drag is released */
 .card-returning {
-    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    transition: transform 0.5s var(--spring-bouncy),
                 box-shadow 0.3s ease-out !important;
 }
 
@@ -919,22 +925,34 @@ body {
         animation: none !important;
     }
 
-    /* Keep essential feedback animations but reduce duration */
+    /* Keep essential feedback animations but reduce duration and remove bounce */
     .card.flipping {
         animation-duration: 0.15s !important;
     }
 
     .card.sorted-correct {
-        animation-duration: 0.25s !important;
+        animation: none !important;
+        /* Static green glow instead of pulsing */
+        box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5) !important;
     }
 
     .card.sorted-wrong {
-        animation-duration: 0.2s !important;
+        animation: none !important;
+        /* Static red glow instead of shaking */
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5) !important;
     }
 
     /* Remove rotation to reduce motion */
     .dragging-clone {
         transform: scale(1.1) !important;
+    }
+
+    .card-returning {
+        transition-duration: 0.1s !important;
+    }
+
+    .card-snap {
+        animation: none !important;
     }
 
     /* Reduce transition speeds */
@@ -1131,7 +1149,7 @@ body {
 }
 
 .card.flipping {
-  animation: flip3d 0.4s ease-in-out;
+  animation: flip3d 0.4s var(--spring-smooth);
 }
 
 /* Stagger animation for initial deal */
@@ -1164,27 +1182,65 @@ body {
   animation: slideToFoundation 0.3s ease-out forwards;
 }
 
-/* Bounce effect on successful sort */
-@keyframes bounce {
+/* Success animation - green pulse with scale (GPU-accelerated) */
+@keyframes successPulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  50% { transform: scale(1.08); }
+}
+
+/* Separate glow animation for pseudo-element */
+@keyframes glowFadeGreen {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .card.sorted-correct {
-  animation: bounce 0.5s ease-out;
+  animation: successPulse 0.5s var(--spring-snappy);
+  position: relative; /* Ensure pseudo-element positioning */
+  will-change: transform;
 }
 
-/* Shake animation on wrong category - increased duration for visibility */
-@keyframes shake {
+.card.sorted-correct::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.6);
+  opacity: 0;
+  animation: glowFadeGreen 0.5s ease-out;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Error animation - shake with red flash (GPU-accelerated) */
+@keyframes errorShake {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-12px); }
-  40% { transform: translateX(12px); }
-  60% { transform: translateX(-12px); }
-  80% { transform: translateX(12px); }
+  25% { transform: translateX(-8px); }
+  75% { transform: translateX(8px); }
+}
+
+/* Red glow animation for pseudo-element */
+@keyframes glowFadeRed {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .card.sorted-wrong {
-  animation: shake 0.5s ease-in-out; /* Increased from 0.3s */
+  animation: errorShake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  position: relative; /* Ensure pseudo-element positioning */
+  will-change: transform;
+}
+
+.card.sorted-wrong::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.5);
+  opacity: 0;
+  animation: glowFadeRed 0.4s ease-out;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Glow/pulse on playable cards - single-play animation (WCAG compliant) */
@@ -1192,13 +1248,6 @@ body {
   0% { box-shadow: 0 0 0 0px var(--success), 0 0 0px rgba(16, 185, 129, 0); }
   50% { box-shadow: 0 0 0 5px var(--success), 0 0 20px rgba(16, 185, 129, 1); }
   100% { box-shadow: 0 0 0 3px var(--success), 0 0 15px rgba(16, 185, 129, 0.75); }
-}
-
-.card.playable {
-  /* Green glow for playable cards */
-  box-shadow: 0 0 0 3px #10b981, 0 4px 8px rgba(0,0,0,0.15);
-  /* Single-play animation when card becomes playable */
-  animation: pulseGlowOnce 0.6s ease-out;
 }
 
 /* Low-performance mode - disable expensive animations */
@@ -1217,6 +1266,18 @@ body {
 }
 
 .low-performance-mode .card.sorted-correct {
+  animation: none;
+  /* Static green glow instead of pulsing */
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.5);
+}
+
+.low-performance-mode .card.sorted-wrong {
+  animation: none;
+  /* Static red glow instead of shaking */
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+}
+
+.low-performance-mode .card-snap {
   animation: none;
 }
 
