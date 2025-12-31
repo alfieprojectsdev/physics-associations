@@ -719,6 +719,11 @@ function createCardElement(card) {
     } else if (card.type === 'word') {
         cardEl.classList.add('word');
 
+        // Add vector class for symbols with vector arrows
+        if (card.hasVector) {
+            cardEl.classList.add('vector');
+        }
+
         // Two-zone layout: header index (top 15%) + body (bottom 85%)
         // Index is ALWAYS visible when stacked, body gets covered
         const displayText = getCardDisplayText(card.word, currentDisplayMode);

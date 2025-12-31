@@ -220,9 +220,9 @@ const PhysicsWords = {
         // Symbols and acronyms
         { word: 'F', type: 'symbol', definition: 'Force', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: 'm', type: 'symbol', definition: 'Mass', validCategories: ['mechanics'], difficulty: 'basic', points: 3 },
-        { word: 'v⃗', type: 'symbol', definition: 'Velocity', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
-        { word: 'a⃗', type: 'symbol', definition: 'Acceleration', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
-        { word: 'p⃗', type: 'symbol', definition: 'Momentum', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
+        { word: 'v', type: 'symbol', definition: 'Velocity', validCategories: ['mechanics'], difficulty: 'basic', points: 4, hasVector: true },
+        { word: 'a', type: 'symbol', definition: 'Acceleration', validCategories: ['mechanics'], difficulty: 'basic', points: 4, hasVector: true },
+        { word: 'p', type: 'symbol', definition: 'Momentum', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5, hasVector: true },
         { word: 'KE', type: 'acronym', definition: 'Kinetic Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: 'PE', type: 'acronym', definition: 'Potential Energy', validCategories: ['mechanics'], difficulty: 'basic', points: 4 },
         { word: '\u03BC', type: 'symbol', definition: 'Coefficient of Friction', validCategories: ['mechanics'], difficulty: 'intermediate', points: 5 },
@@ -273,7 +273,7 @@ const PhysicsWords = {
         { word: 'q', type: 'symbol', definition: 'Charge', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
         { word: 'C', type: 'symbol', definition: 'Capacitance', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
         { word: 'B', type: 'symbol', definition: 'Magnetic Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 },
-        { word: 'E⃗', type: 'symbol', definition: 'Electric Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 6 },
+        { word: 'E', type: 'symbol', definition: 'Electric Field', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 6, hasVector: true },
         { word: 'Ω', type: 'symbol', definition: 'Ohm', validCategories: ['electromagnetism'], difficulty: 'basic', points: 4 },
         { word: 'EMF', type: 'acronym', definition: 'Electromotive Force', validCategories: ['electromagnetism'], difficulty: 'intermediate', points: 5 }
     ],
@@ -410,6 +410,11 @@ function generateLevelDeck(level = 1) {
             } else {
                 // Legacy format: single categoryId for regular words
                 card.categoryId = cat.id;
+            }
+
+            // Preserve hasVector property for vector symbols
+            if (wordData.hasVector) {
+                card.hasVector = true;
             }
 
             deck.wordCards.push(card);

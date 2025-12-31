@@ -517,9 +517,23 @@ body {
     padding: 2px;
 }
 
-/* Show full word on hover/long-press (desktop/mobile) */
-.card.word:hover::after,
-.card.word:active::after {
+/* Vector arrow overlay for symbols with hasVector property */
+.card.vector::after {
+    content: '→';
+    position: absolute;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.6em;
+    font-weight: bold;
+    color: var(--text-dark);
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Show full word on hover/long-press (desktop/mobile) - use ::before to avoid conflict with vector arrow */
+.card.word:hover::before,
+.card.word:active::before {
     content: attr(data-full-word);
     position: absolute;
     bottom: -30px;
