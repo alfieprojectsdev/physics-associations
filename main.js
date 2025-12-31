@@ -16,7 +16,7 @@ let currentTouchY = 0;
 // 3D Card Effect state
 let cardRotationX = 0;
 let cardRotationY = 0;
-const MAX_ROTATION = 20; // Maximum rotation angle in degrees
+const MAX_ROTATION = 12; // Maximum rotation angle in degrees
 
 // Performance monitoring for budget devices (Phase 4)
 let lastFrameTime = performance.now();
@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDomainIcon(); // Set initial domain icon
     startNewGame();
     startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
+    checkBirthdayEasterEgg();
 
     // Register service worker for PWA offline support (Phase 5)
     if ('serviceWorker' in navigator) {
@@ -1259,4 +1260,48 @@ async function promptInstall() {
 // Track if launched from home screen
 if (isInstalledPWA() && typeof GameAnalytics !== 'undefined') {
     trackGameEvent('app-launched-from-homescreen');
+}
+
+// --- Birthday Easter Egg Logic ---
+
+function checkBirthdayEasterEgg() {
+    const today = new Date();
+    // Months are 0-indexed: 0=Jan, 11=Dec. 
+    // Target: Jan 1, 2026
+    const isBirthday = today.getFullYear() === 2026 && 
+                       today.getMonth() === 0 && 
+                       today.getDate() === 1;
+
+    // Consistency check: use the same year in the key
+    const hasSeenGreeting = localStorage.getItem('bhazel_birthday_2026');
+
+    if (isBirthday && !hasSeenGreeting) {
+        showBirthdayMessage();
+        localStorage.setItem('bhazel_birthday_2026', 'true');
+    }
+}
+
+function showBirthdayMessage() {
+    const modalTitle = document.getElementById('modal-title');
+    const modalBody = document.getElementById('modal-body');
+    const modal = document.getElementById('modal');
+
+    if (modalTitle && modalBody && modal) {
+        modalTitle.innerText = "🎂 Happy Birthday, Bhazel!";
+        modalBody.innerHTML = `
+            <div style="text-align: center; padding: 20px;">
+                <p style="font-size: 1.2rem; margin-bottom: 15px;">
+                    Surprise! I've spent the last 50+ commits cleaning up those bugs you saw last week.
+                </p>
+                <p>I hope you enjoy the "Ground State" of your new year!</p>
+                <div style="font-size: 3rem; margin: 15px 0;">🎁⚛️💖</div>
+            </div>
+        `;
+        
+        // Correct way to add the glow: inside the function where 'modal' is defined
+        const content = modal.querySelector('.modal-content');
+        if (content) content.classList.add('birthday-glow');
+        
+        modal.classList.remove('hidden');
+    }
 }
