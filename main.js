@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateDomainIcon(); // Set initial domain icon
     startNewGame();
     startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
+    document.body.classList.add('flowers-not-loaded');
     checkBirthdayEasterEgg();
 
     // Register service worker for PWA offline support (Phase 5)
@@ -1264,15 +1265,20 @@ if (isInstalledPWA() && typeof GameAnalytics !== 'undefined') {
 
 // --- Birthday Easter Egg Logic ---
 
+// =============================================================================
+// BIRTHDAY EASTER EGG WITH BLOOMING FLOWERS EFFECT
+// Integration for physics-associations/main.js
+// =============================================================================
+
+// --- Birthday Easter Egg Logic ---
+
 function checkBirthdayEasterEgg() {
     const today = new Date();
-    // Months are 0-indexed: 0=Jan, 11=Dec. 
     // Target: Jan 1, 2026
     const isBirthday = today.getFullYear() === 2026 && 
                        today.getMonth() === 0 && 
                        today.getDate() === 1;
 
-    // Consistency check: use the same year in the key
     const hasSeenGreeting = localStorage.getItem('bhazel_birthday_2026');
 
     if (isBirthday && !hasSeenGreeting) {
@@ -1288,20 +1294,566 @@ function showBirthdayMessage() {
 
     if (modalTitle && modalBody && modal) {
         modalTitle.innerText = "🎂 Happy Birthday, Bhazel!";
+        
+        // Create birthday message content
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 20px;">
+            <div style="text-align: center; padding: 20px; position: relative; z-index: 10;">
                 <p style="font-size: 1.2rem; margin-bottom: 15px;">
                     Surprise! I've spent the last 50+ commits cleaning up those bugs you saw last week.
                 </p>
                 <p>I hope you enjoy the "Ground State" of your new year!</p>
                 <div style="font-size: 3rem; margin: 15px 0;">🎁⚛️💖</div>
             </div>
+            
+            <!-- Flowers Container -->
+            <div class="birthday-flowers-container"></div>
         `;
         
-        // Correct way to add the glow: inside the function where 'modal' is defined
+        // Add birthday glow effect to modal
         const content = modal.querySelector('.modal-content');
-        if (content) content.classList.add('birthday-glow');
+        if (content) {
+            content.classList.add('birthday-glow');
+            
+            // Initialize flowers animation
+            initBirthdayFlowers(content);
+        }
         
         modal.classList.remove('hidden');
     }
 }
+
+// =============================================================================
+// BLOOMING FLOWERS ANIMATION SYSTEM
+// =============================================================================
+
+function initBirthdayFlowers(container) {
+    // Create flowers container
+    const flowersContainer = container.querySelector('.birthday-flowers-container');
+    if (!flowersContainer) return;
+    
+    // Inject CSS if not already present
+    injectFlowersCSS();
+    
+    // Build flower HTML structure
+    flowersContainer.innerHTML = createFlowersHTML();
+    
+    // Start animation sequence after a brief delay
+    setTimeout(() => {
+        document.body.classList.remove('flowers-not-loaded');
+    }, 100);
+}
+
+function injectFlowersCSS() {
+    // Check if CSS already exists
+    if (document.getElementById('birthday-flowers-styles')) return;
+    
+    const style = document.createElement('style');
+    style.id = 'birthday-flowers-styles';
+    style.textContent = `
+        /* Birthday Flowers Animation Styles */
+        
+        .birthday-flowers-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 180px;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .flowers {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transform: scale(0.7);
+            transform-origin: bottom center;
+        }
+        
+        .flower {
+            position: absolute;
+            bottom: 0;
+            transform-origin: bottom center;
+            z-index: 10;
+        }
+        
+        .flower--1 {
+            left: 15%;
+            animation: moving-flower-1 4s linear infinite;
+        }
+        
+        .flower--2 {
+            left: 50%;
+            animation: moving-flower-2 4s linear infinite;
+        }
+        
+        .flower--3 {
+            left: 75%;
+            animation: moving-flower-3 4s linear infinite;
+        }
+        
+        /* Flower petals container */
+        .flower__leafs {
+            position: relative;
+            animation: blooming-flower 2s backwards;
+        }
+        
+        .flower__leafs--1 { animation-delay: 1.1s; }
+        .flower__leafs--2 { animation-delay: 1.4s; }
+        .flower__leafs--3 { animation-delay: 1.7s; }
+        
+        /* Individual petal */
+        .flower__leaf {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 20px;
+            height: 28px;
+            border-radius: 51% 49% 47% 53% / 44% 45% 55% 69%;
+            background: linear-gradient(to top, #ff69b4, #ffb6d9);
+            transform-origin: bottom center;
+            opacity: 0.9;
+            box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
+        }
+        
+        .flower__leaf--1 {
+            transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg);
+        }
+        
+        .flower__leaf--2 {
+            transform: translate(-50%, -4%) rotateX(40deg);
+        }
+        
+        .flower__leaf--3 {
+            transform: translate(-90%, 0%) rotateY(45deg) rotateX(50deg);
+        }
+        
+        .flower__leaf--4 {
+            width: 20px;
+            height: 20px;
+            transform-origin: bottom left;
+            border-radius: 10px 25px 10px 10px;
+            transform: translate(0%, 18%) rotateX(70deg) rotate(-43deg);
+            background: linear-gradient(to top, #ff1493, #ffb6d9);
+            z-index: 1;
+            opacity: 0.8;
+        }
+        
+        /* Flower center */
+        .flower__white-circle {
+            position: absolute;
+            left: -8px;
+            top: -7px;
+            width: 22px;
+            height: 10px;
+            border-radius: 50%;
+            background: #fff;
+        }
+        
+        .flower__white-circle::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 45%;
+            transform: translate(-50%, -50%);
+            width: 60%;
+            height: 60%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #ffeb12, #ffce00);
+        }
+        
+        /* Flower stem */
+        .flower__line {
+            height: 140px;
+            width: 4px;
+            background: linear-gradient(to left, #000, transparent, rgba(255, 255, 255, 0.2)),
+                        linear-gradient(to top, transparent 10%, #14757a, #39c6d6);
+            box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
+            animation: grow-flower-tree 4s backwards;
+        }
+        
+        .flower--1 .flower__line { animation-delay: 0.3s; }
+        .flower--2 .flower__line { animation-delay: 0.6s; }
+        .flower--3 .flower__line { animation-delay: 0.9s; }
+        
+        /* Stem leaves */
+        .flower__line__leaf {
+            --w: 18px;
+            --h: calc(var(--w) + 5px);
+            position: absolute;
+            top: 20%;
+            left: 90%;
+            width: var(--w);
+            height: var(--h);
+            border-top-right-radius: var(--h);
+            border-bottom-left-radius: var(--h);
+            background: linear-gradient(to top, rgba(20, 117, 122, 0.4), #39c6d6);
+        }
+        
+        .flower__line__leaf--1 {
+            transform: rotate(70deg) rotateY(30deg);
+            animation: blooming-leaf-right 0.8s 1.6s backwards;
+        }
+        
+        .flower__line__leaf--2 {
+            top: 45%;
+            transform: rotate(70deg) rotateY(30deg);
+            animation: blooming-leaf-right 0.8s 1.4s backwards;
+        }
+        
+        .flower__line__leaf--3 {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: var(--h);
+            border-bottom-right-radius: var(--h);
+            left: -460%;
+            top: 12%;
+            transform: rotate(-70deg) rotateY(30deg);
+            animation: blooming-leaf-left 0.8s 1.2s backwards;
+        }
+        
+        .flower__line__leaf--4 {
+            border-top-right-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-left-radius: var(--h);
+            border-bottom-right-radius: var(--h);
+            left: -460%;
+            top: 40%;
+            transform: rotate(-70deg) rotateY(30deg);
+            animation: blooming-leaf-left 0.8s 1s backwards;
+        }
+        
+        /* Sparkles */
+        .flower__light {
+            position: absolute;
+            bottom: 0;
+            width: 2px;
+            height: 2px;
+            background: #fffb00;
+            border-radius: 50%;
+            filter: blur(0.5px);
+            animation: light-ans 4s linear infinite backwards;
+        }
+        
+        .flower__light:nth-child(odd) {
+            background: #23f0ff;
+        }
+        
+        .flower__light--1 { left: -5px; animation-delay: 1s; }
+        .flower__light--2 { left: 7px; animation-delay: 0.5s; }
+        .flower__light--3 { left: -15px; animation-delay: 0.3s; }
+        .flower__light--4 { left: 15px; animation-delay: 0.9s; }
+        .flower__light--5 { left: -2px; animation-delay: 1.5s; }
+        .flower__light--6 { left: -10px; animation-delay: 3s; }
+        .flower__light--7 { left: 7px; animation-delay: 2s; }
+        .flower__light--8 { left: -15px; animation-delay: 3.5s; }
+        
+        /* Ground grass decoration */
+        .flower__grass {
+            --c: #159faa;
+            position: absolute;
+            bottom: 10px;
+            left: -15px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            z-index: 20;
+            transform-origin: bottom center;
+            transform: rotate(-48deg) rotateY(40deg);
+            animation: moving-grass 2s linear infinite;
+        }
+        
+        .flower__grass--1 { animation-delay: 0s; }
+        .flower__grass--2 {
+            left: 5px;
+            bottom: 8px;
+            transform: scale(0.5) rotate(75deg) rotateX(10deg) rotateY(-200deg);
+            opacity: 0.8;
+            z-index: 0;
+            animation: moving-grass--2 1.5s linear infinite;
+        }
+        
+        .flower__grass--top {
+            width: 18px;
+            height: 25px;
+            border-top-right-radius: 100%;
+            border-right: 4px solid var(--c);
+            transform: rotate(-2deg);
+        }
+        
+        .flower__grass--bottom {
+            margin-top: -2px;
+            width: 4px;
+            height: 60px;
+            background: linear-gradient(to top, transparent, var(--c));
+        }
+        
+        /* Growing animation wrapper */
+        .grow-ans {
+            animation: grow-ans 2s var(--d, 0s) backwards;
+        }
+        
+        .growing-grass {
+            animation: growing-grass-ans 1s 2s backwards;
+        }
+        
+        /* Keyframe Animations */
+        
+        @keyframes moving-flower-1 {
+            0%, 100% { transform: rotate(2deg); }
+            50% { transform: rotate(-2deg); }
+        }
+        
+        @keyframes moving-flower-2 {
+            0%, 100% { transform: rotate(18deg); }
+            50% { transform: rotate(14deg); }
+        }
+        
+        @keyframes moving-flower-3 {
+            0%, 100% { transform: rotate(-18deg); }
+            50% { transform: rotate(-20deg) rotateY(-10deg); }
+        }
+        
+        @keyframes blooming-flower {
+            0% { transform: scale(0); }
+        }
+        
+        @keyframes blooming-leaf-right {
+            0% {
+                transform-origin: left;
+                transform: rotate(70deg) rotateY(30deg) scale(0);
+            }
+        }
+        
+        @keyframes blooming-leaf-left {
+            0% {
+                transform-origin: right;
+                transform: rotate(-70deg) rotateY(30deg) scale(0);
+            }
+        }
+        
+        @keyframes grow-flower-tree {
+            0% {
+                height: 0;
+                border-radius: 2px;
+            }
+        }
+        
+        @keyframes light-ans {
+            0% {
+                opacity: 0;
+                transform: translateY(0);
+            }
+            25% {
+                opacity: 1;
+                transform: translateY(-12px) translateX(-5px);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-35px) translateX(5px);
+                filter: blur(0.5px);
+            }
+            75% {
+                transform: translateY(-50px) translateX(-5px);
+                filter: blur(0.5px);
+            }
+            100% {
+                transform: translateY(-75px);
+                opacity: 0;
+                filter: blur(2px);
+            }
+        }
+        
+        @keyframes moving-grass {
+            0%, 100% { transform: rotate(-48deg) rotateY(40deg); }
+            50% { transform: rotate(-50deg) rotateY(40deg); }
+        }
+        
+        @keyframes moving-grass--2 {
+            0%, 100% {
+                transform: scale(0.5) rotate(75deg) rotateX(10deg) rotateY(-200deg);
+            }
+            50% {
+                transform: scale(0.5) rotate(79deg) rotateX(10deg) rotateY(-200deg);
+            }
+        }
+        
+        @keyframes grow-ans {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+        }
+        
+        @keyframes growing-grass-ans {
+            0% { transform: scale(0); }
+        }
+        
+        /* Pause animations initially */
+        .flowers-not-loaded * {
+            animation-play-state: paused !important;
+        }
+        
+        /* Responsive adjustments for smaller modals */
+        @media (max-width: 480px) {
+            .birthday-flowers-container {
+                height: 140px;
+            }
+            
+            .flowers {
+                transform: scale(0.5);
+            }
+            
+            .flower__line {
+                height: 100px;
+            }
+        }
+    `;
+    
+    document.head.appendChild(style);
+}
+
+function createFlowersHTML() {
+    return `
+        <div class="flowers">
+            <!-- Flower 1 -->
+            <div class="flower flower--1">
+                <div class="flower__leafs flower__leafs--1">
+                    <div class="flower__leaf flower__leaf--1"></div>
+                    <div class="flower__leaf flower__leaf--2"></div>
+                    <div class="flower__leaf flower__leaf--3"></div>
+                    <div class="flower__leaf flower__leaf--4"></div>
+                    <div class="flower__white-circle"></div>
+                    
+                    <div class="flower__light flower__light--1"></div>
+                    <div class="flower__light flower__light--2"></div>
+                    <div class="flower__light flower__light--3"></div>
+                    <div class="flower__light flower__light--4"></div>
+                    <div class="flower__light flower__light--5"></div>
+                    <div class="flower__light flower__light--6"></div>
+                    <div class="flower__light flower__light--7"></div>
+                    <div class="flower__light flower__light--8"></div>
+                </div>
+                <div class="flower__line">
+                    <div class="flower__line__leaf flower__line__leaf--1"></div>
+                    <div class="flower__line__leaf flower__line__leaf--2"></div>
+                    <div class="flower__line__leaf flower__line__leaf--3"></div>
+                    <div class="flower__line__leaf flower__line__leaf--4"></div>
+                </div>
+            </div>
+
+            <!-- Flower 2 -->
+            <div class="flower flower--2">
+                <div class="flower__leafs flower__leafs--2">
+                    <div class="flower__leaf flower__leaf--1"></div>
+                    <div class="flower__leaf flower__leaf--2"></div>
+                    <div class="flower__leaf flower__leaf--3"></div>
+                    <div class="flower__leaf flower__leaf--4"></div>
+                    <div class="flower__white-circle"></div>
+                    
+                    <div class="flower__light flower__light--1"></div>
+                    <div class="flower__light flower__light--2"></div>
+                    <div class="flower__light flower__light--3"></div>
+                    <div class="flower__light flower__light--4"></div>
+                    <div class="flower__light flower__light--5"></div>
+                    <div class="flower__light flower__light--6"></div>
+                    <div class="flower__light flower__light--7"></div>
+                    <div class="flower__light flower__light--8"></div>
+                </div>
+                <div class="flower__line">
+                    <div class="flower__line__leaf flower__line__leaf--1"></div>
+                    <div class="flower__line__leaf flower__line__leaf--2"></div>
+                    <div class="flower__line__leaf flower__line__leaf--3"></div>
+                    <div class="flower__line__leaf flower__line__leaf--4"></div>
+                </div>
+            </div>
+
+            <!-- Flower 3 -->
+            <div class="flower flower--3">
+                <div class="flower__leafs flower__leafs--3">
+                    <div class="flower__leaf flower__leaf--1"></div>
+                    <div class="flower__leaf flower__leaf--2"></div>
+                    <div class="flower__leaf flower__leaf--3"></div>
+                    <div class="flower__leaf flower__leaf--4"></div>
+                    <div class="flower__white-circle"></div>
+                    
+                    <div class="flower__light flower__light--1"></div>
+                    <div class="flower__light flower__light--2"></div>
+                    <div class="flower__light flower__light--3"></div>
+                    <div class="flower__light flower__light--4"></div>
+                    <div class="flower__light flower__light--5"></div>
+                    <div class="flower__light flower__light--6"></div>
+                    <div class="flower__light flower__light--7"></div>
+                    <div class="flower__light flower__light--8"></div>
+                </div>
+                <div class="flower__line">
+                    <div class="flower__line__leaf flower__line__leaf--1"></div>
+                    <div class="flower__line__leaf flower__line__leaf--2"></div>
+                    <div class="flower__line__leaf flower__line__leaf--3"></div>
+                    <div class="flower__line__leaf flower__line__leaf--4"></div>
+                </div>
+            </div>
+
+            <!-- Decorative grass -->
+            <div class="growing-grass">
+                <div class="flower__grass flower__grass--1">
+                    <div class="flower__grass--top"></div>
+                    <div class="flower__grass--bottom"></div>
+                </div>
+            </div>
+
+            <div class="growing-grass">
+                <div class="flower__grass flower__grass--2">
+                    <div class="flower__grass--top"></div>
+                    <div class="flower__grass--bottom"></div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// =============================================================================
+// INITIALIZATION
+// Add flowers-not-loaded class to body initially (to be removed after setup)
+// =============================================================================
+
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.body.classList.add('flowers-not-loaded');
+//     checkBirthdayEasterEgg();
+// });
+
+// =============================================================================
+// USAGE INSTRUCTIONS
+// =============================================================================
+
+/*
+INTEGRATION STEPS:
+
+1. Replace the existing checkBirthdayEasterEgg() and showBirthdayMessage() 
+   functions in your main.js with this entire code block.
+
+2. The flower animation will automatically initialize when the birthday modal opens.
+
+3. The flowers are positioned at the bottom of the modal and won't interfere with
+   the message text (which has z-index: 10).
+
+4. Responsive design is built-in - flowers scale down on mobile devices.
+
+5. The animation is performance-optimized and uses CSS animations (GPU-accelerated).
+
+CUSTOMIZATION OPTIONS:
+
+- Adjust flower colors: Change the gradient colors in .flower__leaf background
+- Change animation speed: Modify animation duration values (e.g., 4s, 2s)
+- Add more flowers: Duplicate a .flower block and adjust left position
+- Adjust height: Change .birthday-flowers-container height value
+- Change sparkle colors: Modify .flower__light background colors
+
+PERFORMANCE NOTES:
+
+- Animations are paused initially via .flowers-not-loaded class
+- Removed after 100ms delay to ensure smooth initialization
+- Uses CSS transforms (GPU-accelerated) instead of position changes
+- Compatible with low-performance mode (animations simplified via prefers-reduced-motion)
+*/
