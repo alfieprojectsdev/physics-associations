@@ -1299,9 +1299,10 @@ function showBirthdayMessage() {
         modalBody.innerHTML = `
             <div style="text-align: center; padding: 20px; position: relative; z-index: 10;">
                 <p style="font-size: 1.2rem; margin-bottom: 15px;">
-                    Surprise! I've spent the last 50+ commits cleaning up those bugs you saw last week.
+                    Surprise! I’ve been busy reducing the entropy in this code. 
+            50+ commits later, we've finally reached a stable <b>Ground State</b>.
                 </p>
-                <p>I hope you enjoy the "Ground State" of your new year!</p>
+                <p>I hope your new year is full of high energy and perfect associations!</p>
                 <div style="font-size: 3rem; margin: 15px 0;">🎁⚛️💖</div>
             </div>
             
