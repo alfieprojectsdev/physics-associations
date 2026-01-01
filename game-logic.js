@@ -284,7 +284,7 @@ class GameEngine {
         // Scenario B: Normal draw
         // Strategic tip: Warn if playable cards exist on tableau
         const playableOnBoard = this.getPlayableCards().filter(c => c.source === 'tableau');
-        if (playableOnBoard.length > 0 && this.waste) {
+        if (playableOnBoard.length > 0 && this.waste.length > 0) {
             // Player is drawing while having playable tableau cards AND an unplayed waste card
             // This is generally a mistake in Associations
             console.warn('Drawing while playable cards exist - may waste moves');
@@ -292,7 +292,7 @@ class GameEngine {
 
         // If waste already has a card, it gets discarded (no move penalty in true Associations)
         // The move cost is ONLY for the draw action itself
-        if (this.waste) {
+        if (this.waste.length > 0) {
             // In strict Associations, unplayed cards just cycle back or are lost
             // We'll allow it but the player spent a move to draw something they didn't use
         }
@@ -584,7 +584,7 @@ class GameEngine {
             maxMoves: this.maxMoves,
             tableau: this.tableau,
             stockCount: this.stockPile.length,
-            waste: this.waste,
+            waste: this.waste.length > 0 ? this.waste[this.waste.length - 1] : null,
             foundations: this.foundations,
             placedCategories: this.placedCategories,
             playableCards: this.getPlayableCards(),

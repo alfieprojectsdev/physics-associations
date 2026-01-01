@@ -918,8 +918,8 @@ function handleShowMenu() {
     elements.modalTitle.textContent = 'Settings & Menu';
     elements.modalBody.innerHTML = `
         <div class="menu-tabs">
-            <button class="tab-btn active" onclick="showMenuTab('game', event)">Game</button>
-            <button class="tab-btn" onclick="showMenuTab('settings', event)">Settings</button>
+            <button class="tab-btn active" disabled style="opacity: 0.5; cursor: not-allowed;">Game</button>
+            <button class="tab-btn" disabled style="opacity: 0.5; cursor: not-allowed;">Settings</button>
         </div>
 
         <!-- Game tab (existing content) -->
@@ -970,7 +970,8 @@ function handleShowMenu() {
             </a>
         </div>
 
-        <!-- Settings tab (new) -->
+        <!-- Settings tab (new) - COMMENTED OUT: Non-functional placeholder for v2.0 -->
+        <!--
         <div id="settings-tab" class="tab-content hidden">
             <h3>Display Settings</h3>
 
@@ -1007,9 +1008,11 @@ function handleShowMenu() {
                 <p>Tap any card to see the full word.</p>
             </div>
         </div>
+        -->
     `;
 
-    // Setup radio button listener
+    // Settings tab radio button handlers - COMMENTED OUT: Settings tab disabled
+    /*
     document.querySelectorAll('input[name="display-mode"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (!e.target.disabled) {
@@ -1017,6 +1020,7 @@ function handleShowMenu() {
             }
         });
     });
+    */
 
     showModal();
 }
