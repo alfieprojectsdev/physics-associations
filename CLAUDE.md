@@ -50,7 +50,7 @@ gemini -p "@game-logic.js Explain the move economy and scoring system"
 gemini -p "@main.js @game-logic.js How do the UI layer and game logic layer interact?"
 
 # Analyze game state management
-gemini -p "@game-logic.js Show how the PhysicsAssociations class manages game state and what getGameState() returns"
+gemini -p "@game-logic.js Show how the GameEngine class manages game state and what getGameState() returns"
 
 # Multiple implementation files
 gemini -p "@game-logic.js @physics-dictionary.js How does the game logic layer consume data from the physics dictionary?"
@@ -219,7 +219,7 @@ gemini -p "@screenshots/tableau-cards.png @game-logic.js Does the tableau layout
 ├── index.html              # Main HTML structure, includes all scripts
 ├── styles.css              # Mobile-first responsive design with touch optimizations
 ├── physics-dictionary.js   # Category & word data definitions
-├── game-logic.js          # Core game state & mechanics (PhysicsAssociations class)
+├── game-logic.js          # Core game state & mechanics (GameEngine class)
 ├── main.js                # UI controller & DOM event handling
 └── TOUCH_OPTIMIZATION.md  # Touch interaction implementation details
 ```
@@ -234,7 +234,7 @@ The codebase follows a three-layer separation:
    - `generateLevelDeck()` function: Creates shuffled decks for each level
 
 2. **Game Logic Layer** (`game-logic.js`):
-   - `PhysicsAssociations` class: Core game state machine
+   - `GameEngine` class: Core game state machine
    - Manages tableau (solitaire-style columns), foundations, stock pile, waste pile
    - Pure game logic - no DOM manipulation
    - Exposes `getGameState()` for UI consumption
@@ -265,7 +265,7 @@ The codebase follows a three-layer separation:
 
 ### State Management
 
-Game state is centralized in `PhysicsAssociations` class:
+Game state is centralized in `GameEngine` class:
 
 ```javascript
 {

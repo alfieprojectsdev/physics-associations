@@ -1,5 +1,23 @@
 // Physics Dictionary - Category-Based System for Associations Gameplay
 
+// Difficulty configuration for game balancing
+const DIFFICULTY_CONFIG = {
+    // Level thresholds
+    easyMaxLevel: 3,           // Levels 1-3: basic words only
+    intermediateMaxLevel: 6,   // Levels 4-6: basic + intermediate words
+    // Levels 7+: all difficulties (basic, intermediate, advanced)
+
+    // Category progression (how many categories per level)
+    minCategories: 3,          // Starting number of categories
+    maxCategories: 6,          // Maximum categories in a level
+    categoryIncreaseRate: 3,   // Add 1 category every N levels
+
+    // Words per category progression
+    minWordsPerCategory: 4,    // Starting words per category
+    maxWordsPerCategory: 12    // Maximum words per category
+    // Words scale as: 4 + level (capped at maxWordsPerCategory)
+};
+
 // Display mode constants
 const displayModes = {
   ABBREVIATED: 'abbreviated',
@@ -361,11 +379,14 @@ function getWordPoints(word) {
 
 function generateLevelDeck(level = 1) {
     const deck = { categoryCards: [], wordCards: [] };
-    const numCategories = Math.min(3 + Math.floor(level / 3), 6);
+    const numCategories = Math.min(
+        DIFFICULTY_CONFIG.minCategories + Math.floor(level / DIFFICULTY_CONFIG.categoryIncreaseRate),
+        DIFFICULTY_CONFIG.maxCategories
+    );
     const shuffledCategories = [...PhysicsCategories]
         .sort(() => Math.random() - 0.5)
         .slice(0, numCategories);
-    
+
     shuffledCategories.forEach(cat => {
         deck.categoryCards.push({
             id: `cat-${cat.id}`,
@@ -376,16 +397,19 @@ function generateLevelDeck(level = 1) {
             description: cat.description
         });
     });
-    
+
     shuffledCategories.forEach(cat => {
         const categoryWords = PhysicsWords[cat.id];
-        const wordsPerCategory = Math.min(4 + level, 12);
+        const wordsPerCategory = Math.min(
+            DIFFICULTY_CONFIG.minWordsPerCategory + level,
+            DIFFICULTY_CONFIG.maxWordsPerCategory
+        );
         let availableWords = categoryWords;
-        
-        if (level <= 3) {
+
+        if (level <= DIFFICULTY_CONFIG.easyMaxLevel) {
             availableWords = categoryWords.filter(w => w.difficulty === 'basic');
-        } else if (level <= 6) {
-            availableWords = categoryWords.filter(w => 
+        } else if (level <= DIFFICULTY_CONFIG.intermediateMaxLevel) {
+            availableWords = categoryWords.filter(w =>
                 w.difficulty === 'basic' || w.difficulty === 'intermediate'
             );
         }
@@ -403,13 +427,12 @@ function generateLevelDeck(level = 1) {
                 difficulty: wordData.difficulty
             };
 
-            // Support both legacy single category and new ambiguous symbols
-            if (wordData.validCategories) {
-                // New format: ambiguous symbols with multiple valid categories
+            // Normalize: convert all cards to use validCategories array
+            if (wordData.validCategories && Array.isArray(wordData.validCategories)) {
                 card.validCategories = wordData.validCategories;
             } else {
-                // Legacy format: single categoryId for regular words
-                card.categoryId = cat.id;
+                // Regular words belong to single category - normalize to array
+                card.validCategories = [cat.id];
             }
 
             // Preserve hasVector property for vector symbols
@@ -428,8 +451,11 @@ function generateLevelDeck(level = 1) {
 function getHint(placedCategories, remainingWords) {
     const categoryCounts = {};
     remainingWords.forEach(card => {
-        const cat = card.categoryId;
-        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        // Handle normalized validCategories array
+        const validCats = card.validCategories || [];
+        validCats.forEach(cat => {
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        });
     });
     
     const missingCategories = Object.keys(categoryCounts)

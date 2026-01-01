@@ -36,7 +36,7 @@ console.log('🧪 Running Playable Cards Fix Test Suite\n');
 
 // Test 1: Phase 1 - getPlayableCards() returns all face-up cards
 console.log('Test 1: Phase 1 - getPlayableCards() returns ALL face-up cards');
-const game = new PhysicsAssociations();
+const game = new GameEngine();
 game.startNewGame();
 
 // Get initial playable cards

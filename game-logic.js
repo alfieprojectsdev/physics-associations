@@ -1,49 +1,51 @@
 // Game Logic - Associations-style Category Sorting
 
 /**
- * Validates if a card can be sorted to a target category
- * Supports both legacy single category and new ambiguous symbol arrays
+ * Normalizes card data schema to use validCategories array consistently
+ * Converts legacy categoryId strings to validCategories arrays
  *
  * @param {Object} card - Card object with either categoryId or validCategories
+ * @returns {Object} Normalized card with validCategories array
+ */
+function normalizeCardData(card) {
+    // If card already has validCategories array, return as-is
+    if (card.validCategories && Array.isArray(card.validCategories)) {
+        return card;
+    }
+
+    // Convert legacy categoryId string to validCategories array
+    if (card.categoryId && typeof card.categoryId === 'string') {
+        card.validCategories = [card.categoryId];
+        delete card.categoryId;
+    }
+
+    return card;
+}
+
+/**
+ * Validates if a card can be sorted to a target category
+ * Uses normalized validCategories array only
+ *
+ * @param {Object} card - Card object with validCategories array
  * @param {string} targetCategory - Category ID to validate against
  * @returns {boolean} True if card belongs to targetCategory
  */
 function checkMatch(card, targetCategory) {
-    // Legacy support: words with single categoryId property
-    if (card.categoryId && card.categoryId === targetCategory) {
-        return true;
-    }
-
-    // New support: ambiguous symbols/acronyms with validCategories array
-    if (card.validCategories && card.validCategories.includes(targetCategory)) {
-        return true;
-    }
-
-    return false;
+    return card.validCategories && card.validCategories.includes(targetCategory);
 }
 
 /**
  * Gets valid category IDs for a card
- * Supports both legacy single category and new ambiguous symbol arrays
+ * Uses normalized validCategories array only
  *
- * @param {Object} card - Card object with either categoryId or validCategories
+ * @param {Object} card - Card object with validCategories array
  * @returns {Array<string>} Array of category IDs the card belongs to
  */
 function getValidCategories(card) {
-    // Legacy support: single categoryId becomes single-element array
-    if (card.categoryId) {
-        return [card.categoryId];
-    }
-
-    // New support: ambiguous symbols with validCategories array
-    if (card.validCategories && Array.isArray(card.validCategories)) {
-        return card.validCategories;
-    }
-
-    return [];
+    return card.validCategories || [];
 }
 
-class PhysicsAssociations {
+class GameEngine {
     constructor() {
         this.level = 1;
         this.maxMoves = 0;
@@ -53,7 +55,7 @@ class PhysicsAssociations {
         // Board layout (similar to solitaire spread)
         this.tableau = []; // Face-up and face-down cards in columns
         this.stockPile = []; // Draw pile
-        this.waste = null; // Current drawn card
+        this.waste = []; // Waste pile stack (array, not single card)
         
         // Foundation stacks (category sorting area)
         this.foundations = {}; // { categoryId: [sorted word cards] }
@@ -77,7 +79,7 @@ class PhysicsAssociations {
         this.score = 0;
         this.foundations = {};
         this.placedCategories = [];
-        this.waste = null;
+        this.waste = [];
         
         // Create tableau layout (5 columns)
         this.createTableauLayout(deck);
@@ -146,8 +148,9 @@ class PhysicsAssociations {
         });
 
         // Waste pile card (always prioritized)
-        if (this.waste && this.waste.faceUp) {
-            allPlayable.unshift({ ...this.waste, source: 'waste' }); // Add to front
+        if (this.waste.length > 0) {
+            const topWaste = this.waste[this.waste.length - 1];  // Get top of stack
+            allPlayable.unshift({ ...topWaste, source: 'waste' }); // Add to front
         }
 
         // Phase 2: Limit to 4 exposed cards for spatial constraint
@@ -270,10 +273,15 @@ class PhysicsAssociations {
      * In Associations: Drawing is only allowed when no other valid moves exist
      */
     drawFromStock() {
+        // Scenario A: Stockpile is empty, trigger Recycle
         if (this.stockPile.length === 0) {
-            return { success: false, message: 'Stock pile is empty' };
+            if (this.waste.length === 0) {
+                return { success: false, message: 'No more cards to recycle!' };
+            }
+            return this.recycleWaste();
         }
 
+        // Scenario B: Normal draw
         // Strategic tip: Warn if playable cards exist on tableau
         const playableOnBoard = this.getPlayableCards().filter(c => c.source === 'tableau');
         if (playableOnBoard.length > 0 && this.waste) {
@@ -291,7 +299,7 @@ class PhysicsAssociations {
 
         const card = this.stockPile.pop();
         card.faceUp = true;
-        this.waste = card;
+        this.waste.push(card);
 
         this.movesRemaining--; // Only the draw costs a move
 
@@ -303,12 +311,57 @@ class PhysicsAssociations {
     }
 
     /**
+     * Recycle waste pile back to stockpile (Windows Solitaire-style)
+     * Reverses the waste pile to maintain card order when popping
+     */
+    recycleWaste() {
+        // Reverse the waste so the order is maintained when popped from stockpile
+        // and hide the cards again
+        this.stockPile = this.waste.reverse().map(card => ({
+            ...card,
+            faceUp: false
+        }));
+
+        this.waste = []; // Clear waste pile
+        this.movesRemaining--; // Recycling costs a move
+
+        return {
+            success: true,
+            message: 'Stockpile recycled!',
+            stockCount: this.stockPile.length
+        };
+    }
+
+    /**
+     * Move card between tableau columns (Windows Solitaire "Free Move" mechanic)
+     * Allows players to move blocking cards to uncover category cards beneath
+     */
+    moveBetweenColumns(fromColIndex, toColIndex) {
+        const fromCol = this.tableau[fromColIndex];
+        const toCol = this.tableau[toColIndex];
+
+        if (fromCol.length === 0) {
+            return { success: false, message: 'No cards to move from source column' };
+        }
+
+        const card = fromCol[fromCol.length - 1];
+
+        // Move top card from source to destination
+        toCol.push(fromCol.pop());
+
+        this.movesRemaining--;
+        this.revealCards(); // Reveal newly exposed cards
+
+        return { success: true, message: 'Card moved between columns', card };
+    }
+
+    /**
      * Remove a card from its source (tableau or waste)
      * Uses ID-based lookup for defensive programming against stale indices
      */
     removeCardFromSource(card) {
         if (card.source === 'waste') {
-            this.waste = null;
+            this.waste.pop();
         } else if (card.source === 'tableau') {
             // Defensive: Find card by ID instead of trusting cardIndex
             const column = this.tableau[card.colIndex];

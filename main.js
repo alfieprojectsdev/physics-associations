@@ -3,6 +3,14 @@
 let game = null;
 let currentDisplayMode = displayModes.ABBREVIATED;
 
+// Helper: Get coordinates from either touch or mouse event
+function getEventCoordinates(e) {
+    if (e.touches && e.touches[0]) {
+        return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+    }
+    return { x: e.clientX, y: e.clientY };
+}
+
 // Drag-and-drop state
 let isDragging = false;
 let draggedCard = null;
@@ -140,6 +148,11 @@ function setupEventListeners() {
     elements.gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
     elements.gameBoard.addEventListener('touchmove', handleTouchMove, { passive: false });
     elements.gameBoard.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    // Mouse events (desktop/touchpad support)
+    elements.gameBoard.addEventListener('mousedown', handleTouchStart);
+    elements.gameBoard.addEventListener('mousemove', handleTouchMove);
+    elements.gameBoard.addEventListener('mouseup', handleTouchEnd);
 }
 
 function updateDomainIcon() {
@@ -300,12 +313,12 @@ function handleTouchStart(e) {
   // Prevent default to avoid scrolling while dragging
   e.preventDefault();
 
-  // Get touch coordinates
-  const touch = e.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-  currentTouchX = touch.clientX;
-  currentTouchY = touch.clientY;
+  // Get coordinates (works with both touch and mouse)
+  const coords = getEventCoordinates(e);
+  touchStartX = coords.x;
+  touchStartY = coords.y;
+  currentTouchX = coords.x;
+  currentTouchY = coords.y;
 
   // Store reference to dragged card
   draggedCard = cardEl;
@@ -318,11 +331,10 @@ function handleTouchStart(e) {
 function handleTouchMove(e) {
   if (!draggedCard) return;
 
-  e.preventDefault();
-
-  const touch = e.touches[0];
-  currentTouchX = touch.clientX;
-  currentTouchY = touch.clientY;
+  // Get coordinates (works with both touch and mouse)
+  const coords = getEventCoordinates(e);
+  currentTouchX = coords.x;
+  currentTouchY = coords.y;
 
   // Calculate distance moved
   const deltaX = Math.abs(currentTouchX - touchStartX);
@@ -332,6 +344,7 @@ function handleTouchMove(e) {
   // Start drag if moved > 10px (prevents accidental drags on taps)
   if (!isDragging && distance > 10) {
     isDragging = true;
+
 
     // Create floating clone (shallow to avoid copying event listeners)
     dragClone = draggedCard.cloneNode(false); // Shallow clone
@@ -349,6 +362,11 @@ function handleTouchMove(e) {
 
     // Enhanced haptic feedback for drag start
     triggerHaptic('light');
+  }
+
+  // Prevent scrolling only when actively dragging
+  if (isDragging) {
+    e.preventDefault();
   }
 
   // Update clone position and 3D rotation to follow finger
@@ -494,7 +512,7 @@ function handleTouchEnd(e) {
 }
 
 function startNewGame(level = 1) {
-    game = new PhysicsAssociations();
+    game = new GameEngine();
     game.initLevel(level);
     isInitialDeal = true; // Reset for stagger animation (Phase 4)
     previousFoundationCounts = {}; // Reset foundation tracking
@@ -900,8 +918,8 @@ function handleShowMenu() {
     elements.modalTitle.textContent = 'Settings & Menu';
     elements.modalBody.innerHTML = `
         <div class="menu-tabs">
-            <button class="tab-btn active" onclick="showMenuTab('game')">Game</button>
-            <button class="tab-btn" onclick="showMenuTab('settings')">Settings</button>
+            <button class="tab-btn active" onclick="showMenuTab('game', event)">Game</button>
+            <button class="tab-btn" onclick="showMenuTab('settings', event)">Settings</button>
         </div>
 
         <!-- Game tab (existing content) -->
@@ -1003,12 +1021,12 @@ function handleShowMenu() {
     showModal();
 }
 
-function showMenuTab(tab) {
+function showMenuTab(tab, evt) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
 
     document.getElementById(`${tab}-tab`).classList.remove('hidden');
-    event.target.classList.add('active');
+    evt.target.classList.add('active');
 }
 
 function handleShowDomainSelector() {
@@ -1202,17 +1220,23 @@ function closeModal() {
 }
 
 function showFeedback(message, type = 'info') {
-    const feedback = document.createElement('div');
-    feedback.className = `feedback ${type}`;
-    feedback.textContent = message;
-    
-    document.body.appendChild(feedback);
-    
+    const feltMsg = document.getElementById('felt-message');
+    if (!feltMsg) return;
+
+    // Reset animation if it's already running
+    feltMsg.classList.remove('active');
+
+    // Tiny timeout to trigger the transition again
     setTimeout(() => {
-        feedback.style.opacity = '0';
-        feedback.style.transition = 'opacity 0.3s';
-        setTimeout(() => feedback.remove(), 300);
-    }, 2000);
+        feltMsg.textContent = message;
+        feltMsg.classList.add('active');
+
+        // Hide after 2 seconds
+        if (window.feltTimer) clearTimeout(window.feltTimer);
+        window.feltTimer = setTimeout(() => {
+            feltMsg.classList.remove('active');
+        }, 2000);
+    }, 50);
 }
 
 // Make functions globally accessible
@@ -1275,8 +1299,8 @@ if (isInstalledPWA() && typeof GameAnalytics !== 'undefined') {
 function checkBirthdayEasterEgg() {
     const today = new Date();
     // Target: Jan 1, 2026
-    const isBirthday = today.getFullYear() === 2026 && 
-                       today.getMonth() === 0 && 
+    const isBirthday = today.getFullYear() === 2026 &&
+                       today.getMonth() === 0 &&
                        today.getDate() === 1;
 
     const hasSeenGreeting = localStorage.getItem('bhazel_birthday_2026');
@@ -1293,32 +1317,33 @@ function showBirthdayMessage() {
     const modal = document.getElementById('modal');
 
     if (modalTitle && modalBody && modal) {
-        modalTitle.innerText = "🎂 Happy Birthday, Bhazel!";
-        
-        // Create birthday message content
+        modalTitle.innerHTML = "🎂 Happy Birthday, Bhazel!";
+
+        // Create birthday message content with better spacing
         modalBody.innerHTML = `
-            <div style="text-align: center; padding: 20px; position: relative; z-index: 10;">
-                <p style="font-size: 1.2rem; margin-bottom: 15px;">
-                    Surprise! I’ve been busy reducing the entropy in this code. 
-            50+ commits later, we've finally reached a stable <b>Ground State</b>.
+            <div style="text-align: center; padding: 20px 20px 200px 20px; position: relative; z-index: 10;">
+                <p style="font-size: 1.2rem; margin-bottom: 15px; line-height: 1.6;">
+                    Surprise! I’ve been busy reducing the entropy in this code. <br>
+                    50+ commits later, we've finally reached a stable <b>Ground State</b>.
                 </p>
-                <p>I hope your new year is full of high energy and perfect associations!</p>
-                <div style="font-size: 3rem; margin: 15px 0;">🎁⚛️💖</div>
+                <p style="margin-bottom: 20px; line-height: 1.6;">I hope your new year is full of high energy and perfect associations!</p>
+                <div style="font-size: 3rem; margin: 15px 0; animation: bounceEmojis 2s ease-in-out infinite;">🎁⚛️💖</div>
             </div>
-            
+
             <!-- Flowers Container -->
             <div class="birthday-flowers-container"></div>
         `;
-        
+
         // Add birthday glow effect to modal
         const content = modal.querySelector('.modal-content');
         if (content) {
             content.classList.add('birthday-glow');
-            
+            content.style.overflow = 'hidden'; // Prevent flowers from escaping
+
             // Initialize flowers animation
             initBirthdayFlowers(content);
         }
-        
+
         modal.classList.remove('hidden');
     }
 }
@@ -1347,63 +1372,64 @@ function initBirthdayFlowers(container) {
 function injectFlowersCSS() {
     // Check if CSS already exists
     if (document.getElementById('birthday-flowers-styles')) return;
-    
+
     const style = document.createElement('style');
     style.id = 'birthday-flowers-styles';
     style.textContent = `
         /* Birthday Flowers Animation Styles */
-        
+
         .birthday-flowers-container {
             position: absolute;
             bottom: 0;
             left: 0;
             right: 0;
-            height: 180px;
+            height: 220px;
             overflow: hidden;
             pointer-events: none;
             z-index: 1;
         }
-        
+
         .flowers {
             position: relative;
             width: 100%;
             height: 100%;
-            transform: scale(0.7);
+            transform: scale(0.8);
             transform-origin: bottom center;
         }
-        
+
         .flower {
             position: absolute;
             bottom: 0;
             transform-origin: bottom center;
             z-index: 10;
         }
-        
+
         .flower--1 {
-            left: 15%;
+            left: 10%;
             animation: moving-flower-1 4s linear infinite;
         }
-        
+
         .flower--2 {
             left: 50%;
+            transform: translateX(-50%);
             animation: moving-flower-2 4s linear infinite;
         }
-        
+
         .flower--3 {
-            left: 75%;
+            left: 85%;
             animation: moving-flower-3 4s linear infinite;
         }
-        
+
         /* Flower petals container */
         .flower__leafs {
             position: relative;
             animation: blooming-flower 2s backwards;
         }
-        
+
         .flower__leafs--1 { animation-delay: 1.1s; }
         .flower__leafs--2 { animation-delay: 1.4s; }
         .flower__leafs--3 { animation-delay: 1.7s; }
-        
+
         /* Individual petal */
         .flower__leaf {
             position: absolute;
@@ -1417,19 +1443,19 @@ function injectFlowersCSS() {
             opacity: 0.9;
             box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.5);
         }
-        
+
         .flower__leaf--1 {
             transform: translate(-10%, 1%) rotateY(40deg) rotateX(-50deg);
         }
-        
+
         .flower__leaf--2 {
             transform: translate(-50%, -4%) rotateX(40deg);
         }
-        
+
         .flower__leaf--3 {
             transform: translate(-90%, 0%) rotateY(45deg) rotateX(50deg);
         }
-        
+
         .flower__leaf--4 {
             width: 20px;
             height: 20px;
@@ -1440,7 +1466,7 @@ function injectFlowersCSS() {
             z-index: 1;
             opacity: 0.8;
         }
-        
+
         /* Flower center */
         .flower__white-circle {
             position: absolute;
@@ -1451,7 +1477,7 @@ function injectFlowersCSS() {
             border-radius: 50%;
             background: #fff;
         }
-        
+
         .flower__white-circle::after {
             content: "";
             position: absolute;
@@ -1463,21 +1489,21 @@ function injectFlowersCSS() {
             border-radius: inherit;
             background: linear-gradient(90deg, #ffeb12, #ffce00);
         }
-        
+
         /* Flower stem */
         .flower__line {
-            height: 140px;
+            height: 160px;
             width: 4px;
             background: linear-gradient(to left, #000, transparent, rgba(255, 255, 255, 0.2)),
-                        linear-gradient(to top, transparent 10%, #14757a, #39c6d6);
+                        linear-gradient(to top, transparent 10%, #2d5016, #4a7c2f);
             box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.5);
             animation: grow-flower-tree 4s backwards;
         }
-        
+
         .flower--1 .flower__line { animation-delay: 0.3s; }
         .flower--2 .flower__line { animation-delay: 0.6s; }
         .flower--3 .flower__line { animation-delay: 0.9s; }
-        
+
         /* Stem leaves */
         .flower__line__leaf {
             --w: 18px;
@@ -1489,20 +1515,20 @@ function injectFlowersCSS() {
             height: var(--h);
             border-top-right-radius: var(--h);
             border-bottom-left-radius: var(--h);
-            background: linear-gradient(to top, rgba(20, 117, 122, 0.4), #39c6d6);
+            background: linear-gradient(to top, rgba(45, 80, 22, 0.4), #4a7c2f);
         }
-        
+
         .flower__line__leaf--1 {
             transform: rotate(70deg) rotateY(30deg);
             animation: blooming-leaf-right 0.8s 1.6s backwards;
         }
-        
+
         .flower__line__leaf--2 {
             top: 45%;
             transform: rotate(70deg) rotateY(30deg);
             animation: blooming-leaf-right 0.8s 1.4s backwards;
         }
-        
+
         .flower__line__leaf--3 {
             border-top-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -1513,7 +1539,7 @@ function injectFlowersCSS() {
             transform: rotate(-70deg) rotateY(30deg);
             animation: blooming-leaf-left 0.8s 1.2s backwards;
         }
-        
+
         .flower__line__leaf--4 {
             border-top-right-radius: 0;
             border-bottom-left-radius: 0;
@@ -1524,23 +1550,25 @@ function injectFlowersCSS() {
             transform: rotate(-70deg) rotateY(30deg);
             animation: blooming-leaf-left 0.8s 1s backwards;
         }
-        
+
         /* Sparkles */
         .flower__light {
             position: absolute;
             bottom: 0;
-            width: 2px;
-            height: 2px;
-            background: #fffb00;
+            width: 3px;
+            height: 3px;
+            background: #ffd700;
             border-radius: 50%;
             filter: blur(0.5px);
             animation: light-ans 4s linear infinite backwards;
+            box-shadow: 0 0 4px #ffd700;
         }
-        
+
         .flower__light:nth-child(odd) {
-            background: #23f0ff;
+            background: #ff69b4;
+            box-shadow: 0 0 4px #ff69b4;
         }
-        
+
         .flower__light--1 { left: -5px; animation-delay: 1s; }
         .flower__light--2 { left: 7px; animation-delay: 0.5s; }
         .flower__light--3 { left: -15px; animation-delay: 0.3s; }
@@ -1549,10 +1577,10 @@ function injectFlowersCSS() {
         .flower__light--6 { left: -10px; animation-delay: 3s; }
         .flower__light--7 { left: 7px; animation-delay: 2s; }
         .flower__light--8 { left: -15px; animation-delay: 3.5s; }
-        
+
         /* Ground grass decoration */
         .flower__grass {
-            --c: #159faa;
+            --c: #4a7c2f;
             position: absolute;
             bottom: 10px;
             left: -15px;
@@ -1564,7 +1592,7 @@ function injectFlowersCSS() {
             transform: rotate(-48deg) rotateY(40deg);
             animation: moving-grass 2s linear infinite;
         }
-        
+
         .flower__grass--1 { animation-delay: 0s; }
         .flower__grass--2 {
             left: 5px;
@@ -1574,7 +1602,7 @@ function injectFlowersCSS() {
             z-index: 0;
             animation: moving-grass--2 1.5s linear infinite;
         }
-        
+
         .flower__grass--top {
             width: 18px;
             height: 25px;
@@ -1582,65 +1610,65 @@ function injectFlowersCSS() {
             border-right: 4px solid var(--c);
             transform: rotate(-2deg);
         }
-        
+
         .flower__grass--bottom {
             margin-top: -2px;
             width: 4px;
             height: 60px;
             background: linear-gradient(to top, transparent, var(--c));
         }
-        
+
         /* Growing animation wrapper */
         .grow-ans {
             animation: grow-ans 2s var(--d, 0s) backwards;
         }
-        
+
         .growing-grass {
             animation: growing-grass-ans 1s 2s backwards;
         }
-        
+
         /* Keyframe Animations */
-        
+
         @keyframes moving-flower-1 {
             0%, 100% { transform: rotate(2deg); }
             50% { transform: rotate(-2deg); }
         }
-        
+
         @keyframes moving-flower-2 {
             0%, 100% { transform: rotate(18deg); }
             50% { transform: rotate(14deg); }
         }
-        
+
         @keyframes moving-flower-3 {
             0%, 100% { transform: rotate(-18deg); }
             50% { transform: rotate(-20deg) rotateY(-10deg); }
         }
-        
+
         @keyframes blooming-flower {
             0% { transform: scale(0); }
         }
-        
+
         @keyframes blooming-leaf-right {
             0% {
                 transform-origin: left;
                 transform: rotate(70deg) rotateY(30deg) scale(0);
             }
         }
-        
+
         @keyframes blooming-leaf-left {
             0% {
                 transform-origin: right;
                 transform: rotate(-70deg) rotateY(30deg) scale(0);
             }
         }
-        
+
         @keyframes grow-flower-tree {
             0% {
                 height: 0;
                 border-radius: 2px;
             }
         }
-        
+
         @keyframes light-ans {
             0% {
                 opacity: 0;
@@ -1665,12 +1693,12 @@ function injectFlowersCSS() {
                 filter: blur(2px);
             }
         }
-        
+
         @keyframes moving-grass {
             0%, 100% { transform: rotate(-48deg) rotateY(40deg); }
             50% { transform: rotate(-50deg) rotateY(40deg); }
         }
-        
+
         @keyframes moving-grass--2 {
             0%, 100% {
                 transform: scale(0.5) rotate(75deg) rotateX(10deg) rotateY(-200deg);
@@ -1679,39 +1707,64 @@ function injectFlowersCSS() {
                 transform: scale(0.5) rotate(79deg) rotateX(10deg) rotateY(-200deg);
             }
         }
-        
+
         @keyframes grow-ans {
             0% {
                 transform: scale(0);
                 opacity: 0;
             }
         }
-        
+
         @keyframes growing-grass-ans {
             0% { transform: scale(0); }
         }
-        
+
+        /* Bounce animation for emojis */
+        @keyframes bounceEmojis {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-10px) scale(1.05);
+            }
+        }
+
         /* Pause animations initially */
         .flowers-not-loaded * {
             animation-play-state: paused !important;
         }
-        
+
         /* Responsive adjustments for smaller modals */
         @media (max-width: 480px) {
             .birthday-flowers-container {
-                height: 140px;
+                height: 160px;
             }
-            
+
             .flowers {
-                transform: scale(0.5);
+                transform: scale(0.6);
             }
-            
+
             .flower__line {
-                height: 100px;
+                height: 120px;
+            }
+        }
+
+        /* Reduce motion for accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            .flower__light,
+            .flower--1,
+            .flower--2,
+            .flower--3,
+            .flower__grass {
+                animation: none !important;
+            }
+
+            @keyframes bounceEmojis {
+                0%, 100% { transform: translateY(0) scale(1); }
             }
         }
     `;
-    
+
     document.head.appendChild(style);
 }
 
