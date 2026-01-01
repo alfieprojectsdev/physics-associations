@@ -153,6 +153,70 @@ function setupEventListeners() {
     elements.gameBoard.addEventListener('mousedown', handleTouchStart);
     elements.gameBoard.addEventListener('mousemove', handleTouchMove);
     elements.gameBoard.addEventListener('mouseup', handleTouchEnd);
+
+    // Waste pile drag support (required - wasteSlot is outside gameBoard DOM tree)
+    // wasteSlot is in controls-area, NOT inside game-board - events do NOT bubble to gameBoard
+    elements.wasteSlot.addEventListener('touchstart', handleTouchStart, { passive: false });
+    elements.wasteSlot.addEventListener('touchmove', handleTouchMove, { passive: false });
+    elements.wasteSlot.addEventListener('touchend', handleTouchEnd, { passive: false });
+    elements.wasteSlot.addEventListener('mousedown', handleTouchStart);
+    elements.wasteSlot.addEventListener('mousemove', handleTouchMove);
+    elements.wasteSlot.addEventListener('mouseup', handleTouchEnd);
+
+    // Card hover feedback (event delegation to prevent memory leaks)
+    const containers = [elements.gameBoard, elements.wasteSlot, elements.foundationsArea];
+
+    containers.forEach(container => {
+        if (!container) return; // Skip null containers
+
+        container.addEventListener('mouseenter', (e) => {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl || !cardEl.dataset.cardType) return;
+
+            if (cardEl.dataset.cardType === 'category') {
+                const icon = cardEl.dataset.categoryIcon || '';
+                const name = cardEl.dataset.categoryName || '';
+                showFeedback(`${icon} ${name}`, 'info');
+            } else if (cardEl.dataset.cardType === 'word') {
+                const word = cardEl.dataset.word || '';
+                const categoryId = cardEl.dataset.categoryId;
+                const domainData = getCurrentDomainData();
+                if (!domainData) return;
+                const cat = domainData.categories.find(c => c.id === categoryId);
+                const categoryName = cat ? cat.name : '';
+                showFeedback(`${word} (${categoryName})`, 'info');
+            }
+        }, true); // Use capture phase for efficiency
+
+        container.addEventListener('mouseleave', (e) => {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl) return;
+
+            const feltMsg = document.getElementById('felt-message');
+            if (feltMsg) {
+                feltMsg.classList.remove('active');
+            }
+        }, true);
+
+        container.addEventListener('touchstart', (e) => {
+            const cardEl = e.target.closest('.card');
+            if (!cardEl || !cardEl.dataset.cardType) return;
+
+            if (cardEl.dataset.cardType === 'category') {
+                const icon = cardEl.dataset.categoryIcon || '';
+                const name = cardEl.dataset.categoryName || '';
+                showFeedback(`${icon} ${name}`, 'info');
+            } else if (cardEl.dataset.cardType === 'word') {
+                const word = cardEl.dataset.word || '';
+                const categoryId = cardEl.dataset.categoryId;
+                const domainData = getCurrentDomainData();
+                if (!domainData) return;
+                const cat = domainData.categories.find(c => c.id === categoryId);
+                const categoryName = cat ? cat.name : '';
+                showFeedback(`${word} (${categoryName})`, 'info');
+            }
+        }, { passive: true, capture: true });
+    });
 }
 
 function updateDomainIcon() {
@@ -736,6 +800,12 @@ function createCardElement(card) {
             <div class="card-icon">${card.icon}</div>
             <div class="card-title">${card.name}</div>
         `;
+
+        // Add data attributes for event delegation
+        cardEl.dataset.cardType = 'category';
+        cardEl.dataset.categoryId = card.id;
+        cardEl.dataset.categoryName = card.name;
+        cardEl.dataset.categoryIcon = card.icon;
     } else if (card.type === 'word') {
         cardEl.classList.add('word');
 
@@ -758,8 +828,11 @@ function createCardElement(card) {
             </div>
         `;
 
-        // Add data attribute for full word (for tooltips/sorting feedback)
+        // Add data attributes for event delegation
         cardEl.dataset.fullWord = card.word;
+        cardEl.dataset.cardType = 'word';
+        cardEl.dataset.word = card.word;
+        cardEl.dataset.categoryId = card.categoryId;
     }
 
     return cardEl;
