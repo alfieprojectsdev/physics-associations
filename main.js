@@ -184,7 +184,7 @@ function setupEventListeners() {
                 if (!domainData) return;
                 const cat = domainData.categories.find(c => c.id === categoryId);
                 const categoryName = cat ? cat.name : '';
-                showFeedback(`${word} (${categoryName})`, 'info');
+                showFeedback(categoryName ? `${word} (${categoryName})` : word, 'info');
             }
         }, true); // Use capture phase for efficiency
 
@@ -213,7 +213,7 @@ function setupEventListeners() {
                 if (!domainData) return;
                 const cat = domainData.categories.find(c => c.id === categoryId);
                 const categoryName = cat ? cat.name : '';
-                showFeedback(`${word} (${categoryName})`, 'info');
+                showFeedback(categoryName ? `${word} (${categoryName})` : word, 'info');
             }
         }, { passive: true, capture: true });
     });
@@ -459,6 +459,9 @@ function handleTouchMove(e) {
     // Update shadow intensity class
     dragClone.classList.remove('shadow-light', 'shadow-medium', 'shadow-heavy');
     dragClone.classList.add(`shadow-${shadowIntensity}`);
+
+    // Update column visual feedback
+    updateColumnHighlights();
   }
 }
 
@@ -473,6 +476,7 @@ function handleTouchEnd(e) {
   e.preventDefault();
 
   let foundationTarget = null;
+  let columnTarget = null;
 
   // Check collision with foundation slots
   const foundations = document.querySelectorAll('.foundation-slot');
@@ -483,6 +487,19 @@ function handleTouchEnd(e) {
       foundationTarget = foundation;
     }
   });
+
+  // Column detection (only if no foundation hit)
+  if (!foundationTarget) {
+    const columns = document.querySelectorAll('.tableau-column');
+    columns.forEach((column, colIndex) => {
+      if (columnTarget) return; // Already found target - prevent overwrite
+      const rect = column.getBoundingClientRect();
+      if (currentTouchX >= rect.left && currentTouchX <= rect.right &&
+          currentTouchY >= rect.top && currentTouchY <= rect.bottom) {
+        columnTarget = { element: column, index: colIndex };
+      }
+    });
+  }
 
   if (foundationTarget && draggedCard) {
     const categoryId = foundationTarget.dataset.categoryId;
@@ -544,6 +561,9 @@ function handleTouchEnd(e) {
       triggerHaptic('error');
       showFeedback('Sort operation failed', 'error');
     }
+  } else if (columnTarget && draggedCard) {
+    // Handle column drop
+    handleColumnDrop(draggedCard, columnTarget.index);
   } else {
     // Snap back animation for invalid drop with spring easing
     if (dragClone) {
@@ -553,6 +573,11 @@ function handleTouchEnd(e) {
       triggerHaptic('light');
     }
   }
+
+  // Remove all column highlights
+  document.querySelectorAll('.tableau-column').forEach(col => {
+    col.classList.remove('drag-over', 'drag-valid', 'drag-invalid');
+  });
 
   // Cleanup with race condition protection
   const currentOperationId = ++dragOperationId;
@@ -573,6 +598,98 @@ function handleTouchEnd(e) {
       dragClone = null;
     }
   }, 300); // Increased from 200ms to 300ms to accommodate longer animations
+}
+
+/**
+ * Handle dropping a card onto a tableau column
+ * @param {HTMLElement} draggedCard - The card being dragged
+ * @param {number} targetColIndex - Index of target column
+ */
+function handleColumnDrop(draggedCard, targetColIndex) {
+    const sourceCard = game.getPlayableCards().find(c => c.id === draggedCard.dataset.cardId);
+
+    if (!sourceCard) {
+        console.error('Card not found in playable cards:', draggedCard.dataset.cardId);
+        triggerHaptic('error');
+        showFeedback('Invalid card - please try again', 'error');
+        return;
+    }
+
+    if (sourceCard.source !== 'tableau') {
+        triggerHaptic('error');
+        showFeedback('Can only move tableau cards between columns', 'error');
+        return;
+    }
+
+    const result = game.moveBetweenColumns(sourceCard.colIndex, targetColIndex);
+
+    if (result.success) {
+        const cardWord = draggedCard.dataset.fullWord || 'card';
+        triggerHaptic('success');
+        showFeedback(result.message, 'success');
+        announceToScreenReader(`${cardWord} moved to another column`, 'polite');
+
+        // Track column reorganization event
+        if (typeof GameAnalytics !== 'undefined') {
+            GameAnalytics.trackGameEvent('column-reorganization', {
+                level: game.level,
+                movesRemaining: game.movesRemaining
+            });
+        }
+
+        // Visual feedback - spring animation
+        if (dragClone) {
+            dragClone.classList.add('card-returning');
+            apply3DTransform(dragClone, 0, 0);
+            dragClone.style.background = 'var(--primary)';
+            dragClone.style.color = 'white';
+            addAnimationClass(dragClone, 'card-snap');
+        }
+
+        renderGame();
+    } else {
+        triggerHaptic('error');
+        showFeedback(result.message, 'error');
+        announceToScreenReader(`Error: ${result.message}`, 'assertive');
+
+        // Snap back animation
+        if (dragClone) {
+            dragClone.classList.add('snap-back', 'card-returning');
+            apply3DTransform(dragClone, 0, 0);
+        }
+    }
+}
+
+/**
+ * Highlight valid/invalid drop zones during drag
+ */
+function updateColumnHighlights() {
+    if (!draggedCard || !draggedCard.dataset || !draggedCard.dataset.cardId) {
+        return; // Defensive: no dragged card, no highlights
+    }
+
+    const columns = document.querySelectorAll('.tableau-column');
+
+    columns.forEach((column, colIndex) => {
+        const rect = column.getBoundingClientRect();
+        const isOver = currentTouchX >= rect.left && currentTouchX <= rect.right &&
+                       currentTouchY >= rect.top && currentTouchY <= rect.bottom;
+
+        // Remove all drag classes
+        column.classList.remove('drag-over', 'drag-valid', 'drag-invalid');
+
+        if (isOver) {
+            column.classList.add('drag-over');
+
+            // Validate if this is a valid drop
+            const sourceCard = game.getPlayableCards().find(c => c.id === draggedCard.dataset.cardId);
+            if (sourceCard && sourceCard.source === 'tableau' && sourceCard.colIndex !== colIndex) {
+                column.classList.add('drag-valid');
+            } else {
+                column.classList.add('drag-invalid');
+            }
+        }
+    });
 }
 
 function startNewGame(level = 1) {
@@ -1007,6 +1124,7 @@ function handleShowMenu() {
                 <ol style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
                     <li><strong>Place categories first</strong> - You can't sort words until their category is on a foundation</li>
                     <li><strong>Sort words to categories</strong> - Tap a word, then select which category it belongs to</li>
+                    <li><strong>Reorganize tableau</strong> - Drag cards between columns to uncover hidden cards</li>
                     <li><strong>Reveal hidden cards</strong> - Sorting from tableau columns flips face-down cards</li>
                     <li><strong>Draw strategically</strong> - Only draw from stock when no tableau moves exist</li>
                     <li><strong>Watch your moves!</strong> - Every action costs 1 move. Wrong categories = wasted move</li>
@@ -1018,6 +1136,7 @@ function handleShowMenu() {
                 <ul style="font-size: 0.875rem; line-height: 1.6; padding-left: 20px;">
                     <li><strong>Analyze first</strong> - Check all face-up cards before placing categories</li>
                     <li><strong>Prioritize tableau</strong> - Sort from columns to reveal more cards (avoid drawing unnecessarily)</li>
+                    <li><strong>Reorganize wisely</strong> - Moving cards between columns costs a move; only do it to access blocked category cards</li>
                     <li><strong>Think ahead</strong> - Ensure word truly belongs to category before tapping</li>
                     <li><strong>Manage the stock</strong> - Drawing uses a move; use board cards first</li>
                 </ul>

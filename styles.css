@@ -201,7 +201,8 @@ body {
 
 .foundation-slot {
   flex-shrink: 0;
-  width: var(--card-width);
+  width: 18vw;
+  max-width: 65px;
   min-height: 80px;
   background: rgba(255, 255, 255, 0.2);
   border-radius: var(--card-radius);
@@ -211,7 +212,7 @@ body {
 
 .foundation-stack {
   flex-shrink: 0;
-  width: var(--card-width);
+  width: 100%;
   aspect-ratio: 2 / 3;
   background: var(--card-bg);
   border: 2px solid var(--border-light);
@@ -963,6 +964,34 @@ body {
 /* Smooth return animation when drag is released */
 .card-returning {
   transition: transform 0.5s var(--spring-bouncy), box-shadow 0.3s ease-out !important;
+}
+
+/* ===== COLUMN DROP ZONES - VISUAL FEEDBACK DURING DRAG ===== */
+.tableau-column.drag-over {
+  background: rgba(99, 102, 241, 0.1);
+  border: 2px dashed var(--primary);
+  border-radius: var(--card-radius);
+  transition: all 0.2s ease;
+}
+
+.tableau-column.drag-valid {
+  background: rgba(16, 185, 129, 0.1);
+  border: 2px solid var(--success);
+}
+
+.tableau-column.drag-invalid {
+  background: rgba(239, 68, 68, 0.1);
+  border: 2px solid var(--danger);
+}
+
+/* Column highlighting animation */
+@keyframes columnPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.tableau-column.drag-valid {
+  animation: columnPulse 0.5s ease-in-out infinite;
 }
 
 /* ===== ANIMATIONS ===== */
