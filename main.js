@@ -779,7 +779,12 @@ function renderWaste(waste) {
     }
 
     const cardEl = createCardElement(waste);
-    cardEl.classList.add('playable');
+
+    // Only word cards are draggable (category cards are clicked to place)
+    if (waste.type === 'word') {
+        cardEl.classList.add('playable');
+    }
+
     cardEl.addEventListener('click', () => handleCardClick(waste));
     elements.wasteSlot.appendChild(cardEl);
 }
