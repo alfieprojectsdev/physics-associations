@@ -273,7 +273,6 @@ class GameEngine {
      * In Associations: Drawing is only allowed when no other valid moves exist
      */
     drawFromStock() {
-        // Scenario A: Stockpile is empty, trigger Recycle
         if (this.stockPile.length === 0) {
             if (this.waste.length === 0) {
                 return { success: false, message: 'No more cards to recycle!' };
@@ -301,7 +300,7 @@ class GameEngine {
         card.faceUp = true;
         this.waste.push(card);
 
-        this.movesRemaining--; // Only the draw costs a move
+        this.movesRemaining--;
 
         return {
             success: true,
@@ -316,13 +315,12 @@ class GameEngine {
      */
     recycleWaste() {
         // Reverse the waste so the order is maintained when popped from stockpile
-        // and hide the cards again
         this.stockPile = this.waste.reverse().map(card => ({
             ...card,
             faceUp: false
         }));
 
-        this.waste = []; // Clear waste pile
+        this.waste = [];
         this.movesRemaining--; // Recycling costs a move
 
         return {
@@ -392,14 +390,13 @@ class GameEngine {
      * Check win/loss conditions
      */
     checkGameState() {
-        // Win: All word cards sorted
         const totalWordsSorted = Object.values(this.foundations)
             .reduce((sum, foundation) => sum + foundation.words.length, 0);
 
         const totalWordsInGame = this.tableau
             .flat()
             .filter(c => c.type === 'word').length
-            + (this.waste && this.waste.type === 'word' ? 1 : 0)
+            + (this.waste.length > 0 && this.waste[this.waste.length - 1]?.type === 'word' ? 1 : 0)
             + this.stockPile.filter(c => c.type === 'word').length;
 
         if (totalWordsInGame === 0 && totalWordsSorted > 0) {
@@ -565,7 +562,6 @@ class GameEngine {
         const tableauWords = this.tableau.flat().filter(c =>
             c.type === 'word' && checkMatch(c, categoryId)
         );
-        const wasteWords = (this.waste && this.waste.type === 'word' && checkMatch(this.waste, categoryId)) ? 1 : 0;
         const stockWords = this.stockPile.filter(c =>
             c.type === 'word' && checkMatch(c, categoryId)
         ).length;

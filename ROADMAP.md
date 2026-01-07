@@ -1,8 +1,8 @@
 # Ground State - Product Roadmap
 
-## Current Version: v1.0 (January 1, 2026)
+## Current Version: v1.2.1 (January 7, 2026)
 
-**Status:** ✅ Launched as birthday gift for Bhazel (PSHS Physics Teacher)
+**Status:** ✅ Bhazel Edition - Refined with ❤️ over 50+ commits
 
 ### v1.0 Features:
 - Abbreviated display mode with authentic physics notation (p, λ, F, τ)

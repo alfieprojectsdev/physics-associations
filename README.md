@@ -293,7 +293,14 @@ Level 10+:   Expert mode, 6 categories, minimal margin for error
 
 ## 🐛 Known Issues & Roadmap
 
-### Current Status (v1.0 - Jan 1, 2026)
+### Current Status (v1.2.1 - Jan 7, 2026)
+- ✅ Drag-and-drop touch offset fix (cards follow finger naturally)
+- ✅ Core gameplay mechanics complete
+- ✅ Phase 4: Animations (flip, deal, stagger, bounce, shake, pulse)
+- ✅ Phase 5: PWA + Analytics (offline support, GoatCounter tracking)
+- ✅ Drag-and-drop with haptic feedback
+- ✅ Accessibility (WCAG 2.1 AA compliant)
+- ✅ Performance optimizations (low-performance mode detection)
 - ✅ Core gameplay mechanics complete
 - ✅ Phase 4: Animations (flip, deal, stagger, bounce, shake, pulse)
 - ✅ Phase 5: PWA + Analytics (offline support, GoatCounter tracking)

@@ -20,6 +20,8 @@ let touchStartX = 0;
 let touchStartY = 0;
 let currentTouchX = 0;
 let currentTouchY = 0;
+let dragOffsetX = 0;
+let dragOffsetY = 0;
 
 // 3D Card Effect state
 let cardRotationX = 0;
@@ -377,12 +379,15 @@ function handleTouchStart(e) {
   // Prevent default to avoid scrolling while dragging
   e.preventDefault();
 
-  // Get coordinates (works with both touch and mouse)
   const coords = getEventCoordinates(e);
   touchStartX = coords.x;
   touchStartY = coords.y;
   currentTouchX = coords.x;
   currentTouchY = coords.y;
+
+  const cardRect = cardEl.getBoundingClientRect();
+  dragOffsetX = touchStartX - cardRect.left;
+  dragOffsetY = touchStartY - cardRect.top;
 
   // Store reference to dragged card
   draggedCard = cardEl;
@@ -435,8 +440,8 @@ function handleTouchMove(e) {
 
   // Update clone position and 3D rotation to follow finger
   if (isDragging && dragClone) {
-    const cloneX = currentTouchX - dragClone.offsetWidth / 2;
-    const cloneY = currentTouchY - dragClone.offsetHeight / 2;
+    const cloneX = currentTouchX - dragOffsetX;
+    const cloneY = currentTouchY - dragOffsetY;
 
     dragClone.style.left = cloneX + 'px';
     dragClone.style.top = cloneY + 'px';

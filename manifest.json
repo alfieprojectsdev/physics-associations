@@ -1,6 +1,7 @@
 {
   "name": "Ground State - Word Solitaire",
   "short_name": "Ground State",
+  "version": "1.2.1",
   "description": "Sort physics terms into categories. Educational word game with limited moves.",
   "start_url": "./",
   "display": "standalone",
