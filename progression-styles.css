@@ -1,0 +1,307 @@
+.career-roadmap-container {
+  padding: 16px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #2d3748 100%);
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+.roadmap-header {
+  text-align: center;
+  margin-bottom: 24px;
+  color: white;
+}
+
+.roadmap-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.progress-overview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.progress-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: white;
+}
+
+.progress-value {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--primary);
+}
+
+.progress-label {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.skill-tree {
+  position: relative;
+  min-height: 600px;
+  background: radial-gradient(circle at center, rgba(99, 102, 241, 0.05) 0%, transparent 70%);
+}
+
+.tree-node {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 10;
+}
+
+.tree-node.locked {
+  opacity: 0.4;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+.tree-node.unlocked {
+  opacity: 1;
+  filter: none;
+  animation: node-unlock 0.6s ease-out;
+}
+
+.tree-node.active {
+  transform: scale(1.1);
+  box-shadow: 0 0 20px currentColor;
+  z-index: 20;
+}
+
+.tree-node.completed {
+  animation: node-complete 0.6s ease-out;
+}
+
+@keyframes node-unlock {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes node-complete {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15) rotate(5deg);
+  }
+}
+
+.tree-connection {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.6) 100%);
+  border-radius: 1px;
+  z-index: 1;
+}
+
+.tree-connection.locked {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tree-connection.unlocked {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.tree-connection.active {
+  background: var(--success);
+  height: 3px;
+  animation: connection-glow 2s ease-in-out infinite;
+}
+
+@keyframes connection-glow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.career-path-card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  color: white;
+  animation: card-fade-in 0.4s ease-out;
+}
+
+.career-path-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.career-icon {
+  font-size: 2rem;
+}
+
+.career-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.career-description {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.career-requirements {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.career-req-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+
+.career-req-item.completed {
+  background: rgba(16, 185, 129, 0.3);
+  border: 1px solid var(--success);
+}
+
+.career-req-item.pending {
+  background: rgba(239, 68, 68, 0.3);
+  border: 1px solid var(--danger);
+}
+
+.career-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.career-badge.alternative {
+  background: rgba(245, 158, 11, 0.3);
+  border: 1px solid var(--warning);
+  color: var(--warning);
+}
+
+.career-badge.interdisciplinary {
+  background: rgba(139, 92, 246, 0.3);
+  border: 1px solid var(--secondary);
+  color: var(--secondary);
+}
+
+.notification-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(30, 41, 59, 0.95);
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  color: white;
+  z-index: 2000;
+  animation: modal-pop 0.3s ease-out;
+  min-width: 300px;
+  max-width: 90vw;
+}
+
+@keyframes modal-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.unlock-icon {
+  font-size: 4rem;
+  margin-bottom: 16px;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.unlock-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.unlock-subtitle {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 24px;
+}
+
+.unlock-btn {
+  background: var(--primary);
+  border: none;
+  color: white;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.unlock-btn:hover {
+  transform: scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tree-node,
+  .tree-connection,
+  .career-path-card {
+    animation: none;
+    transition: none;
+  }
+
+  .unlock-icon {
+    animation: none;
+  }
+}

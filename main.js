@@ -71,13 +71,16 @@ const elements = {
     drawBtn: null,
     hintBtn: null,
     menuBtn: null,
+    careerBtn: null,
     domainBtn: null,
     domainIcon: null,
     modal: null,
     modalOverlay: null,
     modalTitle: null,
     modalBody: null,
-    modalClose: null
+    modalClose: null,
+    careerModal: null,
+    careerModalBody: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -89,6 +92,9 @@ document.addEventListener('DOMContentLoaded', () => {
     startPerformanceMonitoring(); // Start FPS monitoring (Phase 4)
     document.body.classList.add('flowers-not-loaded');
     checkBirthdayEasterEgg();
+
+    // Initialize progression manager
+    window.progressionManager = new ProgressionManager();
 
     // Register service worker for PWA offline support (Phase 5)
     if ('serviceWorker' in navigator) {
@@ -131,11 +137,16 @@ function initializeElements() {
     elements.menuBtn = document.getElementById('menu-btn');
     elements.domainBtn = document.getElementById('domain-btn');
     elements.domainIcon = document.getElementById('domain-icon');
+    elements.careerBtn = document.getElementById('career-btn');
     elements.modal = document.getElementById('modal');
     elements.modalOverlay = document.getElementById('modal-overlay');
     elements.modalTitle = document.getElementById('modal-title');
     elements.modalBody = document.getElementById('modal-body');
     elements.modalClose = document.getElementById('modal-close');
+    elements.careerModal = document.getElementById('career-modal');
+    elements.careerModalTitle = document.getElementById('career-modal-title');
+    elements.careerModalBody = document.getElementById('career-modal-body');
+    elements.careerModalClose = document.getElementById('career-modal-close');
 }
 
 function setupEventListeners() {
@@ -143,7 +154,11 @@ function setupEventListeners() {
     elements.hintBtn.addEventListener('click', handleShowHint);
     elements.menuBtn.addEventListener('click', handleShowMenu);
     elements.domainBtn.addEventListener('click', handleShowDomainSelector);
+    elements.careerBtn.addEventListener('click', handleShowCareerRoadmap);
     elements.modalClose.addEventListener('click', closeModal);
+    elements.careerModalClose.addEventListener('click', () => {
+        document.getElementById('career-modal').classList.add('hidden');
+    });
     elements.modalOverlay.addEventListener('click', closeModal);
 
     // Drag-and-drop touch event listeners
@@ -1353,7 +1368,40 @@ function handleDomainSelect(domainKey) {
     announceToScreenReader(`Switched to ${DomainData[domainKey].name} domain. Starting new game at Level 1.`, 'polite');
 }
 
-function confirmNewGame() {
+function handleShowCareerRoadmap() {
+    stopPerformanceMonitoring();
+
+    if (!window.progressionManager) {
+        console.error('ProgressionManager not initialized');
+        return;
+    }
+
+    elements.modalTitle.textContent = '🎯 Career Roadmap';
+    elements.modalBody.innerHTML = '';
+
+    const roadmap = new CareerRoadmap(window.progressionManager);
+    roadmap.render(elements.modalBody);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'btn-stock';
+    closeBtn.style.marginTop = '16px';
+    closeBtn.textContent = 'Back to Game';
+    closeBtn.onclick = () => {
+        roadmap.close();
+        closeModal();
+        if (game && !lowPerformanceMode) {
+            startPerformanceMonitoring();
+        }
+    };
+
+    elements.modalBody.appendChild(closeBtn);
+
+    showModal();
+
+    window.addEventListener('resize', () => roadmap.handleResize());
+}
+
+function handleShowMenu() {
     if (confirm('Start a new game? Current progress will be lost.')) {
         closeModal();
         startNewGame(game.level);
@@ -1372,6 +1420,14 @@ function showGameOverModal(won, state) {
             const reason = state.movesRemaining === 0 ? 'out-of-moves' : 'no-valid-moves';
             GameAnalytics.levelFailed(state.level, reason);
         }
+    }
+
+    if (won && window.progressionManager) {
+        window.progressionManager.updateDomainProgress(currentDomain, {
+            level: game.level,
+            score: state.score,
+            completed: true
+        });
     }
 
     elements.modalBody.innerHTML = `
